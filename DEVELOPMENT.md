@@ -1,19 +1,22 @@
 # CellProfiler Pipeline Dependency Graph Tool - Development Summary
 
 ## Project Overview
-We've built a tool to extract and visualize image dependencies from CellProfiler pipelines by analyzing the JSON format that CellProfiler uses. This tool helps understand how data flows between modules in a pipeline.
+We've built a tool to extract and visualize data dependencies from CellProfiler pipelines by analyzing the JSON format that CellProfiler uses. This tool helps understand how various data types (images, objects, and lists) flow between modules in a pipeline.
 
 ## Key Discoveries
 1. CellProfiler pipelines in JSON format contain detailed information about:
    - Module configurations (enabled/disabled status, module type, settings)
-   - Image inputs and outputs are defined by specific setting types
-   - Input images use: `cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber`
-   - Output images use: `cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName`
+   - Various data types are defined by specific setting types:
+     - Images (via ImageSubscriber/ImageName)
+     - Objects (via LabelSubscriber/LabelName)
+     - Image Lists (via ImageListSubscriber)
+     - Object Lists (via LabelListSubscriber)
 
 2. Each module in the pipeline can be represented as a node in a processing graph that:
-   - Takes specific named images as inputs
-   - Produces specific named images as outputs
+   - Takes specific named data items as inputs
+   - Produces specific named data items as outputs
    - May be enabled or disabled
+   - May handle multiple data types (images, objects, lists)
 
 ## CellProfiler Pipeline JSON Format
 
@@ -93,9 +96,16 @@ Each setting is represented as an object:
 ### Setting Types
 The pipeline uses a variety of setting types:
 
-1. **Image References**:
-   - Input images: `cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber`
-   - Output images: `cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName`
+1. **Data References**:
+   - **Image Inputs/Outputs**:
+     - Input images: `cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber`
+     - Output images: `cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName`
+   - **Object Inputs/Outputs**:
+     - Input objects: `cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber`
+     - Output objects: `cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName`
+   - **List Inputs**:
+     - Image lists: `cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber`
+     - Object lists: `cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber`
 
 2. **Basic Types**:
    - Binary (Yes/No): `cellprofiler_core.setting._binary.Binary`
@@ -110,11 +120,12 @@ The pipeline uses a variety of setting types:
    - Filename: `cellprofiler_core.setting.text._filename.Filename`
    - Hidden counts: `cellprofiler_core.setting._hidden_count.HiddenCount`
 
-### Image Flow Representation
-Images flow through the pipeline by name:
-1. A module creates an image with a specific name using `ImageName` setting
-2. Another module references this image by its name using `ImageSubscriber` setting
-3. This creates an implicit dependency between modules
+### Data Flow Representation
+Data flows through the pipeline by name:
+1. A module creates data (image, object) with specific names using settings like `ImageName` or `LabelName`
+2. Another module references this data by name using subscriber settings like `ImageSubscriber` or `LabelSubscriber`
+3. Some modules consume or produce collections via list subscribers like `ImageListSubscriber` or `LabelListSubscriber`
+4. These named connections create implicit dependencies between modules
 
 ### Version Handling
 - Each module has its own `variable_revision_number`
@@ -130,11 +141,11 @@ Images flow through the pipeline by name:
 We created `cp_graph.py` which:
 1. Parses the JSON pipeline file
 2. Extracts module metadata and enabled status
-3. Identifies input and output images for each module
+3. Identifies input and output data (images, objects, lists) for each module
 4. Builds a directed graph where:
-   - Nodes represent image names
+   - Nodes represent data items (images, objects, image lists, object lists)
    - Nodes also represent modules, using stable hash-based identifiers
-   - Edges represent image flow connections between modules and images
+   - Edges represent data flow connections between modules and data nodes
 5. Creates a standardized representation for comparison purposes
 6. Outputs the graph in standard formats (DOT, GraphML, GEXF)
 
@@ -145,22 +156,34 @@ We created `cp_graph.py` which:
    - Designed to be invariant to module reordering in the pipeline
 
 2. **Pipeline Comparison Support**:
-   - Focuses exclusively on image flow (deliberately excludes module settings)
+   - Focuses on structural data flow (deliberately excludes module settings)
    - Creates canonical representations that can be compared with diff tools
    - Ignores irrelevant differences while highlighting structural changes
 
-3. **Additional Features**:
+3. **Multi-Data Type Support**:
+   - Tracks multiple types of data flow:
+     - Images (via ImageSubscriber and ImageName)
+     - Objects (via LabelSubscriber and LabelName)
+     - Image Lists (via ImageListSubscriber)
+     - Object Lists (via LabelListSubscriber)
+   - Visual differentiation between data types with distinctive styling
+   - Filtering options to focus on specific data types
+
+4. **Additional Features**:
    - **Disabled Module Handling**: By default, ignores modules with `enabled: false` attribute
    - **Module Info on Edges**: Shows module name and number on graph edges
    - **Flexible Outputs**: Supports multiple graph formats
    - **Formatting Control**: Option to strip visual styling for comparison focus
    - **Stable ID Mapping**: Explains the relationship between node IDs and original module numbers
 
-4. **Command-Line Options**:
+5. **Command-Line Options**:
    - `--no-formatting`: Strips all formatting for topology-focused comparison
    - `--no-module-info`: Hides module information on edges
    - `--include-disabled`: Includes disabled modules in the graph
    - `--explain-ids`: Shows mapping between stable IDs and original module numbers
+   - `--images-only`: Include only image flow in the graph
+   - `--objects-only`: Include only object flow in the graph
+   - `--no-lists`: Exclude list inputs in the graph
 
 ## Documentation
 Created `README.md` with:
@@ -172,19 +195,23 @@ Created `README.md` with:
 
 ## Use Cases
 1. Understanding complex pipeline data flows
-2. Visualizing image transformation paths
+2. Visualizing data transformation paths (images, objects, lists)
 3. Debugging missing connections
 4. Documentation for CellProfiler pipelines
-5. Identifying unused images or redundant operations
+5. Identifying unused data or redundant operations
+6. Tracking specific data types (e.g., objects only)
+7. Understanding module dependencies for pipeline optimization
 
 ## Future Extension Points
 To extend this tool in the future, consider:
-1. Support for analyzing other types (objects, measurements)
+1. Support for analyzing measurements and metadata
 2. Integration with CellProfiler as a plugin
 3. Interactive visualization capabilities
 4. Deeper analysis of module parameters
-5. Filtering connections by image type or module category
+5. Filtering connections by specific module categories
 6. Allowing simplified views of complex pipelines
+7. More advanced data type filtering combinations
+8. Visual styles customization options
 
 ## Technical References
 - CellProfiler Core repo: https://github.com/CellProfiler/core
@@ -192,4 +219,15 @@ To extend this tool in the future, consider:
 - NetworkX documentation: https://networkx.org/documentation/stable/
 - Graphviz documentation: https://graphviz.org/documentation/
 
-The tool is functional in its current state and can be used to analyze any CellProfiler pipeline in v6 JSON format.
+## Running the Tool
+
+The script includes PEP 723 dependency metadata, which allows it to be run directly with UV:
+
+```bash
+# Run with UV to automatically install dependencies
+uv run --script cp_graph.py <pipeline.json> [output_graph.graphml] [options]
+```
+
+This is the recommended approach as it automatically installs the required dependencies (networkx and pydot) in an isolated environment.
+
+The tool is functional in its current state and can be used to analyze any CellProfiler pipeline in v6 JSON format. It supports a comprehensive view of data flow, including images, objects, and list inputs/outputs, with visual differentiation and filtering options for each data type.
