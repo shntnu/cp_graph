@@ -133,17 +133,34 @@ We created `cp_graph.py` which:
 3. Identifies input and output images for each module
 4. Builds a directed graph where:
    - Nodes represent image names
-   - Edges represent transformations from input to output
-   - Edge labels show which module performed the transformation
-5. Outputs the graph in standard formats (DOT, GraphML, GEXF)
+   - Nodes also represent modules, using stable hash-based identifiers
+   - Edges represent image flow connections between modules and images
+5. Creates a standardized representation for comparison purposes
+6. Outputs the graph in standard formats (DOT, GraphML, GEXF)
 
-## Features Added
-1. **Disabled Module Handling**: By default, ignores modules with `enabled: false` attribute
-2. **Module Info on Edges**: Shows module name and number on graph edges
-3. **Flexible Outputs**: Supports multiple graph formats
+## Core Features
+1. **Standardized Graph Representation**: 
+   - Uses stable module identifiers based on module type and I/O connections
+   - Consistently orders nodes and edges for reliable comparisons
+   - Designed to be invariant to module reordering in the pipeline
+
+2. **Pipeline Comparison Support**:
+   - Focuses exclusively on image flow (deliberately excludes module settings)
+   - Creates canonical representations that can be compared with diff tools
+   - Ignores irrelevant differences while highlighting structural changes
+
+3. **Additional Features**:
+   - **Disabled Module Handling**: By default, ignores modules with `enabled: false` attribute
+   - **Module Info on Edges**: Shows module name and number on graph edges
+   - **Flexible Outputs**: Supports multiple graph formats
+   - **Formatting Control**: Option to strip visual styling for comparison focus
+   - **Stable ID Mapping**: Explains the relationship between node IDs and original module numbers
+
 4. **Command-Line Options**:
+   - `--no-formatting`: Strips all formatting for topology-focused comparison
    - `--no-module-info`: Hides module information on edges
    - `--include-disabled`: Includes disabled modules in the graph
+   - `--explain-ids`: Shows mapping between stable IDs and original module numbers
 
 ## Documentation
 Created `README.md` with:

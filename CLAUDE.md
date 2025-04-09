@@ -4,9 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build/Run Commands
 - Run script: `python cp_graph.py <pipeline.json> [output_graph.graphml]`
-- Run with options: `python cp_graph.py <pipeline.json> [output] --no-module-info --include-disabled`
+- Run with options: `python cp_graph.py <pipeline.json> [output] --no-module-info --include-disabled --no-formatting`
 - Generate image from DOT: `dot -Tpng <file>.dot -o <file>.png`
 - Install dependencies: `pip install networkx pydot`
+
+### Command Line Options
+- `--no-formatting`: Strip all formatting information to focus on topology for comparison
+- `--no-module-info`: Hide module information on graph edges
+- `--include-disabled`: Include disabled modules in the graph
+- `--explain-ids`: Print mapping of stable node IDs to original module numbers
+
+### Tool Purpose & Scope
+- Primary purpose: Standardized graph representation for comparing pipeline structures
+- Focus: Image flow analysis only (module parameter settings and non-image outputs are excluded)
+- Visualization is a secondary feature; the primary goal is to create consistent, comparable graph representations
 
 ## Code Style Guidelines
 - Python 3.11+ compatibility
