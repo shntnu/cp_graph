@@ -64,6 +64,8 @@ If you have Graphviz installed, you can render a DOT file to an image:
 dot -Tpng 1_CP_Illum_graph.dot -o 1_CP_Illum_graph.png
 ```
 
+![image](1_CP_Illum_graph.png)
+
 ### Using Other Tools
 
 The generated files can be opened with:
