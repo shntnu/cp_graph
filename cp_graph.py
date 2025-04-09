@@ -10,6 +10,7 @@
 #!/usr/bin/env python
 
 import json
+import hashlib
 import networkx as nx
 from pathlib import Path
 
@@ -166,9 +167,11 @@ def create_dependency_graph(
         all_inputs.sort()
         all_outputs.sort()
 
-        # Create a stable unique identifier
+        # Create a stable unique identifier using a deterministic hash function
         io_pattern = ",".join(all_inputs) + "|" + ",".join(all_outputs)
-        hash_val = hash(io_pattern) & 0xFFFFFFFF
+        # Use SHA-256 hash which is deterministic across runs
+        hash_obj = hashlib.sha256(io_pattern.encode('utf-8'))
+        hash_val = int(hash_obj.hexdigest()[:8], 16)
         stable_id = f"{module_type}_{hash_val:x}"
 
         # Keep the original module number in the label for reference
@@ -242,6 +245,7 @@ def main(
     no_module_info=False,
     include_disabled=False,
     no_formatting=False,
+    ultra_minimal=False,
     include_objects=True,
     include_lists=True,
     include_images=True,
@@ -388,34 +392,48 @@ def main(
             nx.write_gexf(G, output_path)
         elif ext == ".dot":
             try:
-                # For DOT format, set proper display labels for all nodes
-                for node, attrs in G.nodes(data=True):
-                    node_type = attrs.get("type")
-
-                    if node_type == "module":
-                        # Use the provided label for modules
-                        G.nodes[node]["label"] = attrs.get("label")
-                    else:
-                        # For data nodes, use just the name without the type prefix
-                        name = attrs.get(
-                            "name", node.split("__", 1)[1] if "__" in node else node
-                        )
-                        # Fix for pydot: ensure we don't have duplicate "name" attributes
-                        if "name" in G.nodes[node] and "name" != "label":
-                            del G.nodes[node]["name"]
-                        G.nodes[node]["label"] = name
-
-                # Ensure consistent ordering in DOT output
+                # For DOT format, prepare the graph
                 G_ordered = nx.DiGraph()
+                
+                # If ultra_minimal is enabled, create a stripped-down version with only essential structure
+                if ultra_minimal:
+                    # Process nodes - keep only the type attribute
+                    for node in sorted(G.nodes()):
+                        node_type = G.nodes[node].get("type", "unknown")
+                        # Add only the type attribute, nothing else
+                        G_ordered.add_node(node, type=node_type)
+                    
+                    # Process edges - keep no attributes
+                    edge_list = sorted(G.edges(data=True), key=lambda x: (x[0], x[1]))
+                    for src, dst, _ in edge_list:
+                        G_ordered.add_edge(src, dst)
+                else:
+                    # For DOT format, set proper display labels for all nodes
+                    for node, attrs in G.nodes(data=True):
+                        node_type = attrs.get("type")
 
-                # Add nodes in sorted order by name
-                for node in sorted(G.nodes()):
-                    G_ordered.add_node(node, **G.nodes[node])
+                        if node_type == "module":
+                            # Use the provided label for modules
+                            G.nodes[node]["label"] = attrs.get("label")
+                        else:
+                            # For data nodes, use just the name without the type prefix
+                            name = attrs.get(
+                                "name", node.split("__", 1)[1] if "__" in node else node
+                            )
+                            # Fix for pydot: ensure we don't have duplicate "name" attributes
+                            if "name" in G.nodes[node] and "name" != "label":
+                                del G.nodes[node]["name"]
+                            G.nodes[node]["label"] = name
 
-                # Add edges in sorted order
-                edge_list = sorted(G.edges(data=True), key=lambda x: (x[0], x[1]))
-                for src, dst, attrs in edge_list:
-                    G_ordered.add_edge(src, dst, **attrs)
+                    # Ensure consistent ordering in DOT output
+                    # Add nodes in sorted order by name
+                    for node in sorted(G.nodes()):
+                        G_ordered.add_node(node, **G.nodes[node])
+
+                    # Add edges in sorted order
+                    edge_list = sorted(G.edges(data=True), key=lambda x: (x[0], x[1]))
+                    for src, dst, attrs in edge_list:
+                        G_ordered.add_edge(src, dst, **attrs)
 
                 nx.drawing.nx_pydot.write_dot(G_ordered, output_path)
             except ImportError:
@@ -451,6 +469,11 @@ if __name__ == "__main__":
         "--no-formatting",
         action="store_true",
         help="Strip formatting information from graph output (colors, shapes, etc.)",
+    )
+    parser.add_argument(
+        "--ultra-minimal",
+        action="store_true",
+        help="Create minimal output with only essential structure for exact diff comparison",
     )
     parser.add_argument(
         "--explain-ids",
@@ -498,6 +521,7 @@ if __name__ == "__main__":
         args.no_module_info,
         args.include_disabled,
         args.no_formatting,
+        args.ultra_minimal,
         include_objects=include_objects,
         include_lists=include_lists,
         include_images=include_images,

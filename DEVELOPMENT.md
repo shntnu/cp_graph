@@ -20,7 +20,7 @@ We've built a tool to extract and visualize data dependencies from CellProfiler 
 
 ## CellProfiler Pipeline JSON Format
 
-Based on analysis of the 1_CP_Illum.json file and the CellProfiler Core codebase, here is a detailed overview of the JSON format structure:
+Based on analysis of the illum.json file and the CellProfiler Core codebase, here is a detailed overview of the JSON format structure:
 
 ### Top-level Structure
 ```json
@@ -152,12 +152,14 @@ We created `cp_graph.py` which:
 ## Core Features
 1. **Standardized Graph Representation**: 
    - Uses stable module identifiers based on module type and I/O connections
+   - Implements deterministic SHA-256 hashing for consistent identifiers across runs
    - Consistently orders nodes and edges for reliable comparisons
    - Designed to be invariant to module reordering in the pipeline
 
 2. **Pipeline Comparison Support**:
    - Focuses on structural data flow (deliberately excludes module settings)
    - Creates canonical representations that can be compared with diff tools
+   - Provides ultra-minimal mode for byte-for-byte identical output of equivalent pipelines
    - Ignores irrelevant differences while highlighting structural changes
 
 3. **Multi-Data Type Support**:
@@ -179,6 +181,7 @@ We created `cp_graph.py` which:
 5. **Command-Line Options**:
    - `--no-formatting`: Strips all formatting for topology-focused comparison
    - `--no-module-info`: Hides module information on edges
+   - `--ultra-minimal`: Creates minimal output with only essential structure for exact diff comparison
    - `--include-disabled`: Includes disabled modules in the graph
    - `--explain-ids`: Shows mapping between stable IDs and original module numbers
    - `--images-only`: Include only image flow in the graph
@@ -190,7 +193,7 @@ Created `README.md` with:
 - Detailed usage instructions
 - Command-line options
 - Explanation of how the tool works
-- Examples with 1_CP_Illum.json
+- Examples with illum.json
 - Installation requirements
 
 ## Use Cases
@@ -213,9 +216,35 @@ To extend this tool in the future, consider:
 7. More advanced data type filtering combinations
 8. Visual styles customization options
 
+## Recent Improvements
+
+### Deterministic Module Identification
+One key improvement is replacing Python's built-in `hash()` function with deterministic SHA-256 hashing. The built-in hash is intentionally randomized across Python process runs (for security reasons), which was causing inconsistent module IDs between executions. By switching to SHA-256:
+
+```python
+# Create a stable unique identifier using a deterministic hash function
+io_pattern = ",".join(all_inputs) + "|" + ",".join(all_outputs)
+# Use SHA-256 hash which is deterministic across runs
+hash_obj = hashlib.sha256(io_pattern.encode('utf-8'))
+hash_val = int(hash_obj.hexdigest()[:8], 16)
+stable_id = f"{module_type}_{hash_val:x}"
+```
+
+This ensures that identical pipeline structures always receive identical module identifiers, regardless of process restart.
+
+### Ultra-Minimal Output Mode
+A new `--ultra-minimal` option was added that produces identical DOT files for structurally equivalent pipelines. This mode:
+
+1. Strips all non-essential attributes from nodes and edges
+2. Retains only fundamental type information and connectivity
+3. Ensures byte-for-byte identical output for equivalent pipelines
+4. Enables reliable diff-based comparison between structurally equivalent pipelines with different module numbering
+
+The tool includes two sample pipelines that demonstrate this feature: `illum.json` and `illum_isoform.json`, which are structurally identical but have different module numbering.
+
 ## Technical References
 - CellProfiler Core repo: https://github.com/CellProfiler/core
-- CellProfiler pipeline JSON structure: Example in 1_CP_Illum.json
+- CellProfiler pipeline JSON structure: Example in illum.json
 - NetworkX documentation: https://networkx.org/documentation/stable/
 - Graphviz documentation: https://graphviz.org/documentation/
 

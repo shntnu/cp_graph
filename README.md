@@ -28,6 +28,7 @@ Options:
 **Display Options:**
 - `--no-formatting` - Strip all formatting information to focus on topology for comparison
 - `--no-module-info` - Hide module information on graph edges
+- `--ultra-minimal` - Create minimal output with only essential structure for exact diff comparison
 - `--explain-ids` - Print mapping of stable node IDs to original module numbers
 
 **Content Filtering Options:**
@@ -87,12 +88,16 @@ This approach makes it possible to:
 3. Create canonical representations of pipeline structure
 
 ```bash
-# Generate stripped-down topology representations for two pipelines
-python cp_graph.py pipeline1.json pipeline1.dot --no-formatting
-python cp_graph.py pipeline2.json pipeline2.dot --no-formatting
+# Generate stripped-down topology representations for two pipelines (minimal differences)
+python cp_graph.py illum.json illum.dot --no-formatting
+python cp_graph.py illum_isoform.json illum_isoform.dot --no-formatting
+
+# Or for exact byte-for-byte equality for structurally identical pipelines
+python cp_graph.py illum.json illum.dot --ultra-minimal
+python cp_graph.py illum_isoform.json illum_isoform.dot --ultra-minimal
 
 # Compare using standard diff tools
-diff pipeline1.dot pipeline2.dot
+diff illum.dot illum_isoform.dot
 ```
 
 ## Additional Features
@@ -103,20 +108,27 @@ By default, the tool ignores modules with `enabled: false` in their attributes. 
 
 ### Example Commands
 
+The repository includes two structurally identical pipelines with different module numbering (`illum.json` and `illum_isoform.json`). These serve as perfect examples for demonstrating the tool's ability to identify equivalent pipeline structures regardless of module ordering.
+
 ```bash
 # Basic comparison-ready output
-python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --no-formatting
+python cp_graph.py illum.json illum_graph.dot --no-formatting
 
 # Include disabled modules
-python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --include-disabled
+python cp_graph.py illum.json illum_graph.dot --include-disabled
 
 # Show stable module ID mapping
-python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --explain-ids
+python cp_graph.py illum.json illum_graph.dot --explain-ids
 
 # Track specific data types
 python cp_graph.py ref_9_Analysis.json objects_only.dot --objects-only
 python cp_graph.py ref_9_Analysis.json images_only.dot --images-only
 python cp_graph.py ref_9_Analysis.json no_lists.dot --no-lists
+
+# Exact comparison between pipelines with different module ordering
+python cp_graph.py illum.json illum.dot --ultra-minimal
+python cp_graph.py illum_isoform.json illum_isoform.dot --ultra-minimal
+diff illum.dot illum_isoform.dot # Should be identical if structures match
 ```
 
 ## Visualization (Secondary Feature)
@@ -140,10 +152,10 @@ The graph visually represents different elements:
 If you have Graphviz installed, you can render a DOT file to an image:
 
 ```bash
-dot -Tpng 1_CP_Illum_graph.dot -o 1_CP_Illum_graph.png
+dot -Tpng illum_graph.dot -o illum_graph.png
 ```
 
-![image](1_CP_Illum_graph.png)
+![image](illum_graph.png)
 
 The generated files can also be opened with:
 - GraphML (.graphml): yEd, Cytoscape, or other graph visualization software
