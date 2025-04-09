@@ -108,7 +108,10 @@ By default, the tool ignores modules with `enabled: false` in their attributes. 
 
 ### Example Commands
 
-The repository includes two structurally identical pipelines with different module numbering (`illum.json` and `illum_isoform.json`). These serve as perfect examples for demonstrating the tool's ability to identify equivalent pipeline structures regardless of module ordering.
+The repository includes several example files:
+
+1. Two structurally identical pipelines with different module numbering (`illum.json` and `illum_isoform.json`) - perfect for demonstrating the tool's ability to identify equivalent pipeline structures regardless of module ordering.
+2. A more complex analysis pipeline (`analysis.json`) - demonstrates data flow of various types (images, objects, and lists) in a multi-step analysis workflow.
 
 ```bash
 # Basic comparison-ready output
@@ -121,9 +124,9 @@ python cp_graph.py illum.json illum_graph.dot --include-disabled
 python cp_graph.py illum.json illum_graph.dot --explain-ids
 
 # Track specific data types
-python cp_graph.py ref_9_Analysis.json objects_only.dot --objects-only
-python cp_graph.py ref_9_Analysis.json images_only.dot --images-only
-python cp_graph.py ref_9_Analysis.json no_lists.dot --no-lists
+python cp_graph.py analysis.json objects_only.dot --objects-only
+python cp_graph.py analysis.json images_only.dot --images-only
+python cp_graph.py analysis.json no_lists.dot --no-lists
 
 # Exact comparison between pipelines with different module ordering
 python cp_graph.py illum.json illum.dot --ultra-minimal

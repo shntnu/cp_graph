@@ -240,7 +240,9 @@ A new `--ultra-minimal` option was added that produces identical DOT files for s
 3. Ensures byte-for-byte identical output for equivalent pipelines
 4. Enables reliable diff-based comparison between structurally equivalent pipelines with different module numbering
 
-The tool includes two sample pipelines that demonstrate this feature: `illum.json` and `illum_isoform.json`, which are structurally identical but have different module numbering.
+The tool includes several sample pipelines:
+- `illum.json` and `illum_isoform.json`: Structurally identical illumination correction pipelines with different module numbering (perfect for demonstrating the stable ID feature)
+- `analysis.json`: A more complex analysis pipeline that showcases various data types (images, objects, and lists) in a multi-step workflow
 
 ## Technical References
 - CellProfiler Core repo: https://github.com/CellProfiler/core
