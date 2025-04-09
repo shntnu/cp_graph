@@ -90,6 +90,7 @@ The generated files can be opened with:
 - PyDot (optional, for DOT output)
 
 Install dependencies with:
+
 ```bash
 pip install networkx pydot
 ```
