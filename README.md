@@ -116,23 +116,10 @@ The tool excels at two critical comparison tasks:
    This reveals the actual structural differences:
    
    ```diff
-   --- examples/output/illum_ultra.dot
-   +++ examples/output/illum_mod_ultra.dot
-   @@ -17,7 +17,6 @@
-    SaveImages_392621f0 [type=module];
-    SaveImages_46180921 [type=module]; 
-    SaveImages_4cf7a938 [type=module];
-   -SaveImages_9c8a2b51 [type=module];
-    SaveImages_c30ff497 [type=module];
-    image__DownsampledDNA [type=image];
-    image__DownsampledPhalloidin [type=image];
-   @@ -83,7 +82,6 @@
-    image__OrigZO1 -> Resize_b00c8387;
-    image__UpsampledIllumDNA -> SaveImages_4cf7a938;
-    image__UpsampledIllumPhalloidin -> SaveImages_392621f0;
-   -image__UpsampledIllumWGA -> SaveImages_9c8a2b51;
-    image__UpsampledIllumZEB1 -> SaveImages_c30ff497;
-    image__UpsampledIllumZO1 -> SaveImages_46180921;
+   12d11
+   < SaveImages_46180921 [type=module];
+   54d52
+   < image__UpsampledIllumZO1 -> SaveImages_46180921;
    ```
    
    This clearly shows the missing SaveImages module and its connection, despite all visual noise from module numbering being removed.
