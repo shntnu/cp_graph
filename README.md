@@ -14,14 +14,14 @@ This tool converts CellProfiler pipelines into standardized graph representation
 
 ```bash
 # Run with regular Python
-python cp_graph.py <pipeline.json> [output_graph.graphml] [options]
+python cp_graph.py <pipeline.json> <output_file> [options]
 
-# Run with UV to automatically install dependencies
-uv run --script cp_graph.py <pipeline.json> [output_graph.graphml] [options]
+# Run with UV to automatically install dependencies (recommended)
+uv run --script cp_graph.py <pipeline.json> <output_file> [options]
 ```
 
 - `pipeline.json` - Your CellProfiler pipeline file (v6 JSON format)
-- `output_graph.graphml` - Optional output file (supports .graphml, .gexf, or .dot formats)
+- `output_file` - Output file path (supports .graphml, .gexf, or .dot formats)
 
 Options:
 
@@ -88,13 +88,9 @@ This approach makes it possible to:
 3. Create canonical representations of pipeline structure
 
 ```bash
-# Generate stripped-down topology representations for two pipelines (minimal differences)
+# Generate stripped-down topology representations for comparison
 python cp_graph.py examples/illum.json examples/output/illum.dot --no-formatting
 python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --no-formatting
-
-# Or for exact byte-for-byte equality for structurally identical pipelines
-python cp_graph.py examples/illum.json examples/output/illum.dot --ultra-minimal
-python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --ultra-minimal
 
 # Compare using standard diff tools
 diff examples/output/illum.dot examples/output/illum_isoform.dot
@@ -106,15 +102,16 @@ diff examples/output/illum.dot examples/output/illum_isoform.dot
 
 By default, the tool ignores modules with `enabled: false` in their attributes. Use the `--include-disabled` flag to include these modules in your graph (shown with pink background and dashed borders).
 
-### Example Commands
+### Example Files & Commands
 
-The repository includes several example files in the `examples/` directory:
+The repository is structured with:
+- `examples/` - Sample CellProfiler pipeline files:
+  - `illum.json` and `illum_isoform.json` - Structurally identical pipelines with different module numbering
+  - `analysis.json` - More complex pipeline demonstrating various data types
+  - `ref_*.json` - Additional reference pipeline examples
+- `examples/output/` - Pre-generated graph outputs for reference
 
-1. Two structurally identical pipelines with different module numbering (`examples/illum.json` and `examples/illum_isoform.json`) - perfect for demonstrating the tool's ability to identify equivalent pipeline structures regardless of module ordering.
-2. A more complex analysis pipeline (`examples/analysis.json`) - demonstrates data flow of various types (images, objects, and lists) in a multi-step analysis workflow.
-3. Additional reference pipelines (`examples/ref_*.json`) - various pipeline examples for different use cases.
-
-Rendered outputs are stored in the `examples/output/` directory.
+Below are example commands showing common usage patterns:
 
 ```bash
 # Basic comparison-ready output
@@ -136,10 +133,10 @@ dot -Tpng examples/output/objects_only.dot -o examples/output/objects_only.png
 dot -Tpng examples/output/images_only.dot -o examples/output/images_only.png
 dot -Tpng examples/output/no_lists.dot -o examples/output/no_lists.png
 
-# Exact comparison between pipelines with different module ordering
-python cp_graph.py examples/illum.json examples/output/illum.dot --ultra-minimal
-python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --ultra-minimal
-diff examples/output/illum.dot examples/output/illum_isoform.dot # Should be identical if structures match
+# Exact byte-for-byte comparison of structurally identical pipelines
+python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
+python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform_ultra.dot --ultra-minimal
+diff examples/output/illum_ultra.dot examples/output/illum_isoform_ultra.dot # Should produce no output if identical
 ```
 
 ## Visualization (Secondary Feature)
@@ -150,13 +147,13 @@ While the primary purpose is computational analysis and comparison, the tool als
 
 The same pipeline can be viewed with different data type filters to focus on specific aspects:
 
-**Objects Only View**:
+**Objects Only View** (--objects-only):
 ![Objects Only](examples/output/analysis_objects.png)
 
-**Images Only View**:
+**Images Only View** (--images-only):
 ![Images Only](examples/output/analysis_images.png)
 
-**No Lists View**:
+**No Lists View** (--no-lists):
 ![No Lists](examples/output/analysis_no_lists.png)
 
 ### Visual Styling
