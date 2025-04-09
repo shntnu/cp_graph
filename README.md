@@ -89,15 +89,15 @@ This approach makes it possible to:
 
 ```bash
 # Generate stripped-down topology representations for two pipelines (minimal differences)
-python cp_graph.py illum.json illum.dot --no-formatting
-python cp_graph.py illum_isoform.json illum_isoform.dot --no-formatting
+python cp_graph.py examples/illum.json examples/output/illum.dot --no-formatting
+python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --no-formatting
 
 # Or for exact byte-for-byte equality for structurally identical pipelines
-python cp_graph.py illum.json illum.dot --ultra-minimal
-python cp_graph.py illum_isoform.json illum_isoform.dot --ultra-minimal
+python cp_graph.py examples/illum.json examples/output/illum.dot --ultra-minimal
+python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --ultra-minimal
 
 # Compare using standard diff tools
-diff illum.dot illum_isoform.dot
+diff examples/output/illum.dot examples/output/illum_isoform.dot
 ```
 
 ## Additional Features
@@ -108,35 +108,56 @@ By default, the tool ignores modules with `enabled: false` in their attributes. 
 
 ### Example Commands
 
-The repository includes several example files:
+The repository includes several example files in the `examples/` directory:
 
-1. Two structurally identical pipelines with different module numbering (`illum.json` and `illum_isoform.json`) - perfect for demonstrating the tool's ability to identify equivalent pipeline structures regardless of module ordering.
-2. A more complex analysis pipeline (`analysis.json`) - demonstrates data flow of various types (images, objects, and lists) in a multi-step analysis workflow.
+1. Two structurally identical pipelines with different module numbering (`examples/illum.json` and `examples/illum_isoform.json`) - perfect for demonstrating the tool's ability to identify equivalent pipeline structures regardless of module ordering.
+2. A more complex analysis pipeline (`examples/analysis.json`) - demonstrates data flow of various types (images, objects, and lists) in a multi-step analysis workflow.
+3. Additional reference pipelines (`examples/ref_*.json`) - various pipeline examples for different use cases.
+
+Rendered outputs are stored in the `examples/output/` directory.
 
 ```bash
 # Basic comparison-ready output
-python cp_graph.py illum.json illum_graph.dot --no-formatting
+python cp_graph.py examples/illum.json examples/output/illum_graph.dot --no-formatting
 
 # Include disabled modules
-python cp_graph.py illum.json illum_graph.dot --include-disabled
+python cp_graph.py examples/illum.json examples/output/illum_graph.dot --include-disabled
 
 # Show stable module ID mapping
-python cp_graph.py illum.json illum_graph.dot --explain-ids
+python cp_graph.py examples/illum.json examples/output/illum_graph.dot --explain-ids
 
 # Track specific data types
-python cp_graph.py analysis.json objects_only.dot --objects-only
-python cp_graph.py analysis.json images_only.dot --images-only
-python cp_graph.py analysis.json no_lists.dot --no-lists
+python cp_graph.py examples/analysis.json examples/output/objects_only.dot --objects-only
+python cp_graph.py examples/analysis.json examples/output/images_only.dot --images-only
+python cp_graph.py examples/analysis.json examples/output/no_lists.dot --no-lists
+
+# Generate visualizations for the different data type views
+dot -Tpng examples/output/objects_only.dot -o examples/output/objects_only.png
+dot -Tpng examples/output/images_only.dot -o examples/output/images_only.png
+dot -Tpng examples/output/no_lists.dot -o examples/output/no_lists.png
 
 # Exact comparison between pipelines with different module ordering
-python cp_graph.py illum.json illum.dot --ultra-minimal
-python cp_graph.py illum_isoform.json illum_isoform.dot --ultra-minimal
-diff illum.dot illum_isoform.dot # Should be identical if structures match
+python cp_graph.py examples/illum.json examples/output/illum.dot --ultra-minimal
+python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --ultra-minimal
+diff examples/output/illum.dot examples/output/illum_isoform.dot # Should be identical if structures match
 ```
 
 ## Visualization (Secondary Feature)
 
 While the primary purpose is computational analysis and comparison, the tool also supports visualization:
+
+### Data Type Filtering Views
+
+The same pipeline can be viewed with different data type filters to focus on specific aspects:
+
+**Objects Only View**:
+![Objects Only](examples/output/analysis_objects.png)
+
+**Images Only View**:
+![Images Only](examples/output/analysis_images.png)
+
+**No Lists View**:
+![No Lists](examples/output/analysis_no_lists.png)
 
 ### Visual Styling
 
@@ -155,10 +176,10 @@ The graph visually represents different elements:
 If you have Graphviz installed, you can render a DOT file to an image:
 
 ```bash
-dot -Tpng illum_graph.dot -o illum_graph.png
+dot -Tpng examples/output/illum_graph.dot -o examples/output/illum_graph.png
 ```
 
-![image](illum_graph.png)
+![image](examples/output/illum_graph.png)
 
 The generated files can also be opened with:
 - GraphML (.graphml): yEd, Cytoscape, or other graph visualization software

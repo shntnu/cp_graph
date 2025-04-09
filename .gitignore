@@ -1,4 +1,4 @@
-examples/
+_ref/
 
 # Ignore uv  / pyproject.toml files for now
 uv.lock

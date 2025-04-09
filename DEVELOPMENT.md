@@ -20,7 +20,7 @@ We've built a tool to extract and visualize data dependencies from CellProfiler 
 
 ## CellProfiler Pipeline JSON Format
 
-Based on analysis of the illum.json file and the CellProfiler Core codebase, here is a detailed overview of the JSON format structure:
+Based on analysis of the examples/illum.json file and the CellProfiler Core codebase, here is a detailed overview of the JSON format structure:
 
 ### Top-level Structure
 ```json
@@ -193,7 +193,7 @@ Created `README.md` with:
 - Detailed usage instructions
 - Command-line options
 - Explanation of how the tool works
-- Examples with illum.json
+- Examples with examples/illum.json
 - Installation requirements
 
 ## Use Cases
@@ -240,13 +240,14 @@ A new `--ultra-minimal` option was added that produces identical DOT files for s
 3. Ensures byte-for-byte identical output for equivalent pipelines
 4. Enables reliable diff-based comparison between structurally equivalent pipelines with different module numbering
 
-The tool includes several sample pipelines:
-- `illum.json` and `illum_isoform.json`: Structurally identical illumination correction pipelines with different module numbering (perfect for demonstrating the stable ID feature)
-- `analysis.json`: A more complex analysis pipeline that showcases various data types (images, objects, and lists) in a multi-step workflow
+The tool includes several sample pipelines in the `examples/` directory:
+- `examples/illum.json` and `examples/illum_isoform.json`: Structurally identical illumination correction pipelines with different module numbering (perfect for demonstrating the stable ID feature)
+- `examples/analysis.json`: A more complex analysis pipeline that showcases various data types (images, objects, and lists) in a multi-step workflow
+- Rendered outputs are stored in the `examples/output/` directory
 
 ## Technical References
 - CellProfiler Core repo: https://github.com/CellProfiler/core
-- CellProfiler pipeline JSON structure: Example in illum.json
+- CellProfiler pipeline JSON structure: Example in examples/illum.json
 - NetworkX documentation: https://networkx.org/documentation/stable/
 - Graphviz documentation: https://graphviz.org/documentation/
 
