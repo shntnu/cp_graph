@@ -5,7 +5,7 @@ This tool extracts image dependency relationships from CellProfiler pipelines an
 ## Usage
 
 ```bash
-python cp_dependency_graph.py <pipeline.json> [output_graph.graphml] [options]
+python cpgraph.py <pipeline.json> [output_graph.graphml] [options]
 ```
 
 - `pipeline.json` - Your CellProfiler pipeline file (v6 JSON format)
@@ -32,13 +32,13 @@ By default, the script ignores modules that have `enabled: false` in their attri
 
 ```bash
 # Basic usage (includes only enabled modules)
-python cp_dependency_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot
+python cpgraph.py 1_CP_Illum.json 1_CP_Illum_graph.dot
 
 # Include disabled modules
-python cp_dependency_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --include-disabled
+python cpgraph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --include-disabled
 
 # Hide module info on edges
-python cp_dependency_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --no-module-info
+python cpgraph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --no-module-info
 ```
 
 The script will print a summary of all connections and save the graph to the specified format.
