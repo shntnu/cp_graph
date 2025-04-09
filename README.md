@@ -108,30 +108,35 @@ The repository is structured with:
 - `examples/` - Sample CellProfiler pipeline files:
   - `illum.json` and `illum_isoform.json` - Structurally identical pipelines with different module numbering
   - `analysis.json` - More complex pipeline demonstrating various data types
-  - `ref_*.json` - Additional reference pipeline examples
 - `examples/output/` - Pre-generated graph outputs for reference
 
 Below are example commands showing common usage patterns:
 
 ```bash
-# Basic comparison-ready output
-python cp_graph.py examples/illum.json examples/output/illum_graph.dot --no-formatting
+# Basic illumination pipeline example
+python cp_graph.py examples/illum.json examples/output/illum_graph.dot
 
-# Include disabled modules
-python cp_graph.py examples/illum.json examples/output/illum_graph.dot --include-disabled
+# Basic visualization
+dot -Tpng examples/output/illum_graph.dot -o examples/output/illum_graph.png
 
-# Show stable module ID mapping
-python cp_graph.py examples/illum.json examples/output/illum_graph.dot --explain-ids
+# Additional illumination pipeline options
+python cp_graph.py examples/illum.json examples/output/illum_graph_no_format.dot --no-formatting
+python cp_graph.py examples/illum.json examples/output/illum_graph_disabled.dot --include-disabled
+python cp_graph.py examples/illum.json examples/output/illum_graph_ids.dot --explain-ids
 
-# Track specific data types
-python cp_graph.py examples/analysis.json examples/output/objects_only.dot --objects-only
-python cp_graph.py examples/analysis.json examples/output/images_only.dot --images-only
-python cp_graph.py examples/analysis.json examples/output/no_lists.dot --no-lists
+# Analyze complex pipeline (all data types)
+python cp_graph.py examples/analysis.json examples/output/analysis_full.dot
 
-# Generate visualizations for the different data type views
-dot -Tpng examples/output/objects_only.dot -o examples/output/objects_only.png
-dot -Tpng examples/output/images_only.dot -o examples/output/images_only.png
-dot -Tpng examples/output/no_lists.dot -o examples/output/no_lists.png
+# Filter complex pipeline by data type
+python cp_graph.py examples/analysis.json examples/output/analysis_objects.dot --objects-only
+python cp_graph.py examples/analysis.json examples/output/analysis_images.dot --images-only
+python cp_graph.py examples/analysis.json examples/output/analysis_no_lists.dot --no-lists
+
+# Generate visualizations
+dot -Tpng examples/output/analysis_full.dot -o examples/output/analysis_full.png
+dot -Tpng examples/output/analysis_objects.dot -o examples/output/analysis_objects.png
+dot -Tpng examples/output/analysis_images.dot -o examples/output/analysis_images.png
+dot -Tpng examples/output/analysis_no_lists.dot -o examples/output/analysis_no_lists.png
 
 # Exact byte-for-byte comparison of structurally identical pipelines
 python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
@@ -142,19 +147,6 @@ diff examples/output/illum_ultra.dot examples/output/illum_isoform_ultra.dot # S
 ## Visualization (Secondary Feature)
 
 While the primary purpose is computational analysis and comparison, the tool also supports visualization:
-
-### Data Type Filtering Views
-
-The same pipeline can be viewed with different data type filters to focus on specific aspects:
-
-**Objects Only View** (--objects-only):
-![Objects Only](examples/output/analysis_objects.png)
-
-**Images Only View** (--images-only):
-![Images Only](examples/output/analysis_images.png)
-
-**No Lists View** (--no-lists):
-![No Lists](examples/output/analysis_no_lists.png)
 
 ### Visual Styling
 
@@ -182,6 +174,28 @@ The generated files can also be opened with:
 - GraphML (.graphml): yEd, Cytoscape, or other graph visualization software
 - GEXF (.gexf): Gephi
 - DOT (.dot): Graphviz, OmniGraffle
+
+### Data Type Filtering Views
+
+While the illumination pipeline (`illum.json`) demonstrates the basic features, the tool shows its real power with more complex pipelines like the analysis pipeline (`examples/analysis.json`). For complex pipelines, filtering by data type becomes essential to understand specific aspects of the workflow:
+
+**Complete Analysis Pipeline** (unfiltered):
+This complex cellular analysis pipeline combines multiple data types - images (gray), objects (green), and lists (yellow/cyan) - making it challenging to focus on specific workflow aspects:
+![Complete Analysis](examples/output/analysis_full.png)
+
+**Filtered Views of the Analysis Pipeline:**
+
+**Objects Only View** (--objects-only):
+Isolates just the cellular object relationships in the pipeline:
+![Objects Only](examples/output/analysis_objects.png)
+
+**Images Only View** (--images-only):
+Shows only image processing and transformation:
+![Images Only](examples/output/analysis_images.png)
+
+**No Lists View** (--no-lists):
+Excludes list data while keeping both images and objects:
+![No Lists](examples/output/analysis_no_lists.png)
 
 ## Requirements
 
