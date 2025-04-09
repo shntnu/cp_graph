@@ -87,14 +87,56 @@ This approach makes it possible to:
 2. Detect real functional changes vs. just module reordering
 3. Create canonical representations of pipeline structure
 
-```bash
-# Generate stripped-down topology representations for comparison
-python cp_graph.py examples/illum.json examples/output/illum.dot --no-formatting
-python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform.dot --no-formatting
+### Detection of Structural Equivalence and Differences
 
-# Compare using standard diff tools
-diff examples/output/illum.dot examples/output/illum_isoform.dot
-```
+The tool excels at two critical comparison tasks:
+
+1. **Confirming Structural Equivalence** 
+
+   When comparing `illum.json` with `illum_isoform.json` (identical structure but different module numbering):
+   
+   ```bash
+   python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
+   python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform_ultra.dot --ultra-minimal
+   diff examples/output/illum_ultra.dot examples/output/illum_isoform_ultra.dot
+   ```
+   
+   This produces no output, confirming the two pipelines are structurally identical despite their different module numbering.
+
+2. **Detecting Real Functional Differences**
+
+   When comparing `illum.json` with `illum_mod.json` (where a SaveImages module is disabled):
+   
+   ```bash
+   python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
+   python cp_graph.py examples/illum_mod.json examples/output/illum_mod_ultra.dot --ultra-minimal
+   diff examples/output/illum_ultra.dot examples/output/illum_mod_ultra.dot
+   ```
+   
+   This reveals the actual structural differences:
+   
+   ```diff
+   --- examples/output/illum_ultra.dot
+   +++ examples/output/illum_mod_ultra.dot
+   @@ -17,7 +17,6 @@
+    SaveImages_392621f0 [type=module];
+    SaveImages_46180921 [type=module]; 
+    SaveImages_4cf7a938 [type=module];
+   -SaveImages_9c8a2b51 [type=module];
+    SaveImages_c30ff497 [type=module];
+    image__DownsampledDNA [type=image];
+    image__DownsampledPhalloidin [type=image];
+   @@ -83,7 +82,6 @@
+    image__OrigZO1 -> Resize_b00c8387;
+    image__UpsampledIllumDNA -> SaveImages_4cf7a938;
+    image__UpsampledIllumPhalloidin -> SaveImages_392621f0;
+   -image__UpsampledIllumWGA -> SaveImages_9c8a2b51;
+    image__UpsampledIllumZEB1 -> SaveImages_c30ff497;
+    image__UpsampledIllumZO1 -> SaveImages_46180921;
+   ```
+   
+   This clearly shows the missing SaveImages module and its connection, despite all visual noise from module numbering being removed.
+
 
 ## Additional Features
 
@@ -106,7 +148,9 @@ By default, the tool ignores modules with `enabled: false` in their attributes. 
 
 The repository is structured with:
 - `examples/` - Sample CellProfiler pipeline files:
-  - `illum.json` and `illum_isoform.json` - Structurally identical pipelines with different module numbering
+  - `illum.json` - Basic illumination correction pipeline
+  - `illum_isoform.json` - Structurally identical to `illum.json` but with different module numbering
+  - `illum_mod.json` - Modified illumination pipeline with a disabled SaveImages module
   - `analysis.json` - More complex pipeline demonstrating various data types
 - `examples/output/` - Pre-generated graph outputs for reference
 
@@ -138,10 +182,10 @@ dot -Tpng examples/output/analysis_objects.dot -o examples/output/analysis_objec
 dot -Tpng examples/output/analysis_images.dot -o examples/output/analysis_images.png
 dot -Tpng examples/output/analysis_no_lists.dot -o examples/output/analysis_no_lists.png
 
-# Exact byte-for-byte comparison of structurally identical pipelines
-python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
-python cp_graph.py examples/illum_isoform.json examples/output/illum_isoform_ultra.dot --ultra-minimal
-diff examples/output/illum_ultra.dot examples/output/illum_isoform_ultra.dot # Should produce no output if identical
+# Converting pipelines with different options
+python cp_graph.py examples/illum_mod.json examples/output/illum_mod.dot # Standard
+python cp_graph.py examples/illum_mod.json examples/output/illum_mod_ultra.dot --ultra-minimal # For diff comparison
+python cp_graph.py examples/illum_mod.json examples/output/illum_mod_include.dot --include-disabled # Show disabled modules
 ```
 
 ## Visualization (Secondary Feature)
