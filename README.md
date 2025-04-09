@@ -24,47 +24,50 @@ Options:
 - `--include-disabled` - Include disabled modules in the graph (excluded by default)
 - `--explain-ids` - Print mapping of stable node IDs to original module numbers
 
-## Pipeline Comparison (Image Flow Focus)
+## Pipeline Comparison
 
-### What This Tool Compares
+### Scope and Limitations
 
 This tool is intentionally narrowly scoped to analyze and compare:
 - Which modules exist in the pipeline
 - How images flow between modules
 - The topological structure of image processing
 
-It deliberately **does not compare**:
+It deliberately excludes:
 - Specific module parameter settings
 - Non-image data (objects, measurements, CSV outputs)
 - Module internal processing logic
 
+These limitations are intentional to keep the graph focused on overall pipeline structure and image flow patterns.
+
 ### How Graph Standardization Works
 
-1. **Stable Node Identification**:
+1. **Stable Module Identifiers**:
    - Image nodes use their actual names from the pipeline (e.g., "OrigDNA")
    - Module nodes use a hash-based identifier that combines:
      - Module type (e.g., "Resize")
      - Alphabetically sorted list of input images
      - Alphabetically sorted list of output images
-   - This ensures the same module functionality always gets the same identifier, regardless of pipeline ordering
+   - This ensures the same module gets the same identifier regardless of pipeline ordering
+   - Original module numbers are maintained in node labels for reference
 
 2. **Consistent Serialization**:
-   - When writing DOT files, nodes are sorted lexicographically by name
+   - Nodes are sorted lexicographically when writing files
    - Edges are sorted by source node first, then destination node
-   - This ensures the exact same file content for functionally equivalent pipelines
+   - This creates identical file content for functionally equivalent pipelines
 
-3. **Optional Formatting Removal**:
-   - The `--no-formatting` option strips all visual styling
-   - This focuses solely on the graph topology for comparison
+3. **Technical Implementation**:
+   - Extracts only input images (`ImageSubscriber`) and output images (`ImageName`)
+   - Creates nodes for images and modules with their connections
+   - Provides the `--explain-ids` option to show mapping between stable IDs and original numbers
 
 ### Comparison Capabilities
 
-This standardization makes it possible to:
+This approach makes it possible to:
 
 1. Compare two pipeline versions using simple file diff tools
 2. Detect real functional changes vs. just module reordering
 3. Create canonical representations of pipeline structure
-4. Identify when two different-looking pipelines have identical data flows
 
 ```bash
 # Generate stripped-down topology representations for two pipelines
@@ -75,58 +78,22 @@ python cp_graph.py pipeline2.json pipeline2.dot --no-formatting
 diff pipeline1.dot pipeline2.dot
 ```
 
-The combination of stable identifiers and consistent serialization ensures that any differences detected between two graph outputs represent actual changes in pipeline functionality, not just cosmetic or ordering differences.
-
-## Technical Implementation
-
-### What's Captured
-
-The tool **focuses exclusively on image flow**, deliberately omitting other aspects of the pipeline. It extracts only two specific elements from each module:
-
-1. Input images: `cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber`
-2. Output images: `cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName`
-
-For each enabled module, it creates:
-- Nodes for each input and output image
-- A node for the module itself with a stable, hash-based identifier
-- Connections tracking the flow of images between modules
-
-### Current Limitations
-
-This tool deliberately excludes:
-
-1. **Module Settings**: The specific parameters and configurations within each module are not captured, only their existence and image connections
-2. **Non-Image Data Flow**: Other outputs such as CSV files, measurements, or object information are not represented
-3. **Module Internal Logic**: Only the external inputs/outputs are captured, not the internal processing
-
-These limitations are intentional to keep the graph focused on overall pipeline structure and image flow patterns.
-
-### Stable Module Identifiers
-
-To enable reliable pipeline comparisons even when modules are reordered, the tool generates stable module identifiers based on:
-1. The module type (e.g., "Resize", "IdentifyPrimaryObjects")
-2. A hash of its input and output image connections
-
-This ensures that functionally equivalent modules have the same ID regardless of their position in the pipeline. Original module numbers from the pipeline are maintained in node labels for reference.
-
-The `--explain-ids` option prints the mapping between stable IDs and the original module numbers.
-
 ## Additional Features
 
 ### Handling Disabled Modules
 
-By default, the tool ignores modules that have `enabled: false` in their attributes, as these aren't actually executed in the pipeline. If you want to include disabled modules in your graph, use the `--include-disabled` flag.
+By default, the tool ignores modules with `enabled: false` in their attributes. Use the `--include-disabled` flag to include these modules in your graph (shown with pink background and dashed borders).
 
 ### Example Commands
 
 ```bash
-# Basic comparison-ready output (no formatting, focused on topology)
+# Basic comparison-ready output
 python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --no-formatting
 
 # Include disabled modules
 python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --include-disabled
 
-# Show stable module ID mapping (useful for debugging)
+# Show stable module ID mapping
 python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --explain-ids
 ```
 
