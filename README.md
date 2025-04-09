@@ -1,6 +1,6 @@
 # CellProfiler Pipeline Dependency Graph
 
-This tool extracts image dependency relationships from CellProfiler pipelines and creates a graph representation.
+This tool extracts image dependency relationships from CellProfiler pipelines and creates a graph representation. It visualizes the flow of images through processing modules in a CellProfiler pipeline.
 
 ## Usage
 
@@ -22,11 +22,17 @@ The script looks for two specific types of settings in each module:
 1. Input images: `cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber`
 2. Output images: `cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName`
 
-For each enabled module, it creates connections from all inputs to all outputs, building a complete image dependency graph.
+For each enabled module, it creates:
+1. A node for the module itself (displayed as a blue box)
+2. Nodes for each input and output image (displayed as gray ovals)
+3. Connections from input images to the module
+4. Connections from the module to its output images
+
+This creates a complete image dependency graph that shows both the images and the processing modules that transform them.
 
 ## Handling Disabled Modules
 
-By default, the script ignores modules that have `enabled: false` in their attributes, as these aren't actually executed in the pipeline. If you want to include disabled modules in your graph, use the `--include-disabled` flag.
+By default, the script ignores modules that have `enabled: false` in their attributes, as these aren't actually executed in the pipeline. If you want to include disabled modules in your graph, use the `--include-disabled` flag. Disabled modules will be displayed with a pink background and dashed outline to distinguish them from enabled modules.
 
 ## Example with 1_CP_Illum.json
 
@@ -43,16 +49,20 @@ python cp_graph.py 1_CP_Illum.json 1_CP_Illum_graph.dot --no-module-info
 
 The script will print a summary of all connections and save the graph to the specified format.
 
-## Module Information on Edges
+## Visual Representation
 
-By default, the edges in the graph include module information (name and number). This helps identify which module created each transformation.
+The graph represents different elements visually:
 
-For example, in the DOT format, edges will include labels like:
-```
-"OrigDNA" -> "DownsampledDNA" [label="Resize #2"];
-```
+- **Images**: Gray ovals 
+- **Processing Modules**: Blue boxes with the module name and number
+- **Disabled Modules**: Pink boxes with dashed borders (when included with `--include-disabled`)
+- **Connections**: Arrows showing the flow from input images to modules and from modules to output images
 
-This makes it clear that the "Resize" module (number 2) transformed "OrigDNA" into "DownsampledDNA".
+### Module Information
+
+Module nodes are labeled with their name and module number (e.g., "Resize #2"). This makes it easy to identify which module is performing each transformation.
+
+When the `--no-module-info` option is used, additional labels on edges are removed for a cleaner visual representation.
 
 ## Visualizing the Output
 

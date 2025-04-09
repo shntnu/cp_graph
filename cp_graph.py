@@ -26,6 +26,7 @@ def extract_module_io(module):
     module_attrs = module.get("attributes", {})
     module_num = module_attrs.get("module_num", 0)
     module_name = module_attrs.get("module_name", "Unknown")
+    module_enabled = module_attrs.get("enabled", True)
     
     for setting in module.get("settings", []):
         setting_name = setting.get("name", "")
@@ -47,10 +48,11 @@ def extract_module_io(module):
         "module_num": module_num,
         "module_name": module_name,
         "inputs": input_images,
-        "outputs": output_images
+        "outputs": output_images,
+        "enabled": module_enabled
     }
 
-def create_image_dependency_graph(pipeline_json):
+def create_image_dependency_graph(pipeline_json, include_disabled=False):
     """Create a dependency graph from images flowing between modules"""
     G = nx.DiGraph()
     
@@ -60,52 +62,131 @@ def create_image_dependency_graph(pipeline_json):
         module_io = extract_module_io(module)
         modules_io.append(module_io)
         
+        # Skip disabled modules if not explicitly included
+        if not module_io["enabled"] and not include_disabled:
+            continue
+            
+        # Skip modules with no inputs or outputs
+        if not module_io["inputs"] and not module_io["outputs"]:
+            continue
+            
         # Add all images as nodes
         for image in module_io["inputs"] + module_io["outputs"]:
             if not G.has_node(image):
                 G.add_node(image, type="image")
-                
-        # Add edges from each module's inputs to its outputs
+        
+        # Create a node for the module
+        module_id = f"module_{module_io['module_num']}"
+        module_label = f"{module_io['module_name']} #{module_io['module_num']}"
+        
+        # Add disabled status to label if module is disabled
+        if not module_io["enabled"]:
+            module_label += " (disabled)"
+            
+        G.add_node(
+            module_id, 
+            type="module", 
+            label=module_label, 
+            module_name=module_io["module_name"], 
+            module_num=module_io["module_num"],
+            enabled=module_io["enabled"]
+        )
+        
+        # Add edges from inputs to module
         for input_img in module_io["inputs"]:
-            for output_img in module_io["outputs"]:
-                G.add_edge(
-                    input_img, 
-                    output_img, 
-                    module=module_io["module_name"],
-                    module_num=module_io["module_num"]
-                )
+            G.add_edge(input_img, module_id, type="input")
+            
+        # Add edges from module to outputs
+        for output_img in module_io["outputs"]:
+            G.add_edge(module_id, output_img, type="output")
     
     return G, modules_io
 
-def main(pipeline_path, output_path=None):
+def main(pipeline_path, output_path=None, no_module_info=False, include_disabled=False):
     """Process a CellProfiler pipeline and create an image dependency graph"""
     # Load the pipeline JSON
     with open(pipeline_path, 'r') as f:
         pipeline = json.load(f)
     
     # Create the graph
-    G, modules_io = create_image_dependency_graph(pipeline)
+    G, modules_io = create_image_dependency_graph(pipeline, include_disabled)
     
     # Print pipeline summary
     print(f"Pipeline: {pipeline_path}")
-    print(f"Graph has {len(G.nodes())} images and {len(G.edges())} connections")
+    
+    image_nodes = [n for n, attr in G.nodes(data=True) if attr.get('type') == 'image']
+    module_nodes = [n for n, attr in G.nodes(data=True) if attr.get('type') == 'module'] 
+    
+    enabled_modules = [n for n in module_nodes if G.nodes[n].get('enabled', True)]
+    disabled_modules = [n for n in module_nodes if not G.nodes[n].get('enabled', True)]
+    
+    print(f"Graph has {len(image_nodes)} images and {len(module_nodes)} modules " +
+          f"({len(enabled_modules)} enabled, {len(disabled_modules)} disabled) with {len(G.edges())} connections")
     
     # Print image connections
-    print("\nImage Connections:")
+    print("\nConnections:")
     for edge in G.edges(data=True):
         src, dst, attrs = edge
-        print(f"  {src} → {dst} (Module: {attrs['module']} #{attrs['module_num']})")
+        src_type = G.nodes[src].get('type')
+        dst_type = G.nodes[dst].get('type')
+        
+        if src_type == 'image' and dst_type == 'module':
+            # Input connection
+            module_name = G.nodes[dst].get('module_name')
+            module_num = G.nodes[dst].get('module_num')
+            module_enabled = G.nodes[dst].get('enabled', True)
+            status = " (disabled)" if not module_enabled else ""
+            print(f"  {src} → [{module_name} #{module_num}{status}] (Input)")
+        elif src_type == 'module' and dst_type == 'image':
+            # Output connection
+            module_name = G.nodes[src].get('module_name')
+            module_num = G.nodes[src].get('module_num')
+            module_enabled = G.nodes[src].get('enabled', True)
+            status = " (disabled)" if not module_enabled else ""
+            print(f"  [{module_name} #{module_num}{status}] → {dst} (Output)")
     
     # Save the graph if requested
     if output_path:
         ext = Path(output_path).suffix.lower()
         
+        # Apply visual attributes for different node types
+        for node, attrs in G.nodes(data=True):
+            if attrs.get('type') == 'module':
+                # Module nodes styling
+                G.nodes[node]['shape'] = 'box'
+                G.nodes[node]['style'] = 'filled'
+                
+                # Style disabled modules differently
+                if attrs.get('enabled', True):
+                    G.nodes[node]['fillcolor'] = 'lightblue'
+                else:
+                    G.nodes[node]['fillcolor'] = 'lightpink'
+                    G.nodes[node]['style'] = 'filled,dashed'
+                    
+                G.nodes[node]['fontname'] = 'Helvetica-Bold'
+            else:
+                # Image nodes styling
+                G.nodes[node]['shape'] = 'ellipse'
+                G.nodes[node]['style'] = 'filled'
+                G.nodes[node]['fillcolor'] = 'lightgray'
+        
+        # If no_module_info is True, simplify edges
+        if no_module_info:
+            for edge in G.edges():
+                # Remove any edge labels
+                if 'label' in G.edges[edge]:
+                    del G.edges[edge]['label']
+                
         if ext == '.graphml':
             nx.write_graphml(G, output_path)
         elif ext == '.gexf':
             nx.write_gexf(G, output_path)
         elif ext == '.dot':
             try:
+                # For DOT format, set proper display labels
+                for node, attrs in G.nodes(data=True):
+                    if attrs.get('type') == 'module':
+                        G.nodes[node]['label'] = attrs.get('label')
                 nx.drawing.nx_pydot.write_dot(G, output_path)
             except ImportError:
                 print("Warning: pydot not available. Saving as GraphML instead.")
@@ -119,11 +200,14 @@ def main(pipeline_path, output_path=None):
     return G, modules_io
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python cp_dependency_graph.py pipeline.json [output_graph.graphml]")
-        sys.exit(1)
+    import argparse
     
-    pipeline_path = sys.argv[1]
-    output_path = sys.argv[2] if len(sys.argv) > 2 else None
+    parser = argparse.ArgumentParser(description='Create a graph representation of a CellProfiler pipeline')
+    parser.add_argument('pipeline', help='CellProfiler pipeline JSON file')
+    parser.add_argument('output', nargs='?', help='Output graph file (.graphml, .gexf, or .dot)')
+    parser.add_argument('--no-module-info', action='store_true', help='Hide module information on graph edges')
+    parser.add_argument('--include-disabled', action='store_true', help='Include disabled modules in the graph')
     
-    main(pipeline_path, output_path)
+    args = parser.parse_args()
+    
+    main(args.pipeline, args.output, args.no_module_info, args.include_disabled)
