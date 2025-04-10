@@ -34,10 +34,8 @@ Options:
 **Content Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph (excluded by default)
 
-**Data Type Options:** (mutually exclusive)
-- `--images-only` - Include only image flow in the graph (default: include all types)
-- `--objects-only` - Include only object flow in the graph (default: include all types)
-- `--no-lists` - Exclude list inputs in the graph (default: include all types)
+**Data Type Options:**
+- `--data-type [all|images_only|objects_only|no_lists]` - Filter by data type (default: all)
 
 ## Pipeline Comparison
 
@@ -159,9 +157,9 @@ python cp_graph.py examples/illum.json examples/output/illum_graph_ids.dot --exp
 python cp_graph.py examples/analysis.json examples/output/analysis_full.dot
 
 # Filter complex pipeline by data type
-python cp_graph.py examples/analysis.json examples/output/analysis_objects.dot --objects-only
-python cp_graph.py examples/analysis.json examples/output/analysis_images.dot --images-only
-python cp_graph.py examples/analysis.json examples/output/analysis_no_lists.dot --no-lists
+python cp_graph.py examples/analysis.json examples/output/analysis_objects.dot --data-type objects_only
+python cp_graph.py examples/analysis.json examples/output/analysis_images.dot --data-type images_only
+python cp_graph.py examples/analysis.json examples/output/analysis_no_lists.dot --data-type no_lists
 
 # Generate visualizations
 dot -Tpng examples/output/analysis_full.dot -o examples/output/analysis_full.png
@@ -191,6 +189,8 @@ The graph visually represents different elements:
 - **Disabled Modules**: Pink boxes with dashed borders (when included)
 - **Connections**: Arrows showing the flow between data nodes and modules
 
+Note: When comparing standard DOT files generated with different versions of the tool, you may notice differences in attribute ordering (e.g., `fillcolor` and `fontname` attributes in different order). These differences are purely cosmetic and don't affect visualization or functionality. If exact byte-for-byte consistency is needed for diff comparisons, use the `--ultra-minimal` option which excludes these styling attributes entirely.
+
 ### Rendering the Graph
 
 If you have Graphviz installed, you can render a DOT file to an image:
@@ -216,26 +216,33 @@ This complex cellular analysis pipeline combines multiple data types - images (g
 
 **Filtered Views of the Analysis Pipeline:**
 
-**Objects Only View** (--objects-only):
+**Objects Only View** (--data-type objects_only):
 Isolates just the cellular object relationships in the pipeline:
 ![Objects Only](examples/output/analysis_objects.png)
 
-**Images Only View** (--images-only):
+**Images Only View** (--data-type images_only):
 Shows only image processing and transformation:
 ![Images Only](examples/output/analysis_images.png)
 
-**No Lists View** (--no-lists):
+**No Lists View** (--data-type no_lists):
 Excludes list data while keeping both images and objects:
 ![No Lists](examples/output/analysis_no_lists.png)
 
 ## Requirements
 
-- Python 3.x
+- Python 3.11+
 - NetworkX library
-- PyDot (optional, for DOT output)
+- PyDot (for DOT output)
+- Click (for CLI interface)
 
 Install dependencies with:
 
 ```bash
-pip install networkx pydot
+pip install networkx pydot click
+```
+
+Or use UV (recommended):
+
+```bash
+uv pip install networkx pydot click
 ```
