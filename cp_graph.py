@@ -17,19 +17,25 @@ import sys
 from pathlib import Path
 import networkx as nx
 import click
-from typing import Dict, List, Set, Tuple, Any, Optional, TypedDict, TypeVar, TextIO
+from typing import Dict, List, Tuple, Any, Optional, TypedDict
 
 # ----- CONSTANTS AND CONFIGURATION -----
 # CellProfiler setting types
 # Input types
 INPUT_IMAGE_TYPE = "cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber"
-INPUT_LABEL_TYPE = "cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber"
+INPUT_LABEL_TYPE = (
+    "cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber"
+)
 INPUT_IMAGE_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber"
 INPUT_LABEL_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber"
 
 # Output types
-OUTPUT_IMAGE_TYPE = "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName"
-OUTPUT_LABEL_TYPE = "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName"
+OUTPUT_IMAGE_TYPE = (
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName"
+)
+OUTPUT_LABEL_TYPE = (
+    "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName"
+)
 
 # Node types
 NODE_TYPE_MODULE = "module"
@@ -44,14 +50,11 @@ EDGE_TYPE_OUTPUT = "output"
 
 # Style constants
 STYLE_COLORS = {
-    NODE_TYPE_MODULE: {
-        "enabled": "lightblue",
-        "disabled": "lightpink"
-    },
+    NODE_TYPE_MODULE: {"enabled": "lightblue", "disabled": "lightpink"},
     NODE_TYPE_IMAGE: "lightgray",
     NODE_TYPE_OBJECT: "lightgreen",
-    NODE_TYPE_IMAGE_LIST: "lightyellow", 
-    NODE_TYPE_OBJECT_LIST: "lightcyan"
+    NODE_TYPE_IMAGE_LIST: "lightyellow",
+    NODE_TYPE_OBJECT_LIST: "lightcyan",
 }
 
 # Graph styles
@@ -60,29 +63,36 @@ STYLE_SHAPES = {
     NODE_TYPE_IMAGE: "ellipse",
     NODE_TYPE_OBJECT: "ellipse",
     NODE_TYPE_IMAGE_LIST: "box",
-    NODE_TYPE_OBJECT_LIST: "box"
+    NODE_TYPE_OBJECT_LIST: "box",
 }
+
 
 # Type definitions
 class ModuleInputs(TypedDict):
     """Dictionary of module inputs by data type"""
+
     image: List[str]
     object: List[str]
     image_list: List[str]
     object_list: List[str]
 
+
 class ModuleOutputs(TypedDict):
     """Dictionary of module outputs by data type"""
+
     image: List[str]
     object: List[str]
 
+
 class ModuleInfo(TypedDict):
     """Information about a module extracted from the pipeline"""
+
     module_num: int
     module_name: str
     inputs: ModuleInputs
     outputs: ModuleOutputs
     enabled: bool
+
 
 # Return type for main functions
 GraphData = Tuple[nx.DiGraph, List[ModuleInfo]]
@@ -92,10 +102,10 @@ GraphData = Tuple[nx.DiGraph, List[ModuleInfo]]
 def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
     """
     Extract inputs and outputs of various data types from a CellProfiler module.
-    
+
     Args:
         module: A dictionary representing a CellProfiler module from the pipeline JSON
-        
+
     Returns:
         ModuleInfo object containing:
             - module_num: The number of the module in the pipeline
@@ -106,12 +116,12 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
     """
     # Initialize dictionaries for different types of inputs/outputs with proper typing
     inputs: ModuleInputs = {
-        NODE_TYPE_IMAGE: [], 
-        NODE_TYPE_OBJECT: [], 
-        NODE_TYPE_IMAGE_LIST: [], 
-        NODE_TYPE_OBJECT_LIST: []
+        NODE_TYPE_IMAGE: [],
+        NODE_TYPE_OBJECT: [],
+        NODE_TYPE_IMAGE_LIST: [],
+        NODE_TYPE_OBJECT_LIST: [],
     }
-    
+
     outputs: ModuleOutputs = {
         NODE_TYPE_IMAGE: [],
         NODE_TYPE_OBJECT: [],
@@ -173,31 +183,31 @@ def create_dependency_graph(
 ) -> GraphData:
     """
     Create a dependency graph showing data flow between modules.
-    
+
     Args:
         pipeline_json: The JSON representation of a CellProfiler pipeline
         include_disabled: Whether to include disabled modules
         include_objects: Whether to include object data nodes
         include_lists: Whether to include list data nodes
         include_images: Whether to include image data nodes
-        
+
     Returns:
         A tuple of (graph, modules_info) where:
             - graph is a NetworkX DiGraph representing the pipeline
             - modules_info is a list of ModuleInfo dictionaries
     """
     G = nx.DiGraph()
-    
+
     # Data type filter configuration
     data_filters = {
         "include_images": include_images,
         "include_objects": include_objects,
-        "include_lists": include_lists
+        "include_lists": include_lists,
     }
 
     # Process each module to build the graph
     modules_info: List[ModuleInfo] = []
-    
+
     for module in pipeline_json.get("modules", []):
         # Extract module inputs and outputs
         module_info = extract_module_io(module)
@@ -206,7 +216,7 @@ def create_dependency_graph(
         # Skip disabled modules if not explicitly included
         if not module_info["enabled"] and not include_disabled:
             continue
-            
+
         # Skip modules with no relevant I/O data based on data type filters
         if not _module_has_relevant_io(module_info, **data_filters):
             continue
@@ -214,7 +224,7 @@ def create_dependency_graph(
         # Generate stable module ID and add module node
         stable_id = _create_stable_module_id(module_info, **data_filters)
         _add_module_node(G, module_info, stable_id)
-        
+
         # Add data nodes and their connections to the module
         _add_module_data_connections(G, module_info, stable_id, **data_filters)
 
@@ -224,18 +234,18 @@ def create_dependency_graph(
 def _module_has_relevant_io(
     module_info: ModuleInfo,
     include_images: bool,
-    include_objects: bool, 
-    include_lists: bool
+    include_objects: bool,
+    include_lists: bool,
 ) -> bool:
     """
     Check if a module has any inputs or outputs of enabled data types.
-    
+
     Args:
         module_info: Module information dictionary from extract_module_io
         include_images: Whether to include image data
         include_objects: Whether to include object data
         include_lists: Whether to include list data
-        
+
     Returns:
         True if the module has any relevant I/O, False otherwise
     """
@@ -244,27 +254,30 @@ def _module_has_relevant_io(
         # Skip empty input lists
         if not inputs:
             continue
-            
+
         # Check against filter settings
         if input_type == NODE_TYPE_IMAGE and include_images:
             return True
         if input_type == NODE_TYPE_OBJECT and include_objects:
             return True
-        if input_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST) and include_lists:
+        if (
+            input_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST)
+            and include_lists
+        ):
             return True
-            
+
     # Check outputs by data type
     for output_type, outputs in module_info["outputs"].items():
         # Skip empty output lists
         if not outputs:
             continue
-            
+
         # Check against filter settings
         if output_type == NODE_TYPE_IMAGE and include_images:
             return True
         if output_type == NODE_TYPE_OBJECT and include_objects:
             return True
-            
+
     # No relevant I/O found
     return False
 
@@ -273,22 +286,22 @@ def _create_stable_module_id(
     module_info: ModuleInfo,
     include_images: bool,
     include_objects: bool,
-    include_lists: bool
+    include_lists: bool,
 ) -> str:
     """
     Create a stable unique identifier for a module based on its I/O pattern.
-    
+
     Args:
         module_info: Module information dictionary from extract_module_io
         include_images: Whether to include image data
         include_objects: Whether to include object data
         include_lists: Whether to include list data
-        
+
     Returns:
         A string identifier that is stable across runs and module reorderings
     """
     module_type = module_info["module_name"]
-    
+
     # Collect all inputs/outputs for hash generation
     all_inputs: List[str] = []
     all_outputs: List[str] = []
@@ -302,7 +315,7 @@ def _create_stable_module_id(
         elif data_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST):
             return include_lists
         return False
-    
+
     # Process inputs - only add those that match the filters
     for input_type, inputs in module_info["inputs"].items():
         if should_include_type(input_type):
@@ -323,28 +336,28 @@ def _create_stable_module_id(
 
     # Create a stable unique identifier using a deterministic hash function
     # We need to ensure our hash function matches the original implementation exactly
-    
+
     # Format is: inputs|outputs where both are comma-separated and sorted
     io_pattern = ",".join(all_inputs) + "|" + ",".join(all_outputs)
-    
+
     # Use SHA-256 hash which is deterministic across runs
-    hash_obj = hashlib.sha256(io_pattern.encode('utf-8'))
+    hash_obj = hashlib.sha256(io_pattern.encode("utf-8"))
     # Take exactly 8 hex characters as in the original
     hash_val = int(hash_obj.hexdigest()[:8], 16)
-    
+
     # Format exactly as original: module_name_hash
     stable_id = f"{module_type}_{hash_val:x}"
-    
+
     # Debug the hash generation
-    #print(f"Hash for {module_type}: input='{io_pattern}', hash={hash_val:x}, id={stable_id}")
-    
+    # print(f"Hash for {module_type}: input='{io_pattern}', hash={hash_val:x}, id={stable_id}")
+
     return stable_id
 
 
 def _add_module_node(G: nx.DiGraph, module_info: ModuleInfo, stable_id: str) -> None:
     """
     Add a module node to the graph with all relevant attributes.
-    
+
     Args:
         G: The NetworkX graph to add the node to
         module_info: Module information dictionary
@@ -353,7 +366,7 @@ def _add_module_node(G: nx.DiGraph, module_info: ModuleInfo, stable_id: str) -> 
     # Keep the original module number in the label for reference
     original_num = module_info["module_num"]
     module_name = module_info["module_name"]
-    
+
     # Create human-readable label
     module_label = f"{module_name} #{original_num}"
 
@@ -364,12 +377,12 @@ def _add_module_node(G: nx.DiGraph, module_info: ModuleInfo, stable_id: str) -> 
     # Add module node with all relevant attributes
     G.add_node(
         stable_id,
-        type=NODE_TYPE_MODULE,           # Node type identifier
-        label=module_label,              # Display label
-        module_name=module_name,         # Original module name
+        type=NODE_TYPE_MODULE,  # Node type identifier
+        label=module_label,  # Display label
+        module_name=module_name,  # Original module name
         module_num=module_info["module_num"],  # Original module number
-        original_num=original_num,       # For reference
-        stable_id=stable_id,             # The calculated stable ID
+        original_num=original_num,  # For reference
+        stable_id=stable_id,  # The calculated stable ID
         enabled=module_info["enabled"],  # Enabled status
     )
 
@@ -380,11 +393,11 @@ def _add_module_data_connections(
     stable_id: str,
     include_images: bool,
     include_objects: bool,
-    include_lists: bool
+    include_lists: bool,
 ) -> None:
     """
     Add all data nodes and their connections to a module in the graph.
-    
+
     Args:
         G: The NetworkX graph
         module_info: Module information dictionary
@@ -394,8 +407,10 @@ def _add_module_data_connections(
         include_lists: Whether to include list data
     """
     # Add input connections (data nodes → module)
-    _add_input_connections(G, module_info, stable_id, include_images, include_objects, include_lists)
-    
+    _add_input_connections(
+        G, module_info, stable_id, include_images, include_objects, include_lists
+    )
+
     # Add output connections (module → data nodes)
     _add_output_connections(G, module_info, stable_id, include_images, include_objects)
 
@@ -406,11 +421,11 @@ def _add_input_connections(
     stable_id: str,
     include_images: bool,
     include_objects: bool,
-    include_lists: bool
+    include_lists: bool,
 ) -> None:
     """
     Add all input data nodes and connections to the module in the graph.
-    
+
     Args:
         G: The NetworkX graph
         module_info: Module information dictionary
@@ -419,6 +434,7 @@ def _add_input_connections(
         include_objects: Whether to include object data
         include_lists: Whether to include list data
     """
+
     # Helper function to check if a data type should be included
     def should_include_type(data_type: str) -> bool:
         if data_type == NODE_TYPE_IMAGE:
@@ -428,7 +444,7 @@ def _add_input_connections(
         elif data_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST):
             return include_lists
         return False
-    
+
     # Process each input type
     for input_type, inputs in module_info["inputs"].items():
         # Skip if this data type is not included
@@ -442,19 +458,10 @@ def _add_input_connections(
 
             # Add node if it doesn't exist
             if not G.has_node(node_id):
-                G.add_node(
-                    node_id, 
-                    type=input_type,
-                    name=input_item, 
-                    label=input_item
-                )
+                G.add_node(node_id, type=input_type, name=input_item, label=input_item)
 
             # Add edge from input to module
-            G.add_edge(
-                node_id, 
-                stable_id, 
-                type=f"{input_type}_{EDGE_TYPE_INPUT}"
-            )
+            G.add_edge(node_id, stable_id, type=f"{input_type}_{EDGE_TYPE_INPUT}")
 
 
 def _add_output_connections(
@@ -462,11 +469,11 @@ def _add_output_connections(
     module_info: ModuleInfo,
     stable_id: str,
     include_images: bool,
-    include_objects: bool
+    include_objects: bool,
 ) -> None:
     """
     Add all output data nodes and connections from the module in the graph.
-    
+
     Args:
         G: The NetworkX graph
         module_info: Module information dictionary
@@ -474,6 +481,7 @@ def _add_output_connections(
         include_images: Whether to include image data
         include_objects: Whether to include object data
     """
+
     # Helper function to check if a data type should be included
     def should_include_type(data_type: str) -> bool:
         if data_type == NODE_TYPE_IMAGE:
@@ -481,7 +489,7 @@ def _add_output_connections(
         elif data_type == NODE_TYPE_OBJECT:
             return include_objects
         return False
-    
+
     # Process each output type
     for output_type, outputs in module_info["outputs"].items():
         # Skip if this data type is not included
@@ -496,25 +504,18 @@ def _add_output_connections(
             # Add node if it doesn't exist
             if not G.has_node(node_id):
                 G.add_node(
-                    node_id, 
-                    type=output_type, 
-                    name=output_item, 
-                    label=output_item
+                    node_id, type=output_type, name=output_item, label=output_item
                 )
 
             # Add edge from module to output
-            G.add_edge(
-                stable_id, 
-                node_id, 
-                type=f"{output_type}_{EDGE_TYPE_OUTPUT}"
-            )
+            G.add_edge(stable_id, node_id, type=f"{output_type}_{EDGE_TYPE_OUTPUT}")
 
 
 # ----- GRAPH FORMATTING AND OUTPUT -----
 def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
     """
     Apply visual styling attributes to graph nodes based on their types.
-    
+
     Args:
         G: The NetworkX graph
         no_formatting: If True, skip applying styling attributes
@@ -522,15 +523,15 @@ def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
     # Skip styling if formatting is disabled
     if no_formatting:
         return
-        
+
     # Process each node in the graph
     for node, attrs in G.nodes(data=True):
         node_type = attrs.get("type")
-        
+
         # Apply basic styling common to all node types
         if node_type in STYLE_SHAPES:
             G.nodes[node]["shape"] = STYLE_SHAPES[node_type]
-            
+
         # Apply type-specific styling
         if node_type == NODE_TYPE_MODULE:
             # Module node styling
@@ -546,7 +547,7 @@ def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
 def _apply_module_node_styling(G: nx.DiGraph, node: str, attrs: Dict[str, Any]) -> None:
     """
     Apply styling specific to module nodes.
-    
+
     Args:
         G: The NetworkX graph
         node: The node identifier
@@ -555,7 +556,7 @@ def _apply_module_node_styling(G: nx.DiGraph, node: str, attrs: Dict[str, Any]) 
     # Base style for all module nodes
     G.nodes[node]["style"] = "filled"
     G.nodes[node]["fontname"] = "Helvetica-Bold"
-    
+
     # Style enabled/disabled modules differently
     if attrs.get("enabled", True):
         # Enabled module
@@ -569,7 +570,7 @@ def _apply_module_node_styling(G: nx.DiGraph, node: str, attrs: Dict[str, Any]) 
 def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
     """
     Apply styling specific to data nodes (images, objects).
-    
+
     Args:
         G: The NetworkX graph
         node: The node identifier
@@ -577,7 +578,7 @@ def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
     """
     # Apply common styling for data nodes
     G.nodes[node]["style"] = "filled"
-    
+
     # Apply type-specific color
     if node_type in STYLE_COLORS:
         G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]
@@ -586,7 +587,7 @@ def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
 def _apply_list_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
     """
     Apply styling specific to list nodes.
-    
+
     Args:
         G: The NetworkX graph
         node: The node identifier
@@ -594,7 +595,7 @@ def _apply_list_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
     """
     # Special style for list nodes (rounded boxes)
     G.nodes[node]["style"] = "filled,rounded"
-    
+
     # Apply type-specific color
     if node_type in STYLE_COLORS:
         G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]
@@ -603,16 +604,16 @@ def _apply_list_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
 def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiGraph:
     """
     Prepare graph for DOT format output with consistent ordering.
-    
+
     Args:
         G: The original NetworkX graph
         ultra_minimal: If True, create a stripped-down version with only essential structure
-        
+
     Returns:
         A new NetworkX DiGraph prepared for DOT output
     """
     G_ordered = nx.DiGraph()
-    
+
     # If ultra_minimal is enabled, create a stripped-down version with only essential structure
     if ultra_minimal:
         # Process nodes - keep only the type attribute
@@ -620,7 +621,7 @@ def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiG
             node_type = G.nodes[node].get("type", "unknown")
             # Add only the type attribute, nothing else
             G_ordered.add_node(node, type=node_type)
-        
+
         # Process edges - keep no attributes
         edge_list = sorted(G.edges(data=True), key=lambda x: (x[0], x[1]))
         for src, dst, _ in edge_list:
@@ -651,14 +652,16 @@ def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiG
         edge_list = sorted(G.edges(data=True), key=lambda x: (x[0], x[1]))
         for src, dst, attrs in edge_list:
             G_ordered.add_edge(src, dst, **attrs)
-            
+
     return G_ordered
 
 
-def write_graph_to_file(G: nx.DiGraph, output_path: str, ultra_minimal: bool = False) -> None:
+def write_graph_to_file(
+    G: nx.DiGraph, output_path: str, ultra_minimal: bool = False
+) -> None:
     """
     Write the graph to the specified output file in the appropriate format.
-    
+
     Args:
         G: The NetworkX graph
         output_path: Path to write the output file
@@ -688,7 +691,7 @@ def write_graph_to_file(G: nx.DiGraph, output_path: str, ultra_minimal: bool = F
 def print_pipeline_summary(G: nx.DiGraph, pipeline_path: str) -> None:
     """
     Print a summary of the pipeline graph structure.
-    
+
     Args:
         G: The NetworkX graph
         pipeline_path: Path to the original pipeline file
@@ -704,7 +707,9 @@ def print_pipeline_summary(G: nx.DiGraph, pipeline_path: str) -> None:
             node_counts[node_type] = 0
         node_counts[node_type] += 1
 
-    module_nodes = [n for n, attr in G.nodes(data=True) if attr.get("type") == NODE_TYPE_MODULE]
+    module_nodes = [
+        n for n, attr in G.nodes(data=True) if attr.get("type") == NODE_TYPE_MODULE
+    ]
     enabled_modules = [n for n in module_nodes if G.nodes[n].get("enabled", True)]
     disabled_modules = [n for n in module_nodes if not G.nodes[n].get("enabled", True)]
 
@@ -723,7 +728,7 @@ def print_pipeline_summary(G: nx.DiGraph, pipeline_path: str) -> None:
 def print_connections(G: nx.DiGraph) -> None:
     """
     Print a human-readable summary of graph connections.
-    
+
     Args:
         G: The NetworkX graph
     """
@@ -772,7 +777,7 @@ def print_connections(G: nx.DiGraph) -> None:
 def print_stable_id_mapping(G: nx.DiGraph) -> None:
     """
     Print a mapping of stable module IDs to their original module numbers.
-    
+
     Args:
         G: The NetworkX graph
     """
@@ -804,10 +809,10 @@ def process_pipeline(
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
-    
+
     This is the main processing function that coordinates loading, graph creation,
     visualization and output.
-    
+
     Args:
         pipeline_path: Path to the CellProfiler pipeline JSON file
         output_path: Path to save the generated graph file
@@ -820,7 +825,7 @@ def process_pipeline(
         include_images: Whether to include image data nodes
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
-        
+
     Returns:
         A tuple of (graph, modules_info) where:
             - graph is a NetworkX DiGraph representing the pipeline
@@ -846,7 +851,7 @@ def process_pipeline(
     if not quiet:
         print_pipeline_summary(G, pipeline_path)
         print_connections(G)
-        
+
         # Explain stable IDs if requested
         if explain_ids:
             print_stable_id_mapping(G)
@@ -855,14 +860,14 @@ def process_pipeline(
     if output_path:
         # Apply node styling if formatting is enabled
         apply_node_styling(G, no_formatting)
-        
+
         # If no_module_info is True, simplify edges
         if no_module_info:
             for edge in G.edges():
                 # Remove any edge labels
                 if "label" in G.edges[edge]:
                     del G.edges[edge]["label"]
-        
+
         # Write the graph to the specified file
         write_graph_to_file(G, output_path, ultra_minimal)
 
@@ -871,6 +876,7 @@ def process_pipeline(
 
 class DataTypeChoice:
     """Helper class to manage data type filtering options"""
+
     ALL = "all"
     IMAGES_ONLY = "images_only"
     OBJECTS_ONLY = "objects_only"
@@ -879,25 +885,45 @@ class DataTypeChoice:
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument("pipeline", type=click.Path(exists=True, dir_okay=False, readable=True))
-@click.argument("output", type=click.Path(dir_okay=False, writable=True), required=False)
+@click.argument(
+    "output", type=click.Path(dir_okay=False, writable=True), required=False
+)
 # Display options
-@click.option("--no-module-info", is_flag=True, help="Hide module information on graph edges")
-@click.option("--no-formatting", is_flag=True, help="Strip formatting (colors, shapes, etc.)")
-@click.option("--ultra-minimal", is_flag=True, help="Create minimal output for exact diff comparison")
-@click.option("--explain-ids", is_flag=True, help="Print mapping of stable IDs to module numbers")
+@click.option(
+    "--no-module-info", is_flag=True, help="Hide module information on graph edges"
+)
+@click.option(
+    "--no-formatting", is_flag=True, help="Strip formatting (colors, shapes, etc.)"
+)
+@click.option(
+    "--ultra-minimal",
+    is_flag=True,
+    help="Create minimal output for exact diff comparison",
+)
+@click.option(
+    "--explain-ids", is_flag=True, help="Print mapping of stable IDs to module numbers"
+)
 # Content filtering options
-@click.option("--include-disabled", is_flag=True, help="Include disabled modules in the graph")
+@click.option(
+    "--include-disabled", is_flag=True, help="Include disabled modules in the graph"
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 # Data type selection as a mutually exclusive choice
-@click.option("--data-type", 
-              type=click.Choice([DataTypeChoice.ALL, 
-                               DataTypeChoice.IMAGES_ONLY, 
-                               DataTypeChoice.OBJECTS_ONLY, 
-                               DataTypeChoice.NO_LISTS], 
-                              case_sensitive=False),
-              default=DataTypeChoice.ALL,
-              help="Filter data types to include in the graph")
+@click.option(
+    "--data-type",
+    type=click.Choice(
+        [
+            DataTypeChoice.ALL,
+            DataTypeChoice.IMAGES_ONLY,
+            DataTypeChoice.OBJECTS_ONLY,
+            DataTypeChoice.NO_LISTS,
+        ],
+        case_sensitive=False,
+    ),
+    default=DataTypeChoice.ALL,
+    help="Filter data types to include in the graph",
+)
 def cli(
     pipeline: str,
     output: Optional[str],
@@ -911,30 +937,33 @@ def cli(
 ) -> None:
     """
     Create a graph representation of a CellProfiler pipeline.
-    
+
     PIPELINE: Path to the CellProfiler pipeline JSON file
-    
+
     OUTPUT: Optional path for output graph file (.graphml, .gexf, or .dot)
-    
+
     Examples:
-    
+
     \b
     # Basic usage - creates DOT file from pipeline
     python cp_graph.py examples/illum.json examples/output/illum_graph.dot
-    
+
     \b
     # Create ultra-minimal output for comparing pipeline structure
     python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
-    
+
     \b
     # View only image data flow
     python cp_graph.py examples/analysis.json examples/output/analysis_images.dot --data-type images_only
     """
     # Determine what data types to include based on choice
     include_objects = data_type != DataTypeChoice.IMAGES_ONLY
-    include_lists = data_type not in (DataTypeChoice.NO_LISTS, DataTypeChoice.OBJECTS_ONLY)
+    include_lists = data_type not in (
+        DataTypeChoice.NO_LISTS,
+        DataTypeChoice.OBJECTS_ONLY,
+    )
     include_images = data_type != DataTypeChoice.OBJECTS_ONLY
-    
+
     try:
         # Run the main processing function
         process_pipeline(
