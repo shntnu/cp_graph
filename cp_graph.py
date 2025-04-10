@@ -3,6 +3,7 @@
 # dependencies = [
 #     "networkx",
 #     "pydot",
+#     "click",
 # ]
 #
 # ///
@@ -12,9 +13,11 @@
 # ----- IMPORTS -----
 import json
 import hashlib
-import networkx as nx
+import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Any, Optional, TypedDict, TypeVar
+import networkx as nx
+import click
+from typing import Dict, List, Set, Tuple, Any, Optional, TypedDict, TypeVar, TextIO
 
 # ----- CONSTANTS AND CONFIGURATION -----
 # CellProfiler setting types
@@ -35,7 +38,7 @@ NODE_TYPE_OBJECT = "object"
 NODE_TYPE_IMAGE_LIST = "image_list"
 NODE_TYPE_OBJECT_LIST = "object_list"
 
-# Edge types
+# Edge types - match original format exactly for compatibility
 EDGE_TYPE_INPUT = "input"
 EDGE_TYPE_OUTPUT = "output"
 
@@ -319,14 +322,21 @@ def _create_stable_module_id(
     all_outputs.sort()
 
     # Create a stable unique identifier using a deterministic hash function
+    # We need to ensure our hash function matches the original implementation exactly
+    
+    # Format is: inputs|outputs where both are comma-separated and sorted
     io_pattern = ",".join(all_inputs) + "|" + ",".join(all_outputs)
     
     # Use SHA-256 hash which is deterministic across runs
     hash_obj = hashlib.sha256(io_pattern.encode('utf-8'))
+    # Take exactly 8 hex characters as in the original
     hash_val = int(hash_obj.hexdigest()[:8], 16)
     
-    # Combine module type with hash for a readable but unique ID
+    # Format exactly as original: module_name_hash
     stable_id = f"{module_type}_{hash_val:x}"
+    
+    # Debug the hash generation
+    #print(f"Hash for {module_type}: input='{io_pattern}', hash={hash_val:x}, id={stable_id}")
     
     return stable_id
 
@@ -779,7 +789,7 @@ def print_stable_id_mapping(G: nx.DiGraph) -> None:
 
 
 # ----- MAIN EXECUTION AND CLI -----
-def main(
+def process_pipeline(
     pipeline_path: str,
     output_path: Optional[str] = None,
     no_module_info: bool = False,
@@ -789,9 +799,14 @@ def main(
     include_objects: bool = True,
     include_lists: bool = True,
     include_images: bool = True,
-) -> Tuple[nx.DiGraph, List[Dict[str, Any]]]:
+    explain_ids: bool = False,
+    quiet: bool = False,
+) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
+    
+    This is the main processing function that coordinates loading, graph creation,
+    visualization and output.
     
     Args:
         pipeline_path: Path to the CellProfiler pipeline JSON file
@@ -803,18 +818,23 @@ def main(
         include_objects: Whether to include object data nodes
         include_lists: Whether to include list data nodes
         include_images: Whether to include image data nodes
+        explain_ids: Whether to print a mapping of stable IDs
+        quiet: Whether to suppress output
         
     Returns:
-        A tuple of (graph, modules_io) where:
+        A tuple of (graph, modules_info) where:
             - graph is a NetworkX DiGraph representing the pipeline
-            - modules_io is a list of module information dictionaries
+            - modules_info is a list of module information dictionaries
     """
     # Load the pipeline JSON
-    with open(pipeline_path, "r") as f:
-        pipeline = json.load(f)
+    try:
+        with open(pipeline_path, "r") as f:
+            pipeline = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        raise click.ClickException(f"Error loading pipeline file: {e}")
 
     # Create the graph with specified data types
-    G, modules_io = create_dependency_graph(
+    G, modules_info = create_dependency_graph(
         pipeline,
         include_disabled=include_disabled,
         include_objects=include_objects,
@@ -822,9 +842,14 @@ def main(
         include_images=include_images,
     )
 
-    # Print information about the pipeline
-    print_pipeline_summary(G, pipeline_path)
-    print_connections(G)
+    # Print information about the pipeline if not quiet
+    if not quiet:
+        print_pipeline_summary(G, pipeline_path)
+        print_connections(G)
+        
+        # Explain stable IDs if requested
+        if explain_ids:
+            print_stable_id_mapping(G)
 
     # Save the graph if requested
     if output_path:
@@ -841,92 +866,97 @@ def main(
         # Write the graph to the specified file
         write_graph_to_file(G, output_path, ultra_minimal)
 
-    return G, modules_io
+    return G, modules_info
+
+
+class DataTypeChoice:
+    """Helper class to manage data type filtering options"""
+    ALL = "all"
+    IMAGES_ONLY = "images_only"
+    OBJECTS_ONLY = "objects_only"
+    NO_LISTS = "no_lists"
+
+
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
+@click.argument("pipeline", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.argument("output", type=click.Path(dir_okay=False, writable=True), required=False)
+# Display options
+@click.option("--no-module-info", is_flag=True, help="Hide module information on graph edges")
+@click.option("--no-formatting", is_flag=True, help="Strip formatting (colors, shapes, etc.)")
+@click.option("--ultra-minimal", is_flag=True, help="Create minimal output for exact diff comparison")
+@click.option("--explain-ids", is_flag=True, help="Print mapping of stable IDs to module numbers")
+# Content filtering options
+@click.option("--include-disabled", is_flag=True, help="Include disabled modules in the graph")
+# Output options
+@click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
+# Data type selection as a mutually exclusive choice
+@click.option("--data-type", 
+              type=click.Choice([DataTypeChoice.ALL, 
+                               DataTypeChoice.IMAGES_ONLY, 
+                               DataTypeChoice.OBJECTS_ONLY, 
+                               DataTypeChoice.NO_LISTS], 
+                              case_sensitive=False),
+              default=DataTypeChoice.ALL,
+              help="Filter data types to include in the graph")
+def cli(
+    pipeline: str,
+    output: Optional[str],
+    no_module_info: bool,
+    no_formatting: bool,
+    ultra_minimal: bool,
+    explain_ids: bool,
+    include_disabled: bool,
+    quiet: bool,
+    data_type: str,
+) -> None:
+    """
+    Create a graph representation of a CellProfiler pipeline.
+    
+    PIPELINE: Path to the CellProfiler pipeline JSON file
+    
+    OUTPUT: Optional path for output graph file (.graphml, .gexf, or .dot)
+    
+    Examples:
+    
+    \b
+    # Basic usage - creates DOT file from pipeline
+    python cp_graph.py examples/illum.json examples/output/illum_graph.dot
+    
+    \b
+    # Create ultra-minimal output for comparing pipeline structure
+    python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
+    
+    \b
+    # View only image data flow
+    python cp_graph.py examples/analysis.json examples/output/analysis_images.dot --data-type images_only
+    """
+    # Determine what data types to include based on choice
+    include_objects = data_type != DataTypeChoice.IMAGES_ONLY
+    include_lists = data_type not in (DataTypeChoice.NO_LISTS, DataTypeChoice.OBJECTS_ONLY)
+    include_images = data_type != DataTypeChoice.OBJECTS_ONLY
+    
+    try:
+        # Run the main processing function
+        process_pipeline(
+            pipeline,
+            output,
+            no_module_info,
+            include_disabled,
+            no_formatting,
+            ultra_minimal,
+            include_objects=include_objects,
+            include_lists=include_lists,
+            include_images=include_images,
+            explain_ids=explain_ids,
+            quiet=quiet,
+        )
+    except click.ClickException as e:
+        e.show()
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    import argparse
-
-    def parse_arguments() -> argparse.Namespace:
-        """Parse command line arguments for the script."""
-        parser = argparse.ArgumentParser(
-            description="Create a graph representation of a CellProfiler pipeline"
-        )
-        parser.add_argument("pipeline", help="CellProfiler pipeline JSON file")
-        parser.add_argument(
-            "output", nargs="?", help="Output graph file (.graphml, .gexf, or .dot)"
-        )
-
-        # Display options
-        parser.add_argument(
-            "--no-module-info",
-            action="store_true",
-            help="Hide module information on graph edges",
-        )
-        parser.add_argument(
-            "--no-formatting",
-            action="store_true",
-            help="Strip formatting information from graph output (colors, shapes, etc.)",
-        )
-        parser.add_argument(
-            "--ultra-minimal",
-            action="store_true",
-            help="Create minimal output with only essential structure for exact diff comparison",
-        )
-        parser.add_argument(
-            "--explain-ids",
-            action="store_true",
-            help="Print explanation of stable node IDs and their source modules",
-        )
-
-        # Content filtering options
-        parser.add_argument(
-            "--include-disabled",
-            action="store_true",
-            help="Include disabled modules in the graph",
-        )
-
-        # Data type options (mutually exclusive group)
-        data_group = parser.add_mutually_exclusive_group()
-        data_group.add_argument(
-            "--images-only",
-            action="store_true",
-            help="Include only image flow in the graph (default includes all)",
-        )
-        data_group.add_argument(
-            "--objects-only",
-            action="store_true",
-            help="Include only object flow in the graph (default includes all)",
-        )
-        data_group.add_argument(
-            "--no-lists",
-            action="store_true",
-            help="Exclude list inputs in the graph (default includes all)",
-        )
-
-        return parser.parse_args()
-
-    # Parse command line arguments
-    args = parse_arguments()
-
-    # Determine what data types to include based on arguments
-    include_objects = not args.images_only
-    include_lists = not args.no_lists and not args.objects_only
-    include_images = not args.objects_only
-
-    # Run the main processing function
-    G, modules_io = main(
-        args.pipeline,
-        args.output,
-        args.no_module_info,
-        args.include_disabled,
-        args.no_formatting,
-        args.ultra_minimal,
-        include_objects=include_objects,
-        include_lists=include_lists,
-        include_images=include_images,
-    )
-
-    # If explain_ids is enabled, print a mapping of stable IDs to original module numbers
-    if args.explain_ids:
-        print_stable_id_mapping(G)
+    cli()
