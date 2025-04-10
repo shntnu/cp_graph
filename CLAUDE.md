@@ -16,4 +16,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Maintain backwards compatibility with existing CellProfiler JSON structures
 - Functions should handle one specific task, modularizing when possible
 - Preserve the standardized representation approach for consistent graph output
-- Maintain color conventions for different data types (images, objects, lists)
+- Maintain color conventions for different data types (images, objects)

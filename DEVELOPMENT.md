@@ -143,9 +143,10 @@ We created `cp_graph.py` which:
 2. Extracts module metadata and enabled status
 3. Identifies input and output data (images, objects, lists) for each module
 4. Builds a directed graph where:
-   - Nodes represent data items (images, objects, image lists, object lists)
+   - Nodes represent data items (images, objects) with a unified representation
    - Nodes also represent modules, using stable hash-based identifiers
-   - Edges represent data flow connections between modules and data nodes
+   - Edges preserve connection types to maintain semantics (regular vs. list inputs)
+   - Edge types indicate the original data usage pattern
 5. Creates a standardized representation for comparison purposes
 6. Outputs the graph in standard formats (DOT, GraphML, GEXF)
 
@@ -168,14 +169,15 @@ The script uses a modular design with:
    - Provides ultra-minimal mode for byte-for-byte identical output of equivalent pipelines
    - Ignores irrelevant differences while highlighting structural changes
 
-3. **Multi-Data Type Support**:
+3. **Unified Data Representation**:
    - Tracks multiple types of data flow:
      - Images (via ImageSubscriber and ImageName)
      - Objects (via LabelSubscriber and LabelName)
      - Image Lists (via ImageListSubscriber)
      - Object Lists (via LabelListSubscriber)
+   - Uses a unified node representation for each data entity
+   - Preserves connection semantics through edge type information
    - Visual differentiation between data types with distinctive styling
-   - Filtering options to focus on specific data types
 
 4. **Additional Features**:
    - **Disabled Module Handling**: By default, ignores modules with `enabled: false` attribute
@@ -190,11 +192,6 @@ The script uses a modular design with:
    - `--ultra-minimal`: Creates minimal output with only essential structure for exact diff comparison
    - `--include-disabled`: Includes disabled modules in the graph
    - `--explain-ids`: Shows mapping between stable IDs and original module numbers
-   - `--data-type`: Filter data types to include in the graph, with choices:
-     - `all`: Include all data types (default)
-     - `images_only`: Include only image flow in the graph
-     - `objects_only`: Include only object flow in the graph 
-     - `no_lists`: Exclude list inputs in the graph
    - `--quiet` or `-q`: Suppress informational output
 
 ## Documentation
@@ -207,11 +204,11 @@ Created `README.md` with:
 
 ## Use Cases
 1. Understanding complex pipeline data flows
-2. Visualizing data transformation paths (images, objects, lists)
+2. Visualizing data transformation paths with a unified representation
 3. Debugging missing connections
 4. Documentation for CellProfiler pipelines
 5. Identifying unused data or redundant operations
-6. Tracking specific data types (e.g., objects only)
+6. Comprehensive overview of all data relationships in a pipeline
 7. Understanding module dependencies for pipeline optimization
 
 ## Future Extension Points
@@ -222,7 +219,7 @@ To extend this tool in the future, consider:
 4. Deeper analysis of module parameters
 5. Filtering connections by specific module categories
 6. Allowing simplified views of complex pipelines
-7. More advanced data type filtering combinations
+7. Enhanced visual distinction for different connection types
 8. Visual styles customization options
 
 ## Recent Improvements
@@ -278,4 +275,17 @@ This is the recommended approach as it automatically installs the required depen
 - PyDot for DOT format output
 - Click for command-line interface handling
 
-The tool is functional in its current state and can be used to analyze any CellProfiler pipeline in v6 JSON format. It supports a comprehensive view of data flow, including images, objects, and list inputs/outputs, with visual differentiation and filtering options for each data type.
+### Unified Data Node Representation
+
+The latest improvement is the unification of data node representation. Previously, the tool created separate nodes for regular and list inputs of the same data entity (for example, "image__ZO1" and "image_list__ZO1"). This was recognized as an artificial distinction based on how modules define their inputs.
+
+The key changes:
+
+1. Data items are now represented as a single node regardless of how they're consumed
+2. Edge types preserve the original connection semantics (regular vs. list inputs) 
+3. Graph visualization is cleaner and more accurately represents the true data flow
+4. Hash-based module identifiers normalize these representations for consistent comparisons
+
+This unified approach results in a more intuitive graph with fewer redundant nodes, while still preserving all necessary information about connection types in the edge metadata.
+
+The tool is functional in its current state and can be used to analyze any CellProfiler pipeline in v6 JSON format. It provides a comprehensive view of data flow with a unified data representation that makes complex pipelines easier to understand.

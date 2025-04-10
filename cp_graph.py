@@ -41,6 +41,7 @@ OUTPUT_LABEL_TYPE = (
 NODE_TYPE_MODULE = "module"
 NODE_TYPE_IMAGE = "image"
 NODE_TYPE_OBJECT = "object"
+# List types are kept for input/edge classification but don't create separate nodes
 NODE_TYPE_IMAGE_LIST = "image_list"
 NODE_TYPE_OBJECT_LIST = "object_list"
 
@@ -53,8 +54,6 @@ STYLE_COLORS = {
     NODE_TYPE_MODULE: {"enabled": "lightblue", "disabled": "lightpink"},
     NODE_TYPE_IMAGE: "lightgray",
     NODE_TYPE_OBJECT: "lightgreen",
-    NODE_TYPE_IMAGE_LIST: "lightyellow",
-    NODE_TYPE_OBJECT_LIST: "lightcyan",
 }
 
 # Graph styles
@@ -62,8 +61,6 @@ STYLE_SHAPES = {
     NODE_TYPE_MODULE: "box",
     NODE_TYPE_IMAGE: "ellipse",
     NODE_TYPE_OBJECT: "ellipse",
-    NODE_TYPE_IMAGE_LIST: "box",
-    NODE_TYPE_OBJECT_LIST: "box",
 }
 
 
@@ -177,9 +174,6 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
 def create_dependency_graph(
     pipeline_json: Dict[str, Any],
     include_disabled: bool = False,
-    include_objects: bool = True,
-    include_lists: bool = True,
-    include_images: bool = True,
 ) -> GraphData:
     """
     Create a dependency graph showing data flow between modules.
@@ -187,9 +181,6 @@ def create_dependency_graph(
     Args:
         pipeline_json: The JSON representation of a CellProfiler pipeline
         include_disabled: Whether to include disabled modules
-        include_objects: Whether to include object data nodes
-        include_lists: Whether to include list data nodes
-        include_images: Whether to include image data nodes
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -197,13 +188,6 @@ def create_dependency_graph(
             - modules_info is a list of ModuleInfo dictionaries
     """
     G = nx.DiGraph()
-
-    # Data type filter configuration
-    data_filters = {
-        "include_images": include_images,
-        "include_objects": include_objects,
-        "include_lists": include_lists,
-    }
 
     # Process each module to build the graph
     modules_info: List[ModuleInfo] = []
@@ -217,85 +201,54 @@ def create_dependency_graph(
         if not module_info["enabled"] and not include_disabled:
             continue
 
-        # Skip modules with no relevant I/O data based on data type filters
-        if not _module_has_relevant_io(module_info, **data_filters):
+        # Skip modules with no I/O data
+        if not _module_has_relevant_io(module_info):
             continue
 
         # Generate stable module ID and add module node
-        stable_id = _create_stable_module_id(module_info, **data_filters)
+        stable_id = _create_stable_module_id(module_info)
         _add_module_node(G, module_info, stable_id)
 
         # Add data nodes and their connections to the module
-        _add_module_data_connections(G, module_info, stable_id, **data_filters)
+        _add_module_data_connections(G, module_info, stable_id)
 
     return G, modules_info
 
 
 def _module_has_relevant_io(
     module_info: ModuleInfo,
-    include_images: bool,
-    include_objects: bool,
-    include_lists: bool,
 ) -> bool:
     """
-    Check if a module has any inputs or outputs of enabled data types.
+    Check if a module has any inputs or outputs.
 
     Args:
         module_info: Module information dictionary from extract_module_io
-        include_images: Whether to include image data
-        include_objects: Whether to include object data
-        include_lists: Whether to include list data
 
     Returns:
-        True if the module has any relevant I/O, False otherwise
+        True if the module has any I/O, False otherwise
     """
-    # Check inputs by data type
+    # Check inputs - if any input type has values, return True
     for input_type, inputs in module_info["inputs"].items():
-        # Skip empty input lists
-        if not inputs:
-            continue
-
-        # Check against filter settings
-        if input_type == NODE_TYPE_IMAGE and include_images:
-            return True
-        if input_type == NODE_TYPE_OBJECT and include_objects:
-            return True
-        if (
-            input_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST)
-            and include_lists
-        ):
+        if inputs:
             return True
 
-    # Check outputs by data type
+    # Check outputs - if any output type has values, return True
     for output_type, outputs in module_info["outputs"].items():
-        # Skip empty output lists
-        if not outputs:
-            continue
-
-        # Check against filter settings
-        if output_type == NODE_TYPE_IMAGE and include_images:
-            return True
-        if output_type == NODE_TYPE_OBJECT and include_objects:
+        if outputs:
             return True
 
-    # No relevant I/O found
+    # No I/O found
     return False
 
 
 def _create_stable_module_id(
     module_info: ModuleInfo,
-    include_images: bool,
-    include_objects: bool,
-    include_lists: bool,
 ) -> str:
     """
     Create a stable unique identifier for a module based on its I/O pattern.
 
     Args:
         module_info: Module information dictionary from extract_module_io
-        include_images: Whether to include image data
-        include_objects: Whether to include object data
-        include_lists: Whether to include list data
 
     Returns:
         A string identifier that is stable across runs and module reorderings
@@ -306,37 +259,36 @@ def _create_stable_module_id(
     all_inputs: List[str] = []
     all_outputs: List[str] = []
 
-    # Helper function to check if a data type should be included
-    def should_include_type(data_type: str) -> bool:
-        if data_type == NODE_TYPE_IMAGE:
-            return include_images
-        elif data_type == NODE_TYPE_OBJECT:
-            return include_objects
-        elif data_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST):
-            return include_lists
-        return False
-
-    # Process inputs - only add those that match the filters
+    # Process inputs - normalize list types to regular types
     for input_type, inputs in module_info["inputs"].items():
-        if should_include_type(input_type):
-            # Create prefixed input identifiers
-            input_ids = [f"{input_type}__{inp}" for inp in inputs]
-            all_inputs.extend(input_ids)
+        if not inputs:
+            continue
 
-    # Process outputs - only add those that match the filters
+        # Normalize list types to their regular counterparts for node IDs
+        normalized_type = input_type
+        if input_type == NODE_TYPE_IMAGE_LIST:
+            normalized_type = NODE_TYPE_IMAGE
+        elif input_type == NODE_TYPE_OBJECT_LIST:
+            normalized_type = NODE_TYPE_OBJECT
+
+        # Create normalized input identifiers
+        input_ids = [f"{normalized_type}__{inp}" for inp in inputs]
+        all_inputs.extend(input_ids)
+
+    # Process outputs
     for output_type, outputs in module_info["outputs"].items():
-        if should_include_type(output_type):
-            # Create prefixed output identifiers
-            output_ids = [f"{output_type}__{out}" for out in outputs]
-            all_outputs.extend(output_ids)
+        if not outputs:
+            continue
+
+        # Create output identifiers (already normalized as there are no list outputs)
+        output_ids = [f"{output_type}__{out}" for out in outputs]
+        all_outputs.extend(output_ids)
 
     # Sort for deterministic ordering (crucial for consistent hashing)
     all_inputs.sort()
     all_outputs.sort()
 
     # Create a stable unique identifier using a deterministic hash function
-    # We need to ensure our hash function matches the original implementation exactly
-
     # Format is: inputs|outputs where both are comma-separated and sorted
     io_pattern = ",".join(all_inputs) + "|" + ",".join(all_outputs)
 
@@ -347,9 +299,6 @@ def _create_stable_module_id(
 
     # Format exactly as original: module_name_hash
     stable_id = f"{module_type}_{hash_val:x}"
-
-    # Debug the hash generation
-    # print(f"Hash for {module_type}: input='{io_pattern}', hash={hash_val:x}, id={stable_id}")
 
     return stable_id
 
@@ -391,9 +340,6 @@ def _add_module_data_connections(
     G: nx.DiGraph,
     module_info: ModuleInfo,
     stable_id: str,
-    include_images: bool,
-    include_objects: bool,
-    include_lists: bool,
 ) -> None:
     """
     Add all data nodes and their connections to a module in the graph.
@@ -402,26 +348,18 @@ def _add_module_data_connections(
         G: The NetworkX graph
         module_info: Module information dictionary
         stable_id: The stable ID for the module
-        include_images: Whether to include image data
-        include_objects: Whether to include object data
-        include_lists: Whether to include list data
     """
     # Add input connections (data nodes → module)
-    _add_input_connections(
-        G, module_info, stable_id, include_images, include_objects, include_lists
-    )
+    _add_input_connections(G, module_info, stable_id)
 
     # Add output connections (module → data nodes)
-    _add_output_connections(G, module_info, stable_id, include_images, include_objects)
+    _add_output_connections(G, module_info, stable_id)
 
 
 def _add_input_connections(
     G: nx.DiGraph,
     module_info: ModuleInfo,
     stable_id: str,
-    include_images: bool,
-    include_objects: bool,
-    include_lists: bool,
 ) -> None:
     """
     Add all input data nodes and connections to the module in the graph.
@@ -430,37 +368,31 @@ def _add_input_connections(
         G: The NetworkX graph
         module_info: Module information dictionary
         stable_id: The stable ID for the module
-        include_images: Whether to include image data
-        include_objects: Whether to include object data
-        include_lists: Whether to include list data
     """
-
-    # Helper function to check if a data type should be included
-    def should_include_type(data_type: str) -> bool:
-        if data_type == NODE_TYPE_IMAGE:
-            return include_images
-        elif data_type == NODE_TYPE_OBJECT:
-            return include_objects
-        elif data_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST):
-            return include_lists
-        return False
-
     # Process each input type
     for input_type, inputs in module_info["inputs"].items():
-        # Skip if this data type is not included
-        if not should_include_type(input_type):
+        if not inputs:
             continue
 
         # Process each input item
         for input_item in inputs:
-            # Create node ID with type prefix using double underscore to avoid dot port syntax
-            node_id = f"{input_type}__{input_item}"
+            # Normalize node type for list inputs
+            normalized_type = input_type
+            if input_type == NODE_TYPE_IMAGE_LIST:
+                normalized_type = NODE_TYPE_IMAGE
+            elif input_type == NODE_TYPE_OBJECT_LIST:
+                normalized_type = NODE_TYPE_OBJECT
+
+            # Create normalized node ID
+            node_id = f"{normalized_type}__{input_item}"
 
             # Add node if it doesn't exist
             if not G.has_node(node_id):
-                G.add_node(node_id, type=input_type, name=input_item, label=input_item)
+                G.add_node(
+                    node_id, type=normalized_type, name=input_item, label=input_item
+                )
 
-            # Add edge from input to module
+            # Add edge from input to module - preserve original edge type for connection semantics
             G.add_edge(node_id, stable_id, type=f"{input_type}_{EDGE_TYPE_INPUT}")
 
 
@@ -468,8 +400,6 @@ def _add_output_connections(
     G: nx.DiGraph,
     module_info: ModuleInfo,
     stable_id: str,
-    include_images: bool,
-    include_objects: bool,
 ) -> None:
     """
     Add all output data nodes and connections from the module in the graph.
@@ -478,27 +408,15 @@ def _add_output_connections(
         G: The NetworkX graph
         module_info: Module information dictionary
         stable_id: The stable ID for the module
-        include_images: Whether to include image data
-        include_objects: Whether to include object data
     """
-
-    # Helper function to check if a data type should be included
-    def should_include_type(data_type: str) -> bool:
-        if data_type == NODE_TYPE_IMAGE:
-            return include_images
-        elif data_type == NODE_TYPE_OBJECT:
-            return include_objects
-        return False
-
     # Process each output type
     for output_type, outputs in module_info["outputs"].items():
-        # Skip if this data type is not included
-        if not should_include_type(output_type):
+        if not outputs:
             continue
 
         # Process each output item
         for output_item in outputs:
-            # Create node ID with type prefix using double underscore to avoid dot port syntax
+            # Create node ID with type prefix
             node_id = f"{output_type}__{output_item}"
 
             # Add node if it doesn't exist
@@ -539,9 +457,6 @@ def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
         elif node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
             # Data nodes (image, object) styling
             _apply_data_node_styling(G, node, node_type)
-        elif node_type in (NODE_TYPE_IMAGE_LIST, NODE_TYPE_OBJECT_LIST):
-            # List nodes styling
-            _apply_list_node_styling(G, node, node_type)
 
 
 def _apply_module_node_styling(G: nx.DiGraph, node: str, attrs: Dict[str, Any]) -> None:
@@ -578,23 +493,6 @@ def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
     """
     # Apply common styling for data nodes
     G.nodes[node]["style"] = "filled"
-
-    # Apply type-specific color
-    if node_type in STYLE_COLORS:
-        G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]
-
-
-def _apply_list_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
-    """
-    Apply styling specific to list nodes.
-
-    Args:
-        G: The NetworkX graph
-        node: The node identifier
-        node_type: The type of the node
-    """
-    # Special style for list nodes (rounded boxes)
-    G.nodes[node]["style"] = "filled,rounded"
 
     # Apply type-specific color
     if node_type in STYLE_COLORS:
@@ -801,9 +699,6 @@ def process_pipeline(
     include_disabled: bool = False,
     no_formatting: bool = False,
     ultra_minimal: bool = False,
-    include_objects: bool = True,
-    include_lists: bool = True,
-    include_images: bool = True,
     explain_ids: bool = False,
     quiet: bool = False,
 ) -> GraphData:
@@ -820,9 +715,6 @@ def process_pipeline(
         include_disabled: Whether to include disabled modules in the graph
         no_formatting: Whether to strip formatting information from graph output
         ultra_minimal: Whether to create minimal output for exact diff comparison
-        include_objects: Whether to include object data nodes
-        include_lists: Whether to include list data nodes
-        include_images: Whether to include image data nodes
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
 
@@ -838,13 +730,10 @@ def process_pipeline(
     except (FileNotFoundError, json.JSONDecodeError) as e:
         raise click.ClickException(f"Error loading pipeline file: {e}")
 
-    # Create the graph with specified data types
+    # Create the graph
     G, modules_info = create_dependency_graph(
         pipeline,
         include_disabled=include_disabled,
-        include_objects=include_objects,
-        include_lists=include_lists,
-        include_images=include_images,
     )
 
     # Print information about the pipeline if not quiet
@@ -874,15 +763,6 @@ def process_pipeline(
     return G, modules_info
 
 
-class DataTypeChoice:
-    """Helper class to manage data type filtering options"""
-
-    ALL = "all"
-    IMAGES_ONLY = "images_only"
-    OBJECTS_ONLY = "objects_only"
-    NO_LISTS = "no_lists"
-
-
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument("pipeline", type=click.Path(exists=True, dir_okay=False, readable=True))
 @click.argument(
@@ -909,21 +789,6 @@ class DataTypeChoice:
 )
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
-# Data type selection as a mutually exclusive choice
-@click.option(
-    "--data-type",
-    type=click.Choice(
-        [
-            DataTypeChoice.ALL,
-            DataTypeChoice.IMAGES_ONLY,
-            DataTypeChoice.OBJECTS_ONLY,
-            DataTypeChoice.NO_LISTS,
-        ],
-        case_sensitive=False,
-    ),
-    default=DataTypeChoice.ALL,
-    help="Filter data types to include in the graph",
-)
 def cli(
     pipeline: str,
     output: Optional[str],
@@ -933,7 +798,6 @@ def cli(
     explain_ids: bool,
     include_disabled: bool,
     quiet: bool,
-    data_type: str,
 ) -> None:
     """
     Create a graph representation of a CellProfiler pipeline.
@@ -953,17 +817,9 @@ def cli(
     python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
 
     \b
-    # View only image data flow
-    python cp_graph.py examples/analysis.json examples/output/analysis_images.dot --data-type images_only
+    # Include disabled modules in the graph
+    python cp_graph.py examples/illum_mod.json examples/output/illum_mod_include.dot --include-disabled
     """
-    # Determine what data types to include based on choice
-    include_objects = data_type != DataTypeChoice.IMAGES_ONLY
-    include_lists = data_type not in (
-        DataTypeChoice.NO_LISTS,
-        DataTypeChoice.OBJECTS_ONLY,
-    )
-    include_images = data_type != DataTypeChoice.OBJECTS_ONLY
-
     try:
         # Run the main processing function
         process_pipeline(
@@ -973,9 +829,6 @@ def cli(
             include_disabled,
             no_formatting,
             ultra_minimal,
-            include_objects=include_objects,
-            include_lists=include_lists,
-            include_images=include_images,
             explain_ids=explain_ids,
             quiet=quiet,
         )
