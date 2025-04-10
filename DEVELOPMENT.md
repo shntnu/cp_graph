@@ -149,6 +149,12 @@ We created `cp_graph.py` which:
 5. Creates a standardized representation for comparison purposes
 6. Outputs the graph in standard formats (DOT, GraphML, GEXF)
 
+The script uses a modular design with:
+- Type definitions using TypedDict for clear interfaces
+- Small, focused functions with well-defined responsibilities
+- Click for command-line interface handling
+- Consistent styling and formatting throughout
+
 ## Core Features
 1. **Standardized Graph Representation**: 
    - Uses stable module identifiers based on module type and I/O connections
@@ -184,9 +190,12 @@ We created `cp_graph.py` which:
    - `--ultra-minimal`: Creates minimal output with only essential structure for exact diff comparison
    - `--include-disabled`: Includes disabled modules in the graph
    - `--explain-ids`: Shows mapping between stable IDs and original module numbers
-   - `--images-only`: Include only image flow in the graph
-   - `--objects-only`: Include only object flow in the graph
-   - `--no-lists`: Exclude list inputs in the graph
+   - `--data-type`: Filter data types to include in the graph, with choices:
+     - `all`: Include all data types (default)
+     - `images_only`: Include only image flow in the graph
+     - `objects_only`: Include only object flow in the graph 
+     - `no_lists`: Exclude list inputs in the graph
+   - `--quiet` or `-q`: Suppress informational output
 
 ## Documentation
 Created `README.md` with:
@@ -260,6 +269,13 @@ The script includes PEP 723 dependency metadata, which allows it to be run direc
 uv run --script cp_graph.py <pipeline.json> [output_graph.graphml] [options]
 ```
 
-This is the recommended approach as it automatically installs the required dependencies (networkx and pydot) in an isolated environment.
+This is the recommended approach as it automatically installs the required dependencies (networkx, pydot, and click) in an isolated environment.
+
+### Dependencies
+
+- Python 3.11+
+- NetworkX for graph representation
+- PyDot for DOT format output
+- Click for command-line interface handling
 
 The tool is functional in its current state and can be used to analyze any CellProfiler pipeline in v6 JSON format. It supports a comprehensive view of data flow, including images, objects, and list inputs/outputs, with visual differentiation and filtering options for each data type.
