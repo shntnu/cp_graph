@@ -691,6 +691,62 @@ def print_stable_id_mapping(G: nx.DiGraph) -> None:
         print(f"  {node} → {module_name} #{orig_num}{enabled}")
 
 
+def filter_graph_by_root_nodes(G: nx.DiGraph, root_node_names: List[str]) -> nx.DiGraph:
+    """
+    Filter graph to only include nodes reachable from specified root nodes.
+
+    Args:
+        G: The original NetworkX graph
+        root_node_names: List of root node names to include (without type prefixes)
+
+    Returns:
+        A new NetworkX DiGraph containing only the nodes reachable from specified roots
+    """
+    # Create a copy of the graph to modify
+    filtered_graph = G.copy()
+
+    # Find all root nodes (nodes with no incoming edges)
+    all_root_nodes = [node for node in G.nodes() if G.in_degree(node) == 0]
+
+    # If no root nodes specified, return the original graph
+    if not root_node_names:
+        return filtered_graph
+
+    # Map the root node names to their node IDs (which include type prefixes)
+    specified_root_ids = []
+    for root_node in all_root_nodes:
+        node_type = G.nodes[root_node].get("type")
+        if node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+            # Extract name from node attributes or from the node ID
+            node_name = G.nodes[root_node].get("name")
+            if not node_name and "__" in root_node:
+                node_name = root_node.split("__", 1)[1]
+
+            # Check if this node should be included
+            if node_name in root_node_names:
+                specified_root_ids.append(root_node)
+
+    # If no specified roots were found, return the original graph with a warning
+    if not specified_root_ids:
+        print("Warning: None of the specified root nodes were found in the graph")
+        return filtered_graph
+
+    # Find all nodes reachable from the specified roots
+    reachable_nodes = set()
+    for root_id in specified_root_ids:
+        # Use BFS to find all nodes reachable from this root
+        bfs_tree = nx.bfs_tree(G, root_id)
+        reachable_nodes.update(bfs_tree.nodes())
+        # Add the root itself
+        reachable_nodes.add(root_id)
+
+    # Remove nodes that aren't reachable
+    nodes_to_remove = [node for node in G.nodes() if node not in reachable_nodes]
+    filtered_graph.remove_nodes_from(nodes_to_remove)
+
+    return filtered_graph
+
+
 # ----- MAIN EXECUTION AND CLI -----
 def process_pipeline(
     pipeline_path: str,
@@ -701,6 +757,7 @@ def process_pipeline(
     ultra_minimal: bool = False,
     explain_ids: bool = False,
     quiet: bool = False,
+    root_nodes: Optional[List[str]] = None,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -717,6 +774,7 @@ def process_pipeline(
         ultra_minimal: Whether to create minimal output for exact diff comparison
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
+        root_nodes: Optional list of root node names to filter the graph by
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -735,6 +793,14 @@ def process_pipeline(
         pipeline,
         include_disabled=include_disabled,
     )
+
+    # Filter the graph by root nodes if specified
+    if root_nodes:
+        if not quiet:
+            print(
+                f"Filtering graph to include only paths from roots: {', '.join(root_nodes)}"
+            )
+        G = filter_graph_by_root_nodes(G, root_nodes)
 
     # Print information about the pipeline if not quiet
     if not quiet:
@@ -787,6 +853,10 @@ def process_pipeline(
 @click.option(
     "--include-disabled", is_flag=True, help="Include disabled modules in the graph"
 )
+@click.option(
+    "--root-nodes",
+    help="Comma-separated list of root node names to filter the graph by",
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
@@ -797,6 +867,7 @@ def cli(
     ultra_minimal: bool,
     explain_ids: bool,
     include_disabled: bool,
+    root_nodes: Optional[str],
     quiet: bool,
 ) -> None:
     """
@@ -819,7 +890,18 @@ def cli(
     \b
     # Include disabled modules in the graph
     python cp_graph.py examples/illum_mod.json examples/output/illum_mod_include.dot --include-disabled
+
+    \b
+    # Filter graph to only include paths from specific root nodes
+    python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigBlue,OrigGreen
     """
+    # Process root nodes if provided
+    root_node_list = None
+    if root_nodes:
+        root_node_list = [
+            name.strip() for name in root_nodes.split(",") if name.strip()
+        ]
+
     try:
         # Run the main processing function
         process_pipeline(
@@ -831,6 +913,7 @@ def cli(
             ultra_minimal,
             explain_ids=explain_ids,
             quiet=quiet,
+            root_nodes=root_node_list,
         )
     except click.ClickException as e:
         e.show()
