@@ -691,16 +691,18 @@ def print_stable_id_mapping(G: nx.DiGraph) -> None:
         print(f"  {node} → {module_name} #{orig_num}{enabled}")
 
 
-def filter_graph_by_root_nodes(G: nx.DiGraph, root_node_names: List[str]) -> nx.DiGraph:
+def filter_keep_reachable_from_roots(
+    G: nx.DiGraph, root_node_names: List[str]
+) -> Tuple[nx.DiGraph, int]:
     """
-    Filter graph to only include nodes reachable from specified root nodes.
+    Filter graph to only keep nodes reachable from specified root nodes.
 
     Args:
         G: The original NetworkX graph
         root_node_names: List of root node names to include (without type prefixes)
 
     Returns:
-        A new NetworkX DiGraph containing only the nodes reachable from specified roots
+        A tuple of (filtered graph, number of nodes removed)
     """
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
@@ -710,7 +712,7 @@ def filter_graph_by_root_nodes(G: nx.DiGraph, root_node_names: List[str]) -> nx.
 
     # If no root nodes specified, return the original graph
     if not root_node_names:
-        return filtered_graph
+        return filtered_graph, 0
 
     # Map the root node names to their node IDs (which include type prefixes)
     specified_root_ids = []
@@ -729,7 +731,7 @@ def filter_graph_by_root_nodes(G: nx.DiGraph, root_node_names: List[str]) -> nx.
     # If no specified roots were found, return the original graph with a warning
     if not specified_root_ids:
         print("Warning: None of the specified root nodes were found in the graph")
-        return filtered_graph
+        return filtered_graph, 0
 
     # Find all nodes reachable from the specified roots
     reachable_nodes = set()
@@ -743,6 +745,94 @@ def filter_graph_by_root_nodes(G: nx.DiGraph, root_node_names: List[str]) -> nx.
     # Remove nodes that aren't reachable
     nodes_to_remove = [node for node in G.nodes() if node not in reachable_nodes]
     filtered_graph.remove_nodes_from(nodes_to_remove)
+
+    return filtered_graph, len(nodes_to_remove)
+
+
+def filter_remove_unused_images(G: nx.DiGraph) -> Tuple[nx.DiGraph, int]:
+    """
+    Filter graph to remove image nodes that are not inputs to any module.
+
+    Args:
+        G: The original NetworkX graph
+
+    Returns:
+        A tuple of (filtered graph, number of nodes removed)
+    """
+    # Create a copy of the graph to modify
+    filtered_graph = G.copy()
+
+    # Find all image nodes
+    image_nodes = [
+        node
+        for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_IMAGE
+    ]
+
+    # Check which ones are unused (not inputs to any module)
+    unused_images = []
+    for node in image_nodes:
+        # Get all successors of this node
+        successors = list(G.successors(node))
+
+        # If there are no successors or none of them are modules, it's unused
+        if not successors or not any(
+            G.nodes[succ].get("type") == NODE_TYPE_MODULE for succ in successors
+        ):
+            unused_images.append(node)
+
+    # Remove unused image nodes
+    if unused_images:
+        filtered_graph.remove_nodes_from(unused_images)
+
+    return filtered_graph, len(unused_images)
+
+
+def apply_graph_filters(
+    G: nx.DiGraph,
+    root_nodes: Optional[List[str]] = None,
+    remove_unused_images: bool = False,
+    quiet: bool = False,
+) -> nx.DiGraph:
+    """
+    Apply multiple graph filters based on specified parameters.
+
+    Args:
+        G: The original NetworkX graph
+        root_nodes: List of root node names to include (None means include all)
+        remove_unused_images: Whether to remove unused image nodes
+        quiet: Whether to suppress filter information output
+
+    Returns:
+        A filtered NetworkX DiGraph
+    """
+    # Start with a copy of the original graph
+    filtered_graph = G.copy()
+    initial_node_count = len(filtered_graph.nodes())
+
+    # Apply root node filtering if specified
+    if root_nodes:
+        if not quiet:
+            print(f"Filtering to keep paths from root nodes: {', '.join(root_nodes)}")
+        filtered_graph, nodes_removed = filter_keep_reachable_from_roots(
+            filtered_graph, root_nodes
+        )
+        if not quiet and nodes_removed > 0:
+            print(f"  Removed {nodes_removed} nodes not reachable from specified roots")
+
+    # Apply unused image filtering if specified
+    if remove_unused_images:
+        if not quiet:
+            print("Filtering to remove unused image nodes")
+        filtered_graph, nodes_removed = filter_remove_unused_images(filtered_graph)
+        if not quiet and nodes_removed > 0:
+            print(f"  Removed {nodes_removed} unused image nodes")
+
+    # Report total filtering results
+    if not quiet:
+        total_removed = initial_node_count - len(filtered_graph.nodes())
+        if total_removed > 0:
+            print(f"Total nodes removed by all filters: {total_removed}")
 
     return filtered_graph
 
@@ -758,6 +848,7 @@ def process_pipeline(
     explain_ids: bool = False,
     quiet: bool = False,
     root_nodes: Optional[List[str]] = None,
+    remove_unused_images: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -775,6 +866,7 @@ def process_pipeline(
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
         root_nodes: Optional list of root node names to filter the graph by
+        remove_unused_images: Whether to remove image nodes not used as inputs
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -794,13 +886,13 @@ def process_pipeline(
         include_disabled=include_disabled,
     )
 
-    # Filter the graph by root nodes if specified
-    if root_nodes:
-        if not quiet:
-            print(
-                f"Filtering graph to include only paths from roots: {', '.join(root_nodes)}"
-            )
-        G = filter_graph_by_root_nodes(G, root_nodes)
+    # Apply filters
+    G = apply_graph_filters(
+        G,
+        root_nodes=root_nodes,
+        remove_unused_images=remove_unused_images,
+        quiet=quiet,
+    )
 
     # Print information about the pipeline if not quiet
     if not quiet:
@@ -857,6 +949,11 @@ def process_pipeline(
     "--root-nodes",
     help="Comma-separated list of root node names to filter the graph by",
 )
+@click.option(
+    "--remove-unused-images",
+    is_flag=True,
+    help="Remove image nodes not used as inputs",
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
@@ -868,6 +965,7 @@ def cli(
     explain_ids: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
+    remove_unused_images: bool,
     quiet: bool,
 ) -> None:
     """
@@ -894,6 +992,14 @@ def cli(
     \b
     # Filter graph to only include paths from specific root nodes
     python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigBlue,OrigGreen
+
+    \b
+    # Remove image nodes that aren't used as inputs to any module
+    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --remove-unused-images
+
+    \b
+    # Apply multiple filters in combination
+    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --root-nodes=OrigBlue,OrigGreen --remove-unused-images
     """
     # Process root nodes if provided
     root_node_list = None
@@ -914,6 +1020,7 @@ def cli(
             explain_ids=explain_ids,
             quiet=quiet,
             root_nodes=root_node_list,
+            remove_unused_images=remove_unused_images,
         )
     except click.ClickException as e:
         e.show()
