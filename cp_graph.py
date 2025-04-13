@@ -29,6 +29,14 @@ INPUT_LABEL_TYPE = (
 INPUT_IMAGE_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber"
 INPUT_LABEL_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber"
 
+# Note: The following additional input types exist but are not currently captured:
+# - cellprofiler.modules.measureobjectintensitydistribution.MORDObjectNameSubscriber
+# - cellprofiler.modules.measureobjectintensitydistribution.MORDImageNameSubscriber
+# - cellprofiler.modules.exporttospreadsheet.EEObjectNameSubscriber
+# See:
+# https://github.com/CellProfiler/CellProfiler/blob/3186518c42fbb58f762e5b92c495fa38e4aeb42d/src/frontend/cellprofiler/modules/measureobjectintensitydistribution.py#L1495-L1521
+# https://github.com/CellProfiler/CellProfiler/blob/3186518c42fbb58f762e5b92c495fa38e4aeb42d/src/frontend/cellprofiler/modules/exporttospreadsheet.py#L1670-L1681
+
 # Output types
 OUTPUT_IMAGE_TYPE = (
     "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName"
