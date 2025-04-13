@@ -78,6 +78,8 @@ This tool provides solutions through its filtering options:
 - Apply `--remove-unused-data` to eliminate unused data nodes
 - Exclude problematic modules with `--exclude-module-types=ExportToSpreadsheet`
 
+Note that some limitations can't be completely resolved with filtering. For example, in the visualization at the top of this README, the CallBarcodes module actually processes multiple cycle images internally, but only the first cycle appears as an explicit input in the JSON. This is why the other cycles don't show connections to the module even though they're used.
+
 ## Pipeline Visualization
 
 The tool creates intuitive graph visualizations showing data flow through pipelines:
