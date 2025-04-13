@@ -313,3 +313,23 @@ The key changes:
 This unified approach results in a more intuitive graph with fewer redundant nodes, while still preserving all necessary information about connection types in the edge metadata.
 
 The tool is functional in its current state and can be used to analyze any CellProfiler pipeline in v6 JSON format. It provides a comprehensive view of data flow with a unified data representation that makes complex pipelines easier to understand.
+
+## Limitations
+
+The way CellProfiler pipeline files work creates some inherent challenges in accurately representing data flow:
+
+1. **Complex Input/Output Relationships**: Determining true inputs and outputs requires parsing module-specific settings logic. A module may have an ImageSubscriber setting but other settings might cause it to be ignored.
+
+2. **Plugin-Specific Behavior**: Some plugins like CallBarcodes and similar modules don't explicitly specify all inputs. For instance, these modules might internally process multiple cycle images but only the first cycle appears as an explicit input in the JSON.
+
+3. **ExportToSpreadsheet Consumption**: It's difficult to accurately determine exactly which measurements ExportToSpreadsheet modules consume, as they often use patterns rather than explicit references.
+
+4. **Unused Objects**: Some created objects may never be used, but detecting this can be challenging.
+
+Despite these limitations, the tool provides practical solutions:
+
+- The `--root-nodes` option ensures we focus on paths from specific inputs, avoiding spurious connections
+- The `--remove-unused-data` option helps eliminate unused data items
+- The `--exclude-module-types` option allows skipping problematic modules like ExportToSpreadsheet
+
+This approach of working directly with the JSON file alone is still valuable, as it doesn't require the full CellProfiler codebase to analyze pipeline structure.
