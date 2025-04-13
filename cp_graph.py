@@ -774,12 +774,12 @@ def filter_keep_reachable_from_roots(
     return filtered_graph, len(nodes_to_process)
 
 
-def filter_remove_unused_images(
+def filter_remove_unused_data(
     G: nx.DiGraph, 
     highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
-    Filter graph to process image nodes that are not inputs to any module.
+    Filter graph to remove data nodes (images and objects) that are not inputs to any module.
 
     Args:
         G: The original NetworkX graph
@@ -791,16 +791,16 @@ def filter_remove_unused_images(
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
 
-    # Find all image nodes
-    image_nodes = [
+    # Find all data nodes (both images and objects)
+    data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_IMAGE
+        if attrs.get("type") in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT)
     ]
 
     # Check which ones are unused (not inputs to any module)
-    unused_images = []
-    for node in image_nodes:
+    unused_data = []
+    for node in data_nodes:
         # Get all successors of this node
         successors = list(G.successors(node))
 
@@ -808,11 +808,11 @@ def filter_remove_unused_images(
         if not successors or not any(
             G.nodes[succ].get("type") == NODE_TYPE_MODULE for succ in successors
         ):
-            unused_images.append(node)
+            unused_data.append(node)
 
     if highlight_filtered:
         # Mark nodes as filtered instead of removing them
-        for node in unused_images:
+        for node in unused_data:
             filtered_graph.nodes[node]["filtered"] = True
             # Add a label suffix to indicate the node is filtered
             if "label" in filtered_graph.nodes[node]:
@@ -820,17 +820,17 @@ def filter_remove_unused_images(
                 if not current_label.endswith(" (filtered)"):
                     filtered_graph.nodes[node]["label"] = f"{current_label} (filtered)"
     else:
-        # Remove unused image nodes
-        if unused_images:
-            filtered_graph.remove_nodes_from(unused_images)
+        # Remove unused data nodes
+        if unused_data:
+            filtered_graph.remove_nodes_from(unused_data)
 
-    return filtered_graph, len(unused_images)
+    return filtered_graph, len(unused_data)
 
 
 def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
-    remove_unused_images: bool = False,
+    remove_unused_data: bool = False,
     highlight_filtered: bool = False,
     quiet: bool = False,
 ) -> nx.DiGraph:
@@ -840,7 +840,7 @@ def apply_graph_filters(
     Args:
         G: The original NetworkX graph
         root_nodes: List of root node names to include (None means include all)
-        remove_unused_images: Whether to remove unused image nodes
+        remove_unused_data: Whether to remove unused image and object nodes
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
 
@@ -869,18 +869,18 @@ def apply_graph_filters(
             else:
                 print(f"  Removed {nodes_affected} nodes not reachable from specified roots")
 
-    # Apply unused image filtering if specified
-    if remove_unused_images:
+    # Apply unused data filtering if specified
+    if remove_unused_data:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"{action_verb} unused image nodes")
-        filtered_graph, nodes_affected = filter_remove_unused_images(filtered_graph, highlight_filtered)
+            print(f"{action_verb} unused data nodes (images and objects)")
+        filtered_graph, nodes_affected = filter_remove_unused_data(filtered_graph, highlight_filtered)
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
             if highlight_filtered:
-                print(f"  Highlighted {nodes_affected} unused image nodes")
+                print(f"  Highlighted {nodes_affected} unused data nodes")
             else:
-                print(f"  Removed {nodes_affected} unused image nodes")
+                print(f"  Removed {nodes_affected} unused data nodes")
 
     # Report total filtering results
     if not quiet and total_affected > 0:
@@ -904,7 +904,7 @@ def process_pipeline(
     explain_ids: bool = False,
     quiet: bool = False,
     root_nodes: Optional[List[str]] = None,
-    remove_unused_images: bool = False,
+    remove_unused_data: bool = False,
     highlight_filtered: bool = False,
 ) -> GraphData:
     """
@@ -923,7 +923,7 @@ def process_pipeline(
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
         root_nodes: Optional list of root node names to filter the graph by
-        remove_unused_images: Whether to remove image nodes not used as inputs
+        remove_unused_data: Whether to remove unused data nodes (images and objects)
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
 
     Returns:
@@ -948,7 +948,7 @@ def process_pipeline(
     G = apply_graph_filters(
         G,
         root_nodes=root_nodes,
-        remove_unused_images=remove_unused_images,
+        remove_unused_data=remove_unused_data,
         highlight_filtered=highlight_filtered,
         quiet=quiet,
     )
@@ -1009,9 +1009,9 @@ def process_pipeline(
     help="Comma-separated list of root node names to filter the graph by",
 )
 @click.option(
-    "--remove-unused-images",
+    "--remove-unused-data",
     is_flag=True,
-    help="Remove image nodes not used as inputs",
+    help="Remove image and object nodes not used as inputs",
 )
 @click.option(
     "--highlight-filtered",
@@ -1029,7 +1029,7 @@ def cli(
     explain_ids: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
-    remove_unused_images: bool,
+    remove_unused_data: bool,
     highlight_filtered: bool,
     quiet: bool,
 ) -> None:
@@ -1059,12 +1059,12 @@ def cli(
     python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigBlue,OrigGreen
 
     \b
-    # Remove image nodes that aren't used as inputs to any module
-    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --remove-unused-images
+    # Remove image and object nodes that aren't used as inputs to any module
+    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --remove-unused-data
 
     \b
     # Apply multiple filters in combination
-    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --root-nodes=OrigBlue,OrigGreen --remove-unused-images
+    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --root-nodes=OrigBlue,OrigGreen --remove-unused-data
     
     \b
     # Highlight filtered nodes instead of removing them (useful for previewing filter effects)
@@ -1094,7 +1094,7 @@ def cli(
             explain_ids=explain_ids,
             quiet=quiet,
             root_nodes=root_node_list,
-            remove_unused_images=remove_unused_images,
+            remove_unused_data=remove_unused_data,
             highlight_filtered=highlight_filtered,
         )
     except click.ClickException as e:

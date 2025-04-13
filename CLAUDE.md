@@ -23,7 +23,7 @@ The primary purpose of this tool is to provide a standardized way to represent a
 ### Common Options
 - `--highlight-filtered`: Highlight nodes that would be filtered instead of removing them
 - `--root-nodes=<name1,name2>`: Filter to only keep paths from specified root nodes
-- `--remove-unused-images`: Remove or highlight image nodes not used as inputs
+- `--remove-unused-data`: Remove or highlight data nodes (images and objects) not used as inputs
 - `--include-disabled`: Include disabled modules in the graph
 
 ## Code Style
