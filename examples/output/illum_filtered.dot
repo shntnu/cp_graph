@@ -4,13 +4,9 @@ Resize_32606b38 [type=module, label="Resize #2", module_name=Resize, module_num=
 Resize_a3b11500 [type=module, label="Resize #4", module_name=Resize, module_num=4, original_num=4, stable_id="Resize_a3b11500", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 SaveImages_4cf7a938 [type=module, label="SaveImages #12", module_name=SaveImages, module_num=12, original_num=12, stable_id="SaveImages_4cf7a938", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 image__DownsampledDNA [type=image, label=DownsampledDNA, shape=ellipse, style=filled, fillcolor=lightgray];
-image__IllumBlueAvg [type=image, label=IllumBlueAvg, shape=ellipse, style=filled, fillcolor=lightgray];
-image__IllumBlueDilated [type=image, label=IllumBlueDilated, shape=ellipse, style=filled, fillcolor=lightgray];
 image__IllumDNA [type=image, label=IllumDNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__OrigDNA [type=image, label=OrigDNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__UpsampledIllumDNA [type=image, label=UpsampledIllumDNA, shape=ellipse, style=filled, fillcolor=lightgray];
-CorrectIlluminationCalculate_e3750f2a -> image__IllumBlueAvg [type="image_output"];
-CorrectIlluminationCalculate_e3750f2a -> image__IllumBlueDilated [type="image_output"];
 CorrectIlluminationCalculate_e3750f2a -> image__IllumDNA [type="image_output"];
 Resize_32606b38 -> image__DownsampledDNA [type="image_output"];
 Resize_a3b11500 -> image__UpsampledIllumDNA [type="image_output"];
