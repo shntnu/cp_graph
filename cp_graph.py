@@ -762,11 +762,7 @@ def filter_keep_reachable_from_roots(
         # Mark nodes as filtered instead of removing them
         for node in nodes_to_process:
             filtered_graph.nodes[node]["filtered"] = True
-            # Add a label suffix to indicate the node is filtered
-            if "label" in filtered_graph.nodes[node]:
-                current_label = filtered_graph.nodes[node]["label"]
-                if not current_label.endswith(" (filtered)"):
-                    filtered_graph.nodes[node]["label"] = f"{current_label} (filtered)"
+            # No label change for module nodes, rely on visual styling (color and dashed border)
     else:
         # Remove nodes that aren't reachable
         filtered_graph.remove_nodes_from(nodes_to_process)
@@ -774,12 +770,52 @@ def filter_keep_reachable_from_roots(
     return filtered_graph, len(nodes_to_process)
 
 
+def filter_exclude_module_types(
+    G: nx.DiGraph,
+    module_types: List[str],
+    highlight_filtered: bool = False
+) -> Tuple[nx.DiGraph, int]:
+    """
+    Filter graph to exclude nodes with specified module types.
+
+    Args:
+        G: The original NetworkX graph
+        module_types: List of module type names to exclude
+        highlight_filtered: If True, mark filtered nodes instead of removing them
+
+    Returns:
+        A tuple of (filtered graph, number of nodes affected)
+    """
+    # Create a copy of the graph to modify
+    filtered_graph = G.copy()
+    
+    # Find all module nodes with the specified types
+    module_nodes_to_exclude = [
+        node for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_MODULE and attrs.get("module_name") in module_types
+    ]
+    
+    if highlight_filtered:
+        # Mark nodes as filtered instead of removing them
+        for node in module_nodes_to_exclude:
+            filtered_graph.nodes[node]["filtered"] = True
+            # No label change, just rely on visual styling (color and dashed border)
+    else:
+        # Remove excluded module nodes
+        if module_nodes_to_exclude:
+            filtered_graph.remove_nodes_from(module_nodes_to_exclude)
+    
+    return filtered_graph, len(module_nodes_to_exclude)
+
+
 def filter_remove_unused_data(
     G: nx.DiGraph, 
     highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
-    Filter graph to remove data nodes (images and objects) that are not inputs to any module.
+    Filter graph to remove image nodes that are not inputs to any module.
+    
+    Note: This only removes unused image nodes, not object nodes.
 
     Args:
         G: The original NetworkX graph
@@ -791,11 +827,11 @@ def filter_remove_unused_data(
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
 
-    # Find all data nodes (both images and objects)
+    # Find all image nodes (exclude objects)
     data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT)
+        if attrs.get("type") == NODE_TYPE_IMAGE
     ]
 
     # Check which ones are unused (not inputs to any module)
@@ -814,11 +850,7 @@ def filter_remove_unused_data(
         # Mark nodes as filtered instead of removing them
         for node in unused_data:
             filtered_graph.nodes[node]["filtered"] = True
-            # Add a label suffix to indicate the node is filtered
-            if "label" in filtered_graph.nodes[node]:
-                current_label = filtered_graph.nodes[node]["label"]
-                if not current_label.endswith(" (filtered)"):
-                    filtered_graph.nodes[node]["label"] = f"{current_label} (filtered)"
+            # No label change, rely on visual styling (color and dashed border)
     else:
         # Remove unused data nodes
         if unused_data:
@@ -831,6 +863,7 @@ def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
     remove_unused_data: bool = False,
+    exclude_module_types: Optional[List[str]] = None,
     highlight_filtered: bool = False,
     quiet: bool = False,
 ) -> nx.DiGraph:
@@ -840,7 +873,8 @@ def apply_graph_filters(
     Args:
         G: The original NetworkX graph
         root_nodes: List of root node names to include (None means include all)
-        remove_unused_data: Whether to remove unused image and object nodes
+        remove_unused_data: Whether to remove unused image nodes
+        exclude_module_types: Optional list of module type names to exclude
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
 
@@ -873,14 +907,27 @@ def apply_graph_filters(
     if remove_unused_data:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"{action_verb} unused data nodes (images and objects)")
+            print(f"{action_verb} unused image nodes")
         filtered_graph, nodes_affected = filter_remove_unused_data(filtered_graph, highlight_filtered)
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
             if highlight_filtered:
-                print(f"  Highlighted {nodes_affected} unused data nodes")
+                print(f"  Highlighted {nodes_affected} unused image nodes")
             else:
-                print(f"  Removed {nodes_affected} unused data nodes")
+                print(f"  Removed {nodes_affected} unused image nodes")
+    
+    # Apply module type exclusion if specified
+    if exclude_module_types:
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
+        if not quiet:
+            print(f"{action_verb} modules of types: {', '.join(exclude_module_types)}")
+        filtered_graph, nodes_affected = filter_exclude_module_types(filtered_graph, exclude_module_types, highlight_filtered)
+        total_affected += nodes_affected
+        if not quiet and nodes_affected > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {nodes_affected} modules of specified types")
+            else:
+                print(f"  Removed {nodes_affected} modules of specified types")
 
     # Report total filtering results
     if not quiet and total_affected > 0:
@@ -906,6 +953,7 @@ def process_pipeline(
     root_nodes: Optional[List[str]] = None,
     remove_unused_data: bool = False,
     highlight_filtered: bool = False,
+    exclude_module_types: Optional[List[str]] = None,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -923,8 +971,9 @@ def process_pipeline(
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
         root_nodes: Optional list of root node names to filter the graph by
-        remove_unused_data: Whether to remove unused data nodes (images and objects)
+        remove_unused_data: Whether to remove unused image nodes
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
+        exclude_module_types: Optional list of module type names to exclude from the graph
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -949,6 +998,7 @@ def process_pipeline(
         G,
         root_nodes=root_nodes,
         remove_unused_data=remove_unused_data,
+        exclude_module_types=exclude_module_types,
         highlight_filtered=highlight_filtered,
         quiet=quiet,
     )
@@ -1011,12 +1061,16 @@ def process_pipeline(
 @click.option(
     "--remove-unused-data",
     is_flag=True,
-    help="Remove image and object nodes not used as inputs",
+    help="Remove image nodes not used as inputs",
 )
 @click.option(
     "--highlight-filtered",
     is_flag=True,
     help="Highlight filtered nodes instead of removing them",
+)
+@click.option(
+    "--exclude-module-types",
+    help="Comma-separated list of module types to exclude (e.g., ExportToSpreadsheet)",
 )
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
@@ -1031,6 +1085,7 @@ def cli(
     root_nodes: Optional[str],
     remove_unused_data: bool,
     highlight_filtered: bool,
+    exclude_module_types: Optional[str],
     quiet: bool,
 ) -> None:
     """
@@ -1081,6 +1136,13 @@ def cli(
         root_node_list = [
             name.strip() for name in root_nodes.split(",") if name.strip()
         ]
+        
+    # Process module types to exclude if provided
+    exclude_module_types_list = None
+    if exclude_module_types:
+        exclude_module_types_list = [
+            name.strip() for name in exclude_module_types.split(",") if name.strip()
+        ]
 
     try:
         # Run the main processing function
@@ -1096,6 +1158,7 @@ def cli(
             root_nodes=root_node_list,
             remove_unused_data=remove_unused_data,
             highlight_filtered=highlight_filtered,
+            exclude_module_types=exclude_module_types_list,
         )
     except click.ClickException as e:
         e.show()
