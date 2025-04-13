@@ -18,7 +18,7 @@ uv run --script cp_graph.py \
    --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI,Cycle01_A,Cycle01_T,Cycle01_G,Cycle01_C,Cycle02_DAPI,Cycle02_A,Cycle02_T,Cycle02_G,Cycle02_C,Cycle03_DAPI,Cycle03_A,Cycle03_T,Cycle03_G,Cycle03_C && \
    dot -Tpng \
    examples/output/analysis_filtered.dot \
-   -o \examples/output/analysis_filtered.png
+   -o examples/output/analysis_filtered.png
 ```
 </details>
 
