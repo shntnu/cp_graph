@@ -96,10 +96,10 @@ The tool provides filtering options to focus on specific parts of complex pipeli
 uv run --script cp_graph.py examples/illum.json examples/output/illum.dot
 
 # Highlight filtered nodes instead of removing them
-uv run --script cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
+uv run --script cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-data --highlight-filtered
 
 # Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
-uv run --script cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
+uv run --script cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-data
 ```
 
 <table>
@@ -183,9 +183,6 @@ uv run --script cp_graph.py examples/illum.json examples/output/illum_ids.dot --
 uv run --script cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI,Cycle01_A,Cycle01_T,Cycle01_G,Cycle01_C,Cycle02_DAPI,Cycle02_A,Cycle02_T,Cycle02_G,Cycle02_C,Cycle03_DAPI,Cycle03_A,Cycle03_T,Cycle03_G,Cycle03_C
-
-# Filter complex analysis pipeline with fewer root nodes and unused data removal
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA
+uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data --highlight-filtered --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI,Cycle01_A,Cycle01_T,Cycle01_G,Cycle01_C,Cycle02_DAPI,Cycle02_A,Cycle02_T,Cycle02_G,Cycle02_C,Cycle03_DAPI,Cycle03_A,Cycle03_T,Cycle03_G,Cycle03_C
 
 ```
