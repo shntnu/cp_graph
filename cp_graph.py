@@ -51,7 +51,11 @@ EDGE_TYPE_OUTPUT = "output"
 
 # Style constants
 STYLE_COLORS = {
-    NODE_TYPE_MODULE: {"enabled": "lightblue", "disabled": "lightpink", "filtered": "lightyellow"},
+    NODE_TYPE_MODULE: {
+        "enabled": "lightblue",
+        "disabled": "lightpink",
+        "filtered": "lightyellow",
+    },
     NODE_TYPE_IMAGE: {"normal": "lightgray", "filtered": "lightsalmon"},
     NODE_TYPE_OBJECT: {"normal": "lightgreen", "filtered": "lightsalmon"},
 }
@@ -702,9 +706,7 @@ def print_stable_id_mapping(G: nx.DiGraph) -> None:
 
 
 def filter_keep_reachable_from_roots(
-    G: nx.DiGraph, 
-    root_node_names: List[str],
-    highlight_filtered: bool = False
+    G: nx.DiGraph, root_node_names: List[str], highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to only keep nodes reachable from specified root nodes.
@@ -757,7 +759,7 @@ def filter_keep_reachable_from_roots(
 
     # Get nodes that aren't reachable
     nodes_to_process = [node for node in G.nodes() if node not in reachable_nodes]
-    
+
     if highlight_filtered:
         # Mark nodes as filtered instead of removing them
         for node in nodes_to_process:
@@ -771,9 +773,7 @@ def filter_keep_reachable_from_roots(
 
 
 def filter_exclude_module_types(
-    G: nx.DiGraph,
-    module_types: List[str],
-    highlight_filtered: bool = False
+    G: nx.DiGraph, module_types: List[str], highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to exclude nodes with specified module types.
@@ -788,13 +788,15 @@ def filter_exclude_module_types(
     """
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
-    
+
     # Find all module nodes with the specified types
     module_nodes_to_exclude = [
-        node for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_MODULE and attrs.get("module_name") in module_types
+        node
+        for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_MODULE
+        and attrs.get("module_name") in module_types
     ]
-    
+
     if highlight_filtered:
         # Mark nodes as filtered instead of removing them
         for node in module_nodes_to_exclude:
@@ -804,17 +806,16 @@ def filter_exclude_module_types(
         # Remove excluded module nodes
         if module_nodes_to_exclude:
             filtered_graph.remove_nodes_from(module_nodes_to_exclude)
-    
+
     return filtered_graph, len(module_nodes_to_exclude)
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, 
-    highlight_filtered: bool = False
+    G: nx.DiGraph, highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to remove image nodes that are not inputs to any module.
-    
+
     Note: This only removes unused image nodes, not object nodes.
 
     Args:
@@ -884,7 +885,7 @@ def apply_graph_filters(
     # Start with a copy of the original graph
     filtered_graph = G.copy()
     initial_node_count = len(filtered_graph.nodes())
-    
+
     # Track count of affected nodes
     total_affected = 0
 
@@ -892,36 +893,46 @@ def apply_graph_filters(
     if root_nodes:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"{action_verb} nodes not reachable from root nodes: {', '.join(root_nodes)}")
+            print(
+                f"{action_verb} nodes not reachable from root nodes: {', '.join(root_nodes)}"
+            )
         filtered_graph, nodes_affected = filter_keep_reachable_from_roots(
             filtered_graph, root_nodes, highlight_filtered
         )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
             if highlight_filtered:
-                print(f"  Highlighted {nodes_affected} nodes not reachable from specified roots")
+                print(
+                    f"  Highlighted {nodes_affected} nodes not reachable from specified roots"
+                )
             else:
-                print(f"  Removed {nodes_affected} nodes not reachable from specified roots")
+                print(
+                    f"  Removed {nodes_affected} nodes not reachable from specified roots"
+                )
 
     # Apply unused data filtering if specified
     if remove_unused_data:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
             print(f"{action_verb} unused image nodes")
-        filtered_graph, nodes_affected = filter_remove_unused_data(filtered_graph, highlight_filtered)
+        filtered_graph, nodes_affected = filter_remove_unused_data(
+            filtered_graph, highlight_filtered
+        )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
             if highlight_filtered:
                 print(f"  Highlighted {nodes_affected} unused image nodes")
             else:
                 print(f"  Removed {nodes_affected} unused image nodes")
-    
+
     # Apply module type exclusion if specified
     if exclude_module_types:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
             print(f"{action_verb} modules of types: {', '.join(exclude_module_types)}")
-        filtered_graph, nodes_affected = filter_exclude_module_types(filtered_graph, exclude_module_types, highlight_filtered)
+        filtered_graph, nodes_affected = filter_exclude_module_types(
+            filtered_graph, exclude_module_types, highlight_filtered
+        )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
             if highlight_filtered:
@@ -1120,11 +1131,11 @@ def cli(
     \b
     # Apply multiple filters in combination
     python cp_graph.py examples/illum.json examples/output/illum_clean.dot --root-nodes=OrigBlue,OrigGreen --remove-unused-data
-    
+
     \b
     # Highlight filtered nodes instead of removing them (useful for previewing filter effects)
     python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
-    
+
     \b
     # Compare standard filtering to highlighted filtering to see what would be removed
     python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
@@ -1136,7 +1147,7 @@ def cli(
         root_node_list = [
             name.strip() for name in root_nodes.split(",") if name.strip()
         ]
-        
+
     # Process module types to exclude if provided
     exclude_module_types_list = None
     if exclude_module_types:
