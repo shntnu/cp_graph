@@ -195,13 +195,13 @@ python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root
 python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
 ```
 
-## Visualization (Secondary Feature)
+## Visualization
 
-While the primary purpose is computational analysis and comparison, the tool also supports visualization:
+While the primary purpose is computational analysis and comparison, the tool provides rich visualization capabilities:
 
 ### Visual Styling
 
-The graph visually represents different elements:
+The graph visually represents different elements with consistent styling:
 
 - **Images**: Gray ovals
 - **Objects**: Green ovals
@@ -210,36 +210,23 @@ The graph visually represents different elements:
 - **Filtered Nodes**: Yellow (modules) or salmon (data) with dashed borders (when using `--highlight-filtered`)
 - **Connections**: Arrows showing the flow between data nodes and modules
 
-Note: When comparing standard DOT files generated with different versions of the tool, you may notice differences in attribute ordering (e.g., `fillcolor` and `fontname` attributes in different order). These differences are purely cosmetic and don't affect visualization or functionality. If exact byte-for-byte consistency is needed for diff comparisons, use the `--ultra-minimal` option which excludes these styling attributes entirely.
-
-### Rendering the Graph
-
-If you have Graphviz installed, you can render a DOT file to an image:
-
-```bash
-dot -Tpng examples/output/illum.dot -o examples/output/illum.png
-```
-
-![image](examples/output/illum.png)
-
-The generated files can also be opened with:
-- GraphML (.graphml): yEd, Cytoscape, or other graph visualization software
-- GEXF (.gexf): Gephi
-- DOT (.dot): Graphviz, OmniGraffle
+For exact byte-for-byte consistency in file comparisons, use the `--ultra-minimal` option which excludes styling attributes entirely.
 
 ### Comprehensive Pipeline Visualization
 
-The illumination pipeline (`illum.json`) demonstrates the basic features, while the more complex analysis pipeline (`examples/analysis.json`) shows how the tool handles multiple data types in a unified visualization:
+The complex analysis pipeline demonstrates how the tool handles multiple data types in a unified visualization:
 
 ![Analysis Pipeline](examples/output/analysis.png)
 
-This comprehensive visualization shows:
-- Image data (gray ovals) 
-- Object data (green ovals)
-- The relationships between different data types
-- Module processing flow throughout the pipeline
+This visualization shows:
+- Multiple data types (images in gray, objects in green)
+- All data relationships and module processing flow
+- Standardized representation optimized for analysis and comparison
 
-The unified representation makes it easier to understand complex pipelines by showing all data relationships in a single view while maintaining distinct visual styling for different data types.
+The generated files can be opened with:
+- Graphviz: `dot -Tpng examples/output/analysis.dot -o examples/output/analysis.png`
+- GraphML (.graphml): yEd, Cytoscape
+- GEXF (.gexf): Gephi
 
 ## Requirements
 
