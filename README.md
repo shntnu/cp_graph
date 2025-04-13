@@ -104,9 +104,9 @@ uv run --script cp_graph.py examples/illum.json examples/output/illum_filtered.d
 
 <table>
 <tr>
-<td width="38%"><img src="examples/output/illum.png" alt="Original Graph" height="350"></td>
-<td width="38%"><img src="examples/output/illum_highlight.png" alt="Highlighted Graph" height="350"></td>
-<td width="24%"><img src="examples/output/illum_filtered.png" alt="Filtered Graph" height="350"></td>
+<td width="38%"><img src="examples/output/illum.png" alt="Original Graph"></td>
+<td width="38%"><img src="examples/output/illum_highlight.png" alt="Highlighted Graph"></td>
+<td width="24%"><img src="examples/output/illum_filtered.png" alt="Filtered Graph"></td>
 </tr>
 <tr>
 <td><center><b>Original Graph</b><br>Complete pipeline</center></td>
