@@ -84,8 +84,9 @@ uv run --script cp_graph.py <pipeline.json> <output_file> [options]
 **Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph
 - `--root-nodes=<name1,name2>` - Keep only paths from specified root nodes
-- `--remove-unused-data` - Remove image and object nodes not used as inputs
-- `--highlight-filtered` - Highlight nodes that would be filtered instead of removing them
+- `--remove-unused-data` - Remove image nodes not used as inputs
+- `--highlight-filtered` - Highlight nodes that would be filtered instead of removing them (uses distinct colors and dashed borders)
+- `--exclude-module-types=<type1,type2>` - Exclude specific module types (e.g., ExportToSpreadsheet)
 
 ## Pipeline Filtering & Highlighting
 
@@ -95,7 +96,7 @@ The tool provides filtering options to focus on specific parts of complex pipeli
 # Generate basic pipeline graph
 uv run --script cp_graph.py examples/illum.json examples/output/illum.dot
 
-# Highlight filtered nodes instead of removing them
+# Highlight filtered nodes instead of removing them (uses distinct colors and dashed borders)
 uv run --script cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-data --highlight-filtered
 
 # Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
@@ -183,6 +184,6 @@ uv run --script cp_graph.py examples/illum.json examples/output/illum_ids.dot --
 uv run --script cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data --highlight-filtered --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI
+uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
 
 ```

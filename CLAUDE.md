@@ -21,10 +21,11 @@ The primary purpose of this tool is to provide a standardized way to represent a
 - Visualization: `dot -Tpng <output_file>.dot -o <output_file>.png`
 
 ### Common Options
-- `--highlight-filtered`: Highlight nodes that would be filtered instead of removing them
+- `--highlight-filtered`: Highlight nodes that would be filtered instead of removing them (uses yellow/salmon coloring with dashed borders)
 - `--root-nodes=<name1,name2>`: Filter to only keep paths from specified root nodes
-- `--remove-unused-data`: Remove or highlight data nodes (images and objects) not used as inputs
+- `--remove-unused-data`: Remove or highlight image nodes not used as inputs
 - `--include-disabled`: Include disabled modules in the graph
+- `--exclude-module-types=<type1,type2>`: Exclude specific module types from the graph
 
 ## Code Style
 - Python 3.11+ with type annotations
