@@ -14,8 +14,8 @@ SaveImages_4cf7a938 [type=module, label="SaveImages #12", module_name=SaveImages
 image__DownsampledDNA [type=image, label=DownsampledDNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__DownsampledPhalloidin [type=image, label=DownsampledPhalloidin, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 image__DownsampledZO1 [type=image, label=DownsampledZO1, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
-image__IllumBlueAvg [type=image, label=IllumBlueAvg, shape=ellipse, style=filled, fillcolor=lightgray];
-image__IllumBlueDilated [type=image, label=IllumBlueDilated, shape=ellipse, style=filled, fillcolor=lightgray];
+image__IllumBlueAvg [type=image, label=IllumBlueAvg, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+image__IllumBlueDilated [type=image, label=IllumBlueDilated, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 image__IllumDNA [type=image, label=IllumDNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__IllumPhalloidin [type=image, label=IllumPhalloidin, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 image__IllumZO1 [type=image, label=IllumZO1, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];

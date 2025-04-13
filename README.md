@@ -148,10 +148,10 @@ The highlight mode is especially useful when exploring a pipeline to understand 
 
 ```bash
 # Generate a filtered graph (removes unreachable nodes)
-python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
+python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-images
 
 # Generate a highlighted graph (keeps but highlights unreachable nodes)
-python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
+python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-images --highlight-filtered
 ```
 
 ![Filtered Graph](examples/output/illum_filtered.png) ![Highlighted Graph](examples/output/illum_highlight.png)
