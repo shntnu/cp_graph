@@ -89,28 +89,33 @@ uv run --script cp_graph.py <pipeline.json> <output_file> [options]
 
 ## Pipeline Filtering & Highlighting
 
-The tool provides filtering options to focus on specific parts of complex pipelines:
+The tool provides filtering options to focus on specific parts of complex pipelines. This progression shows how filtering and highlighting work:
 
 ```bash
-# Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
-uv run --script cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
+# Generate basic pipeline graph
+uv run --script cp_graph.py examples/illum.json examples/output/illum.dot
 
 # Highlight filtered nodes instead of removing them
 uv run --script cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
+
+# Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
+uv run --script cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
 ```
 
 <table>
 <tr>
-<td width="50%"><img src="examples/output/illum_filtered.png" alt="Filtered Graph"></td>
-<td width="50%"><img src="examples/output/illum_highlight.png" alt="Highlighted Graph"></td>
+<td width="33%"><img src="examples/output/illum.png" alt="Original Graph" height="350"></td>
+<td width="33%"><img src="examples/output/illum_highlight.png" alt="Highlighted Graph" height="350"></td>
+<td width="33%"><img src="examples/output/illum_filtered.png" alt="Filtered Graph" height="350"></td>
 </tr>
 <tr>
-<td><center><b>Filtered Graph</b> - Unreachable nodes removed</center></td>
-<td><center><b>Highlighted Graph</b> - Unreachable nodes highlighted</center></td>
+<td><center><b>Original Graph</b><br>Complete pipeline</center></td>
+<td><center><b>Highlighted Graph</b><br>Unreachable nodes highlighted</center></td>
+<td><center><b>Filtered Graph</b><br>Unreachable nodes removed</center></td>
 </tr>
 </table>
 
-Highlighting is particularly useful for exploring a pipeline to understand which parts would be affected by filters before actually removing them.
+Highlighting is particularly useful for exploring a pipeline to understand which parts would be affected by filters before actually removing them. As shown above, you can first visualize what would be filtered (middle image) before committing to removing those nodes (right image).
 
 ## Pipeline Comparison
 
