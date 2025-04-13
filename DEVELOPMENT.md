@@ -192,6 +192,8 @@ The script uses a modular design with:
    - `--ultra-minimal`: Creates minimal output with only essential structure for exact diff comparison
    - `--include-disabled`: Includes disabled modules in the graph
    - `--explain-ids`: Shows mapping between stable IDs and original module numbers
+   - `--rank-nodes`: Positions source nodes at top and sink nodes at bottom
+   - `--rank-ignore-filtered`: Ignores filtered nodes when calculating rank positions
    - `--quiet` or `-q`: Suppress informational output
 
 ## Documentation
@@ -252,6 +254,7 @@ The tool now supports the `--rank-nodes` option to improve graph layout in DOT f
 1. Source nodes (input images with no incoming edges) are positioned at the top of the graph
 2. Sink nodes (SaveImages, Measure*, Export* modules) are positioned at the bottom
 3. This creates a more intuitive top-to-bottom data flow in the visualized graph
+4. Use with `--rank-ignore-filtered` to exclude filtered nodes from rank calculations when highlighting is used
 
 The implementation uses Graphviz's rank attribute to enforce node positioning:
 

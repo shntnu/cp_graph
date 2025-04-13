@@ -551,7 +551,7 @@ def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
             G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]["normal"]
 
 
-def _identify_source_nodes(G: nx.DiGraph) -> List[str]:
+def _identify_source_nodes(G: nx.DiGraph, ignore_filtered: bool = False) -> List[str]:
     """
     Identify source nodes in the graph for ranking at the top.
     
@@ -559,6 +559,7 @@ def _identify_source_nodes(G: nx.DiGraph) -> List[str]:
     
     Args:
         G: The NetworkX graph
+        ignore_filtered: If True, skip nodes that are marked as filtered
         
     Returns:
         List of node IDs to rank at the top
@@ -568,8 +569,13 @@ def _identify_source_nodes(G: nx.DiGraph) -> List[str]:
     # Find nodes that match source criteria:
     # 1. Node type is in SOURCE_NODE_TYPES
     # 2. No incoming edges (in_degree = 0)
+    # 3. Not filtered if ignore_filtered is True
     for node, attrs in G.nodes(data=True):
         node_type = attrs.get("type")
+        # Skip filtered nodes if requested
+        if ignore_filtered and attrs.get("filtered", False):
+            continue
+            
         if node_type in SOURCE_NODE_TYPES and G.in_degree(node) == 0:
             # Node IDs are already properly formatted in the graph
             source_nodes.append(node)
@@ -577,7 +583,7 @@ def _identify_source_nodes(G: nx.DiGraph) -> List[str]:
     return source_nodes
 
 
-def _identify_sink_nodes(G: nx.DiGraph) -> List[str]:
+def _identify_sink_nodes(G: nx.DiGraph, ignore_filtered: bool = False) -> List[str]:
     """
     Identify sink nodes in the graph for ranking at the bottom.
     
@@ -585,6 +591,7 @@ def _identify_sink_nodes(G: nx.DiGraph) -> List[str]:
     
     Args:
         G: The NetworkX graph
+        ignore_filtered: If True, skip nodes that are marked as filtered
         
     Returns:
         List of node IDs to rank at the bottom
@@ -595,8 +602,13 @@ def _identify_sink_nodes(G: nx.DiGraph) -> List[str]:
     # Find module nodes that match sink criteria:
     # 1. Node type is NODE_TYPE_MODULE
     # 2. Module name matches one of the patterns in SINK_MODULE_PATTERNS
+    # 3. Not filtered if ignore_filtered is True
     for node, attrs in G.nodes(data=True):
         node_type = attrs.get("type")
+        # Skip filtered nodes if requested
+        if ignore_filtered and attrs.get("filtered", False):
+            continue
+            
         if node_type == NODE_TYPE_MODULE:
             module_name = attrs.get("module_name", "")
             
@@ -614,7 +626,12 @@ def _identify_sink_nodes(G: nx.DiGraph) -> List[str]:
 # and is kept only for reference until removed
 
 
-def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False, rank_nodes: bool = False) -> nx.DiGraph:
+def prepare_for_dot_output(
+    G: nx.DiGraph, 
+    ultra_minimal: bool = False, 
+    rank_nodes: bool = False,
+    rank_ignore_filtered: bool = False
+) -> nx.DiGraph:
     """
     Prepare graph for DOT format output with consistent ordering.
 
@@ -622,6 +639,7 @@ def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False, rank_node
         G: The original NetworkX graph
         ultra_minimal: If True, create a stripped-down version with only essential structure
         rank_nodes: If True, add rank attributes to position source and sink nodes
+        rank_ignore_filtered: If True, ignore filtered nodes when calculating rank positions
 
     Returns:
         A new NetworkX DiGraph prepared for DOT output
@@ -670,12 +688,12 @@ def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False, rank_node
         # Add rank information for DOT output if requested
         if rank_nodes:
             # Identify source nodes (to be positioned at the top)
-            source_nodes = _identify_source_nodes(G)
+            source_nodes = _identify_source_nodes(G, rank_ignore_filtered)
             if source_nodes:
                 G_ordered.graph["dot_rank_min"] = source_nodes
                 
             # Identify sink nodes (to be positioned at the bottom)
-            sink_nodes = _identify_sink_nodes(G)
+            sink_nodes = _identify_sink_nodes(G, rank_ignore_filtered)
             if sink_nodes:
                 G_ordered.graph["dot_rank_max"] = sink_nodes
 
@@ -734,7 +752,11 @@ def _add_rank_statements(dot_file_path: str, G: nx.DiGraph) -> None:
 
 
 def write_graph_to_file(
-    G: nx.DiGraph, output_path: str, ultra_minimal: bool = False, rank_nodes: bool = False
+    G: nx.DiGraph, 
+    output_path: str, 
+    ultra_minimal: bool = False, 
+    rank_nodes: bool = False,
+    rank_ignore_filtered: bool = False
 ) -> None:
     """
     Write the graph to the specified output file in the appropriate format.
@@ -744,6 +766,7 @@ def write_graph_to_file(
         output_path: Path to write the output file
         ultra_minimal: If True, create a stripped-down version for exact diff comparison
         rank_nodes: If True, add rank statements to position source and sink nodes
+        rank_ignore_filtered: If True, ignore filtered nodes when calculating rank positions
     """
     ext = Path(output_path).suffix.lower()
 
@@ -754,7 +777,12 @@ def write_graph_to_file(
     elif ext == ".dot":
         try:
             # For DOT format, prepare the graph with consistent ordering
-            G_ordered = prepare_for_dot_output(G, ultra_minimal, rank_nodes)
+            G_ordered = prepare_for_dot_output(
+                G, 
+                ultra_minimal=ultra_minimal, 
+                rank_nodes=rank_nodes,
+                rank_ignore_filtered=rank_ignore_filtered
+            )
             nx.drawing.nx_pydot.write_dot(G_ordered, output_path)
             
             # Add rank statements to DOT file if requested and not in ultra-minimal mode
@@ -1137,6 +1165,7 @@ def process_pipeline(
     highlight_filtered: bool = False,
     exclude_module_types: Optional[List[str]] = None,
     rank_nodes: bool = False,
+    rank_ignore_filtered: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -1158,6 +1187,7 @@ def process_pipeline(
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         exclude_module_types: Optional list of module type names to exclude from the graph
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
+        rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -1209,7 +1239,13 @@ def process_pipeline(
                     del G.edges[edge]["label"]
 
         # Write the graph to the specified file
-        write_graph_to_file(G, output_path, ultra_minimal, rank_nodes)
+        write_graph_to_file(
+            G, 
+            output_path, 
+            ultra_minimal=ultra_minimal, 
+            rank_nodes=rank_nodes,
+            rank_ignore_filtered=rank_ignore_filtered
+        )
 
     return G, modules_info
 
@@ -1238,6 +1274,11 @@ def process_pipeline(
     "--rank-nodes", 
     is_flag=True, 
     help="Position source nodes at top and sink nodes at bottom in DOT output"
+)
+@click.option(
+    "--rank-ignore-filtered", 
+    is_flag=True, 
+    help="Ignore filtered nodes when positioning source and sink nodes"
 )
 # Content filtering options
 @click.option(
@@ -1271,6 +1312,7 @@ def cli(
     ultra_minimal: bool,
     explain_ids: bool,
     rank_nodes: bool,
+    rank_ignore_filtered: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
     remove_unused_data: bool,
@@ -1323,6 +1365,10 @@ def cli(
     \b
     # Position source nodes at top and sink nodes at bottom in the graph
     python cp_graph.py examples/illum.json examples/output/illum_ranked.dot --rank-nodes
+    
+    \b
+    # Position source and sink nodes while ignoring filtered nodes
+    python cp_graph.py examples/illum.json examples/output/illum_clean_ranked.dot --root-nodes=OrigDNA --highlight-filtered --rank-nodes --rank-ignore-filtered
     """
     # Process root nodes if provided
     root_node_list = None
@@ -1354,6 +1400,7 @@ def cli(
             highlight_filtered=highlight_filtered,
             exclude_module_types=exclude_module_types_list,
             rank_nodes=rank_nodes,
+            rank_ignore_filtered=rank_ignore_filtered,
         )
     except click.ClickException as e:
         e.show()

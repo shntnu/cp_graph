@@ -81,6 +81,7 @@ uv run --script cp_graph.py <pipeline.json> <output_file> [options]
 - `--ultra-minimal` - Create minimal output for exact diff comparison
 - `--explain-ids` - Print mapping of stable IDs to module numbers
 - `--rank-nodes` - Position source nodes at top and sink nodes at bottom in DOT output
+- `--rank-ignore-filtered` - Ignore filtered nodes when positioning source and sink nodes (use with `--rank-nodes` and `--highlight-filtered`)
 
 **Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph
@@ -192,4 +193,7 @@ uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filt
 
 # Combine node ranking with filtering for optimal visualization
 uv run --script cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-data
+
+# Combine node ranking with highlighted filtering, ignoring filtered nodes in ranking
+uv run --script cp_graph.py examples/analysis.json examples/output/analysis_clean_ranked.dot --rank-nodes --rank-ignore-filtered --root-nodes=CorrPhalloidin,CorrZO1 --highlight-filtered
 ```
