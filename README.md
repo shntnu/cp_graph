@@ -62,7 +62,6 @@ diff examples/output/illum_ultra.dot examples/output/illum_mod_ultra.dot
 ## Core Capabilities
 
 - **Standardized Representation**: Consistent pipeline encoding for reliable comparison
-- **Multi-Data Tracking**: Unified representation of images, objects, and lists
 - **Filter & Highlight**: Focus on specific parts of the pipeline with visual feedback
 - **Visual Analysis**: Intuitive colored graph visualization of data flow patterns
 
