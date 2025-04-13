@@ -33,6 +33,9 @@ Options:
 
 **Content Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph (excluded by default)
+- `--root-nodes=<name1,name2>` - Filter to keep only paths from specified root nodes
+- `--remove-unused-images` - Remove image nodes not used as inputs
+- `--highlight-filtered` - Highlight nodes that would be filtered instead of removing them
 
 ## Pipeline Comparison
 
@@ -127,6 +130,32 @@ The tool excels at two critical comparison tasks:
 
 By default, the tool ignores modules with `enabled: false` in their attributes. Use the `--include-disabled` flag to include these modules in your graph (shown with pink background and dashed borders).
 
+### Filtering and Highlighting
+
+The tool provides several filtering options to focus on specific parts of the pipeline:
+
+- **Root Node Filtering**: Use `--root-nodes=<name1,name2>` to keep only paths reachable from specified root nodes. This is useful for focusing on a specific data flow path in complex pipelines.
+
+- **Unused Image Removal**: Use `--remove-unused-images` to remove image nodes that aren't used as inputs to any module.
+
+- **Highlighting vs. Removing**: When using filters, you can either:
+  - Remove filtered nodes (default behavior)
+  - Highlight them visually with `--highlight-filtered` to see what would be filtered out
+
+The highlight mode is especially useful when exploring a pipeline to understand which parts would be affected by filters before actually removing them.
+
+#### Example: Highlighting vs. Filtering
+
+```bash
+# Generate a filtered graph (removes unreachable nodes)
+python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
+
+# Generate a highlighted graph (keeps but highlights unreachable nodes)
+python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
+```
+
+![Filtered Graph](examples/output/illum_filtered.png) ![Highlighted Graph](examples/output/illum_highlight.png)
+
 ### Example Files & Commands
 
 The repository is structured with:
@@ -160,6 +189,10 @@ dot -Tpng examples/output/analysis.dot -o examples/output/analysis.png
 # Ultra-minimal mode for pipeline comparison
 python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
 python cp_graph.py examples/illum_mod.json examples/output/illum_mod_ultra.dot --ultra-minimal
+
+# Filtering options
+python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
+python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
 ```
 
 ## Visualization (Secondary Feature)
@@ -174,6 +207,7 @@ The graph visually represents different elements:
 - **Objects**: Green ovals
 - **Processing Modules**: Blue boxes with the module name and number
 - **Disabled Modules**: Pink boxes with dashed borders (when included)
+- **Filtered Nodes**: Yellow (modules) or salmon (data) with dashed borders (when using `--highlight-filtered`)
 - **Connections**: Arrows showing the flow between data nodes and modules
 
 Note: When comparing standard DOT files generated with different versions of the tool, you may notice differences in attribute ordering (e.g., `fillcolor` and `fontname` attributes in different order). These differences are purely cosmetic and don't affect visualization or functionality. If exact byte-for-byte consistency is needed for diff comparisons, use the `--ultra-minimal` option which excludes these styling attributes entirely.

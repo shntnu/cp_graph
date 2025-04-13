@@ -51,9 +51,9 @@ EDGE_TYPE_OUTPUT = "output"
 
 # Style constants
 STYLE_COLORS = {
-    NODE_TYPE_MODULE: {"enabled": "lightblue", "disabled": "lightpink"},
-    NODE_TYPE_IMAGE: "lightgray",
-    NODE_TYPE_OBJECT: "lightgreen",
+    NODE_TYPE_MODULE: {"enabled": "lightblue", "disabled": "lightpink", "filtered": "lightyellow"},
+    NODE_TYPE_IMAGE: {"normal": "lightgray", "filtered": "lightsalmon"},
+    NODE_TYPE_OBJECT: {"normal": "lightgreen", "filtered": "lightsalmon"},
 }
 
 # Graph styles
@@ -472,14 +472,18 @@ def _apply_module_node_styling(G: nx.DiGraph, node: str, attrs: Dict[str, Any]) 
     G.nodes[node]["style"] = "filled"
     G.nodes[node]["fontname"] = "Helvetica-Bold"
 
+    # Check if node is filtered
+    if attrs.get("filtered", False):
+        G.nodes[node]["fillcolor"] = STYLE_COLORS[NODE_TYPE_MODULE]["filtered"]
+        G.nodes[node]["style"] = "filled,dashed"  # Add dashed border
     # Style enabled/disabled modules differently
-    if attrs.get("enabled", True):
-        # Enabled module
-        G.nodes[node]["fillcolor"] = STYLE_COLORS[NODE_TYPE_MODULE]["enabled"]
-    else:
+    elif not attrs.get("enabled", True):
         # Disabled module
         G.nodes[node]["fillcolor"] = STYLE_COLORS[NODE_TYPE_MODULE]["disabled"]
         G.nodes[node]["style"] = "filled,dashed"  # Add dashed border
+    else:
+        # Enabled module
+        G.nodes[node]["fillcolor"] = STYLE_COLORS[NODE_TYPE_MODULE]["enabled"]
 
 
 def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
@@ -496,7 +500,13 @@ def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
 
     # Apply type-specific color
     if node_type in STYLE_COLORS:
-        G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]
+        # Check if the node is filtered
+        is_filtered = G.nodes[node].get("filtered", False)
+        if is_filtered:
+            G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]["filtered"]
+            G.nodes[node]["style"] = "filled,dashed"
+        else:
+            G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]["normal"]
 
 
 def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiGraph:
@@ -692,7 +702,9 @@ def print_stable_id_mapping(G: nx.DiGraph) -> None:
 
 
 def filter_keep_reachable_from_roots(
-    G: nx.DiGraph, root_node_names: List[str]
+    G: nx.DiGraph, 
+    root_node_names: List[str],
+    highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to only keep nodes reachable from specified root nodes.
@@ -700,9 +712,10 @@ def filter_keep_reachable_from_roots(
     Args:
         G: The original NetworkX graph
         root_node_names: List of root node names to include (without type prefixes)
+        highlight_filtered: If True, mark filtered nodes instead of removing them
 
     Returns:
-        A tuple of (filtered graph, number of nodes removed)
+        A tuple of (filtered graph, number of nodes affected)
     """
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
@@ -742,22 +755,38 @@ def filter_keep_reachable_from_roots(
         # Add the root itself
         reachable_nodes.add(root_id)
 
-    # Remove nodes that aren't reachable
-    nodes_to_remove = [node for node in G.nodes() if node not in reachable_nodes]
-    filtered_graph.remove_nodes_from(nodes_to_remove)
+    # Get nodes that aren't reachable
+    nodes_to_process = [node for node in G.nodes() if node not in reachable_nodes]
+    
+    if highlight_filtered:
+        # Mark nodes as filtered instead of removing them
+        for node in nodes_to_process:
+            filtered_graph.nodes[node]["filtered"] = True
+            # Add a label suffix to indicate the node is filtered
+            if "label" in filtered_graph.nodes[node]:
+                current_label = filtered_graph.nodes[node]["label"]
+                if not current_label.endswith(" (filtered)"):
+                    filtered_graph.nodes[node]["label"] = f"{current_label} (filtered)"
+    else:
+        # Remove nodes that aren't reachable
+        filtered_graph.remove_nodes_from(nodes_to_process)
 
-    return filtered_graph, len(nodes_to_remove)
+    return filtered_graph, len(nodes_to_process)
 
 
-def filter_remove_unused_images(G: nx.DiGraph) -> Tuple[nx.DiGraph, int]:
+def filter_remove_unused_images(
+    G: nx.DiGraph, 
+    highlight_filtered: bool = False
+) -> Tuple[nx.DiGraph, int]:
     """
-    Filter graph to remove image nodes that are not inputs to any module.
+    Filter graph to process image nodes that are not inputs to any module.
 
     Args:
         G: The original NetworkX graph
+        highlight_filtered: If True, mark filtered nodes instead of removing them
 
     Returns:
-        A tuple of (filtered graph, number of nodes removed)
+        A tuple of (filtered graph, number of nodes affected)
     """
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
@@ -781,9 +810,19 @@ def filter_remove_unused_images(G: nx.DiGraph) -> Tuple[nx.DiGraph, int]:
         ):
             unused_images.append(node)
 
-    # Remove unused image nodes
-    if unused_images:
-        filtered_graph.remove_nodes_from(unused_images)
+    if highlight_filtered:
+        # Mark nodes as filtered instead of removing them
+        for node in unused_images:
+            filtered_graph.nodes[node]["filtered"] = True
+            # Add a label suffix to indicate the node is filtered
+            if "label" in filtered_graph.nodes[node]:
+                current_label = filtered_graph.nodes[node]["label"]
+                if not current_label.endswith(" (filtered)"):
+                    filtered_graph.nodes[node]["label"] = f"{current_label} (filtered)"
+    else:
+        # Remove unused image nodes
+        if unused_images:
+            filtered_graph.remove_nodes_from(unused_images)
 
     return filtered_graph, len(unused_images)
 
@@ -792,6 +831,7 @@ def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
     remove_unused_images: bool = False,
+    highlight_filtered: bool = False,
     quiet: bool = False,
 ) -> nx.DiGraph:
     """
@@ -801,6 +841,7 @@ def apply_graph_filters(
         G: The original NetworkX graph
         root_nodes: List of root node names to include (None means include all)
         remove_unused_images: Whether to remove unused image nodes
+        highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
 
     Returns:
@@ -809,29 +850,44 @@ def apply_graph_filters(
     # Start with a copy of the original graph
     filtered_graph = G.copy()
     initial_node_count = len(filtered_graph.nodes())
+    
+    # Track count of affected nodes
+    total_affected = 0
 
     # Apply root node filtering if specified
     if root_nodes:
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"Filtering to keep paths from root nodes: {', '.join(root_nodes)}")
-        filtered_graph, nodes_removed = filter_keep_reachable_from_roots(
-            filtered_graph, root_nodes
+            print(f"{action_verb} nodes not reachable from root nodes: {', '.join(root_nodes)}")
+        filtered_graph, nodes_affected = filter_keep_reachable_from_roots(
+            filtered_graph, root_nodes, highlight_filtered
         )
-        if not quiet and nodes_removed > 0:
-            print(f"  Removed {nodes_removed} nodes not reachable from specified roots")
+        total_affected += nodes_affected
+        if not quiet and nodes_affected > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {nodes_affected} nodes not reachable from specified roots")
+            else:
+                print(f"  Removed {nodes_affected} nodes not reachable from specified roots")
 
     # Apply unused image filtering if specified
     if remove_unused_images:
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print("Filtering to remove unused image nodes")
-        filtered_graph, nodes_removed = filter_remove_unused_images(filtered_graph)
-        if not quiet and nodes_removed > 0:
-            print(f"  Removed {nodes_removed} unused image nodes")
+            print(f"{action_verb} unused image nodes")
+        filtered_graph, nodes_affected = filter_remove_unused_images(filtered_graph, highlight_filtered)
+        total_affected += nodes_affected
+        if not quiet and nodes_affected > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {nodes_affected} unused image nodes")
+            else:
+                print(f"  Removed {nodes_affected} unused image nodes")
 
     # Report total filtering results
-    if not quiet:
-        total_removed = initial_node_count - len(filtered_graph.nodes())
-        if total_removed > 0:
+    if not quiet and total_affected > 0:
+        if highlight_filtered:
+            print(f"Total nodes highlighted by all filters: {total_affected}")
+        else:
+            total_removed = initial_node_count - len(filtered_graph.nodes())
             print(f"Total nodes removed by all filters: {total_removed}")
 
     return filtered_graph
@@ -849,6 +905,7 @@ def process_pipeline(
     quiet: bool = False,
     root_nodes: Optional[List[str]] = None,
     remove_unused_images: bool = False,
+    highlight_filtered: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -867,6 +924,7 @@ def process_pipeline(
         quiet: Whether to suppress output
         root_nodes: Optional list of root node names to filter the graph by
         remove_unused_images: Whether to remove image nodes not used as inputs
+        highlight_filtered: Whether to highlight filtered nodes instead of removing them
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -891,6 +949,7 @@ def process_pipeline(
         G,
         root_nodes=root_nodes,
         remove_unused_images=remove_unused_images,
+        highlight_filtered=highlight_filtered,
         quiet=quiet,
     )
 
@@ -954,6 +1013,11 @@ def process_pipeline(
     is_flag=True,
     help="Remove image nodes not used as inputs",
 )
+@click.option(
+    "--highlight-filtered",
+    is_flag=True,
+    help="Highlight filtered nodes instead of removing them",
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
@@ -966,6 +1030,7 @@ def cli(
     include_disabled: bool,
     root_nodes: Optional[str],
     remove_unused_images: bool,
+    highlight_filtered: bool,
     quiet: bool,
 ) -> None:
     """
@@ -1000,6 +1065,15 @@ def cli(
     \b
     # Apply multiple filters in combination
     python cp_graph.py examples/illum.json examples/output/illum_clean.dot --root-nodes=OrigBlue,OrigGreen --remove-unused-images
+    
+    \b
+    # Highlight filtered nodes instead of removing them (useful for previewing filter effects)
+    python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
+    
+    \b
+    # Compare standard filtering to highlighted filtering to see what would be removed
+    python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
+    python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
     """
     # Process root nodes if provided
     root_node_list = None
@@ -1021,6 +1095,7 @@ def cli(
             quiet=quiet,
             root_nodes=root_node_list,
             remove_unused_images=remove_unused_images,
+            highlight_filtered=highlight_filtered,
         )
     except click.ClickException as e:
         e.show()
