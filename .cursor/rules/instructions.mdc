@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Rules for AI Agents Working with cp_graph
+
+## Project Overview
+
+This tool converts CellProfiler pipelines into standardized graph representations to analyze data flow between modules. It enables precise comparison of pipeline structures while deliberately excluding module settings. The tool tracks multiple data types (images, objects, lists) using a unified representation optimized for detecting structural changes between pipeline versions.
+
+### Core Purpose
+
+The primary purpose of this tool is to provide a standardized way to represent and compare pipeline structures. It allows users to:
+- Generate consistent graph representations that ignore irrelevant differences (like module reordering)
+- Detect meaningful structural changes between pipeline versions
+- Track data flow through complex pipelines with multiple data types
+- Convert pipeline structure to standard graph formats for programmatic analysis
+- Visualize pipeline structure as a directed graph with intuitive color coding for different data types
+
+## Rules
+
+- Maintain Python 3.11+ compatibility with proper type annotations throughout the code.
+- Follow the unified data node representation pattern where data items are represented as a single node regardless of how they're consumed.
+- Preserve the stable module identification system using deterministic SHA-256 hashing for consistent identifiers.
+- Respect the established node and edge typing system with clear type prefixes (image__, object__).
+- Use consistent 4-space indentation and snake_case for variable and function names.
+- Keep the clean separation between pipeline parsing, graph construction, and output formatting.
+- Include descriptive docstrings for all functions explaining purpose and parameters.
+- Maintain color conventions for different data types (images in gray, objects in green, modules in blue).
+- Create small, focused functions with well-defined responsibilities.
+- Preserve the NetworkX graph structure and attributes for compatibility.
+- Keep essential constants at the top of the file for easy reference and modification.
+- Maintain the standardized representation approach for consistent graph output across runs.
+- When adding new features, follow the ultra-minimal mode pattern to support exact diff comparison.
+- Use TypedDict for structured data representation to maintain type safety.
+- Preserve the ability to handle disabled modules correctly.
+- Ensure all graph outputs maintain deterministic node and edge ordering.
+- Keep code modular to support future extension points (measurements, metadata, etc.).
+- Follow the established CLI pattern using Click for new command-line options.
+- Use the Path library for handling paths
+- Use consistent error handling patterns with appropriate exceptions and error messages.
