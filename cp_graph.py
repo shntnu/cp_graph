@@ -49,6 +49,16 @@ NODE_TYPE_OBJECT_LIST = "object_list"
 EDGE_TYPE_INPUT = "input"
 EDGE_TYPE_OUTPUT = "output"
 
+# Rank types for DOT output
+RANK_MIN = "min"
+RANK_MAX = "max"
+
+# Node ranking configuration
+# Source nodes: typically root data nodes (input images)
+SOURCE_NODE_TYPES = [NODE_TYPE_IMAGE]
+# Sink nodes: typically terminal modules like SaveImages or Measure*
+SINK_MODULE_PATTERNS = ["SaveImages", "Measure*", "Export*"]
+
 # Style constants
 STYLE_COLORS = {
     NODE_TYPE_MODULE: {
@@ -307,6 +317,23 @@ def _create_stable_module_id(
     return stable_id
 
 
+def _ensure_valid_node_id(node_id: str) -> str:
+    """
+    Ensure a node ID is valid for graph representation by adding quotes if necessary.
+    This prevents issues with spaces and special characters in node IDs.
+    
+    Args:
+        node_id: The original node ID
+        
+    Returns:
+        A properly formatted node ID 
+    """
+    # If node ID contains spaces and is not already quoted, add quotes
+    if " " in node_id and not (node_id.startswith('"') and node_id.endswith('"')):
+        return f'"{node_id}"'
+    return node_id
+
+
 def _add_module_node(G: nx.DiGraph, module_info: ModuleInfo, stable_id: str) -> None:
     """
     Add a module node to the graph with all relevant attributes.
@@ -326,10 +353,13 @@ def _add_module_node(G: nx.DiGraph, module_info: ModuleInfo, stable_id: str) -> 
     # Add disabled status to label if module is disabled
     if not module_info["enabled"]:
         module_label += " (disabled)"
+        
+    # Ensure stable_id is properly formatted
+    node_id = _ensure_valid_node_id(stable_id)
 
     # Add module node with all relevant attributes
     G.add_node(
-        stable_id,
+        node_id,
         type=NODE_TYPE_MODULE,  # Node type identifier
         label=module_label,  # Display label
         module_name=module_name,  # Original module name
@@ -378,6 +408,9 @@ def _add_input_connections(
         if not inputs:
             continue
 
+        # Ensure module_id is properly formatted
+        module_id = _ensure_valid_node_id(stable_id)
+            
         # Process each input item
         for input_item in inputs:
             # Normalize node type for list inputs
@@ -387,8 +420,9 @@ def _add_input_connections(
             elif input_type == NODE_TYPE_OBJECT_LIST:
                 normalized_type = NODE_TYPE_OBJECT
 
-            # Create normalized node ID
-            node_id = f"{normalized_type}__{input_item}"
+            # Create normalized node ID and ensure it's properly formatted
+            raw_node_id = f"{normalized_type}__{input_item}"
+            node_id = _ensure_valid_node_id(raw_node_id)
 
             # Add node if it doesn't exist
             if not G.has_node(node_id):
@@ -397,7 +431,7 @@ def _add_input_connections(
                 )
 
             # Add edge from input to module - preserve original edge type for connection semantics
-            G.add_edge(node_id, stable_id, type=f"{input_type}_{EDGE_TYPE_INPUT}")
+            G.add_edge(node_id, module_id, type=f"{input_type}_{EDGE_TYPE_INPUT}")
 
 
 def _add_output_connections(
@@ -417,11 +451,15 @@ def _add_output_connections(
     for output_type, outputs in module_info["outputs"].items():
         if not outputs:
             continue
+            
+        # Ensure module_id is properly formatted
+        module_id = _ensure_valid_node_id(stable_id)
 
         # Process each output item
         for output_item in outputs:
-            # Create node ID with type prefix
-            node_id = f"{output_type}__{output_item}"
+            # Create node ID with type prefix and ensure it's properly formatted
+            raw_node_id = f"{output_type}__{output_item}"
+            node_id = _ensure_valid_node_id(raw_node_id)
 
             # Add node if it doesn't exist
             if not G.has_node(node_id):
@@ -430,7 +468,7 @@ def _add_output_connections(
                 )
 
             # Add edge from module to output
-            G.add_edge(stable_id, node_id, type=f"{output_type}_{EDGE_TYPE_OUTPUT}")
+            G.add_edge(module_id, node_id, type=f"{output_type}_{EDGE_TYPE_OUTPUT}")
 
 
 # ----- GRAPH FORMATTING AND OUTPUT -----
@@ -513,13 +551,77 @@ def _apply_data_node_styling(G: nx.DiGraph, node: str, node_type: str) -> None:
             G.nodes[node]["fillcolor"] = STYLE_COLORS[node_type]["normal"]
 
 
-def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiGraph:
+def _identify_source_nodes(G: nx.DiGraph) -> List[str]:
+    """
+    Identify source nodes in the graph for ranking at the top.
+    
+    Source nodes are typically input image nodes with no incoming edges.
+    
+    Args:
+        G: The NetworkX graph
+        
+    Returns:
+        List of node IDs to rank at the top
+    """
+    source_nodes = []
+    
+    # Find nodes that match source criteria:
+    # 1. Node type is in SOURCE_NODE_TYPES
+    # 2. No incoming edges (in_degree = 0)
+    for node, attrs in G.nodes(data=True):
+        node_type = attrs.get("type")
+        if node_type in SOURCE_NODE_TYPES and G.in_degree(node) == 0:
+            # Node IDs are already properly formatted in the graph
+            source_nodes.append(node)
+            
+    return source_nodes
+
+
+def _identify_sink_nodes(G: nx.DiGraph) -> List[str]:
+    """
+    Identify sink nodes in the graph for ranking at the bottom.
+    
+    Sink nodes are typically terminal modules like SaveImages, Measure*, Export*
+    
+    Args:
+        G: The NetworkX graph
+        
+    Returns:
+        List of node IDs to rank at the bottom
+    """
+    import fnmatch
+    sink_nodes = []
+    
+    # Find module nodes that match sink criteria:
+    # 1. Node type is NODE_TYPE_MODULE
+    # 2. Module name matches one of the patterns in SINK_MODULE_PATTERNS
+    for node, attrs in G.nodes(data=True):
+        node_type = attrs.get("type")
+        if node_type == NODE_TYPE_MODULE:
+            module_name = attrs.get("module_name", "")
+            
+            # Check if module name matches any of the sink module patterns
+            for pattern in SINK_MODULE_PATTERNS:
+                if fnmatch.fnmatch(module_name, pattern):
+                    # Node IDs are already properly formatted in the graph
+                    sink_nodes.append(node)
+                    break
+    
+    return sink_nodes
+
+
+# This function has been replaced by the more generic _ensure_valid_node_id
+# and is kept only for reference until removed
+
+
+def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False, rank_nodes: bool = False) -> nx.DiGraph:
     """
     Prepare graph for DOT format output with consistent ordering.
 
     Args:
         G: The original NetworkX graph
         ultra_minimal: If True, create a stripped-down version with only essential structure
+        rank_nodes: If True, add rank attributes to position source and sink nodes
 
     Returns:
         A new NetworkX DiGraph prepared for DOT output
@@ -531,7 +633,7 @@ def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiG
         # Process nodes - keep only the type attribute
         for node in sorted(G.nodes()):
             node_type = G.nodes[node].get("type", "unknown")
-            # Add only the type attribute, nothing else
+            # Add only the type attribute, nothing else (node IDs already properly formatted)
             G_ordered.add_node(node, type=node_type)
 
         # Process edges - keep no attributes
@@ -564,12 +666,75 @@ def prepare_for_dot_output(G: nx.DiGraph, ultra_minimal: bool = False) -> nx.DiG
         edge_list = sorted(G.edges(data=True), key=lambda x: (x[0], x[1]))
         for src, dst, attrs in edge_list:
             G_ordered.add_edge(src, dst, **attrs)
+            
+        # Add rank information for DOT output if requested
+        if rank_nodes:
+            # Identify source nodes (to be positioned at the top)
+            source_nodes = _identify_source_nodes(G)
+            if source_nodes:
+                G_ordered.graph["dot_rank_min"] = source_nodes
+                
+            # Identify sink nodes (to be positioned at the bottom)
+            sink_nodes = _identify_sink_nodes(G)
+            if sink_nodes:
+                G_ordered.graph["dot_rank_max"] = sink_nodes
 
     return G_ordered
 
 
+def _add_rank_statements(dot_file_path: str, G: nx.DiGraph) -> None:
+    """
+    Add rank statements to a DOT file to position nodes at top or bottom.
+    
+    Args:
+        dot_file_path: Path to the DOT file to modify
+        G: The NetworkX graph with rank information
+    """
+    # Check if rank information is available
+    if not ("dot_rank_min" in G.graph or "dot_rank_max" in G.graph):
+        return
+        
+    try:
+        # Read the existing DOT file
+        with open(dot_file_path, "r") as f:
+            dot_content = f.read()
+            
+        # Find the position just before the closing brace
+        closing_pos = dot_content.rfind("}")
+        if closing_pos == -1:
+            return  # Cannot find closing brace, abort
+            
+        rank_statements = []
+        
+        # Add rank=min for source nodes (positioned at top)
+        if "dot_rank_min" in G.graph and G.graph["dot_rank_min"]:
+            min_nodes = "; ".join(G.graph["dot_rank_min"])
+            rank_statements.append(f"  {{rank = {RANK_MIN}; {min_nodes};}}")
+            
+        # Add rank=max for sink nodes (positioned at bottom)
+        if "dot_rank_max" in G.graph and G.graph["dot_rank_max"]:
+            max_nodes = "; ".join(G.graph["dot_rank_max"])
+            rank_statements.append(f"  {{rank = {RANK_MAX}; {max_nodes};}}")
+            
+        # Insert rank statements before the closing brace
+        if rank_statements:
+            new_content = (
+                dot_content[:closing_pos]
+                + "\n"
+                + "\n".join(rank_statements)
+                + "\n"
+                + dot_content[closing_pos:]
+            )
+            
+            # Write the updated content back to the file
+            with open(dot_file_path, "w") as f:
+                f.write(new_content)
+    except Exception as e:
+        print(f"Warning: Failed to add rank statements to DOT file: {e}")
+
+
 def write_graph_to_file(
-    G: nx.DiGraph, output_path: str, ultra_minimal: bool = False
+    G: nx.DiGraph, output_path: str, ultra_minimal: bool = False, rank_nodes: bool = False
 ) -> None:
     """
     Write the graph to the specified output file in the appropriate format.
@@ -578,6 +743,7 @@ def write_graph_to_file(
         G: The NetworkX graph
         output_path: Path to write the output file
         ultra_minimal: If True, create a stripped-down version for exact diff comparison
+        rank_nodes: If True, add rank statements to position source and sink nodes
     """
     ext = Path(output_path).suffix.lower()
 
@@ -588,8 +754,13 @@ def write_graph_to_file(
     elif ext == ".dot":
         try:
             # For DOT format, prepare the graph with consistent ordering
-            G_ordered = prepare_for_dot_output(G, ultra_minimal)
+            G_ordered = prepare_for_dot_output(G, ultra_minimal, rank_nodes)
             nx.drawing.nx_pydot.write_dot(G_ordered, output_path)
+            
+            # Add rank statements to DOT file if requested and not in ultra-minimal mode
+            if rank_nodes and not ultra_minimal:
+                _add_rank_statements(output_path, G_ordered)
+                
         except ImportError:
             print("Warning: pydot not available. Saving as GraphML instead.")
             nx.write_graphml(G, output_path.replace(ext, ".graphml"))
@@ -965,6 +1136,7 @@ def process_pipeline(
     remove_unused_data: bool = False,
     highlight_filtered: bool = False,
     exclude_module_types: Optional[List[str]] = None,
+    rank_nodes: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -985,6 +1157,7 @@ def process_pipeline(
         remove_unused_data: Whether to remove unused image nodes
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         exclude_module_types: Optional list of module type names to exclude from the graph
+        rank_nodes: Whether to add rank statements for positioning source and sink nodes
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -1036,7 +1209,7 @@ def process_pipeline(
                     del G.edges[edge]["label"]
 
         # Write the graph to the specified file
-        write_graph_to_file(G, output_path, ultra_minimal)
+        write_graph_to_file(G, output_path, ultra_minimal, rank_nodes)
 
     return G, modules_info
 
@@ -1060,6 +1233,11 @@ def process_pipeline(
 )
 @click.option(
     "--explain-ids", is_flag=True, help="Print mapping of stable IDs to module numbers"
+)
+@click.option(
+    "--rank-nodes", 
+    is_flag=True, 
+    help="Position source nodes at top and sink nodes at bottom in DOT output"
 )
 # Content filtering options
 @click.option(
@@ -1092,6 +1270,7 @@ def cli(
     no_formatting: bool,
     ultra_minimal: bool,
     explain_ids: bool,
+    rank_nodes: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
     remove_unused_data: bool,
@@ -1140,6 +1319,10 @@ def cli(
     # Compare standard filtering to highlighted filtering to see what would be removed
     python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
     python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
+    
+    \b
+    # Position source nodes at top and sink nodes at bottom in the graph
+    python cp_graph.py examples/illum.json examples/output/illum_ranked.dot --rank-nodes
     """
     # Process root nodes if provided
     root_node_list = None
@@ -1170,6 +1353,7 @@ def cli(
             remove_unused_data=remove_unused_data,
             highlight_filtered=highlight_filtered,
             exclude_module_types=exclude_module_types_list,
+            rank_nodes=rank_nodes,
         )
     except click.ClickException as e:
         e.show()
