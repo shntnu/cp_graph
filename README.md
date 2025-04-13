@@ -66,6 +66,19 @@ diff examples/output/illum_ultra.dot examples/output/illum_mod_ultra.dot
 - **Filter & Highlight**: Focus on specific parts of the pipeline with visual feedback
 - **Visual Analysis**: Intuitive colored graph visualization of data flow patterns
 
+## Limitations & Workarounds
+
+CellProfiler pipeline JSON files present some inherent challenges:
+
+- Some modules may have complex settings that make their true inputs/outputs difficult to determine
+- Specialized modules like CallBarcodes don't explicitly list all inputs in the JSON
+- Some objects or images may appear unused in the pipeline structure
+
+This tool provides solutions through its filtering options:
+- Use `--root-nodes` to focus on paths from known inputs
+- Apply `--remove-unused-data` to eliminate unused data nodes
+- Exclude problematic modules with `--exclude-module-types=ExportToSpreadsheet`
+
 ## Pipeline Visualization
 
 The tool creates intuitive graph visualizations showing data flow through pipelines:
