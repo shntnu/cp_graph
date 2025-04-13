@@ -4,17 +4,26 @@ This tool converts CellProfiler pipelines into standardized graph representation
 
 ![Analysis Pipeline](examples/output/analysis.png)
 
-## Installation
+## Installation & Running
 
 - Python 3.11+
 - Dependencies: NetworkX, PyDot, Click
 
+The **recommended way** to run the tool is with `uv run --script`, which automatically handles all dependencies in an isolated environment without requiring manual installation:
+
 ```bash
-# Install with pip
+# Run directly (no installation needed)
+uv run --script cp_graph.py <pipeline.json> <output_file> [options]
+```
+
+If you prefer manual installation:
+
+```bash
+# Install dependencies
 pip install networkx pydot click
 
-# Or use UV (recommended)
-uv pip install networkx pydot click
+# Then run directly
+python cp_graph.py <pipeline.json> <output_file> [options]
 ```
 
 ## Quick Start
@@ -56,6 +65,8 @@ Output formats include:
 - **GEXF**: For Gephi visualization
 
 ## Command Options
+
+As mentioned, the recommended way to run the tool is:
 
 ```bash
 uv run --script cp_graph.py <pipeline.json> <output_file> [options]
