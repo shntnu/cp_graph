@@ -246,6 +246,27 @@ A new `--ultra-minimal` option was added that produces identical DOT files for s
 3. Ensures byte-for-byte identical output for equivalent pipelines
 4. Enables reliable diff-based comparison between structurally equivalent pipelines with different module numbering
 
+### Node Ranking for Improved Visualization
+The tool now supports the `--rank-nodes` option to improve graph layout in DOT format:
+
+1. Source nodes (input images with no incoming edges) are positioned at the top of the graph
+2. Sink nodes (SaveImages, Measure*, Export* modules) are positioned at the bottom
+3. This creates a more intuitive top-to-bottom data flow in the visualized graph
+
+The implementation uses Graphviz's rank attribute to enforce node positioning:
+
+```dot
+{rank = min; image__CorrDNA; image__Cycle01_DAPI; ...}  # Source nodes at top
+{rank = max; SaveImages_22818067; MeasureObjectIntensity_40d9dc39; ...}  # Sink nodes at bottom
+```
+
+### Robust Node ID Handling
+The tool now properly handles node IDs with spaces and special characters:
+
+1. Node IDs are properly quoted in the DOT output if they contain spaces
+2. This is handled early in the graph creation process for consistency
+3. Ensures proper visualization of pipelines with complex naming schemes
+
 The tool includes several sample pipelines in the `examples/` directory:
 - `examples/illum.json` and `examples/illum_isoform.json`: Structurally identical illumination correction pipelines with different module numbering (perfect for demonstrating the stable ID feature)
 - `examples/analysis.json`: A more complex analysis pipeline that showcases various data types (images, objects, and lists) in a multi-step workflow

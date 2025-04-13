@@ -80,6 +80,7 @@ uv run --script cp_graph.py <pipeline.json> <output_file> [options]
 - `--no-module-info` - Hide module information on graph edges
 - `--ultra-minimal` - Create minimal output for exact diff comparison
 - `--explain-ids` - Print mapping of stable IDs to module numbers
+- `--rank-nodes` - Position source nodes at top and sink nodes at bottom in DOT output
 
 **Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph
@@ -180,10 +181,15 @@ uv run --script cp_graph.py examples/illum.json examples/output/illum_ultra.dot 
 # Display detailed module ID mapping for reference
 uv run --script cp_graph.py examples/illum.json examples/output/illum_ids.dot --explain-ids
 
+# Improve graph layout with node ranking (source nodes at top, sink nodes at bottom)
+uv run --script cp_graph.py examples/illum.json examples/output/illum_ranked.dot --rank-nodes
+
 # Analyze complex pipeline with multiple data types
 uv run --script cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
 uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
 
+# Combine node ranking with filtering for optimal visualization
+uv run --script cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-data
 ```
