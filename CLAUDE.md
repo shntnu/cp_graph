@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. Read @README.md for more information.
 
 ## Project Overview
 
@@ -16,21 +16,13 @@ The primary purpose of this tool is to provide a standardized way to represent a
 - Visualize pipeline structure as a directed graph with intuitive color coding for different data types
 
 ## Commands
-- Run tool: `python cp_graph.py <pipeline.json> [output_graph.graphml] [options]`
-- Alternative with UV: `uv run --script cp_graph.py <pipeline.json> [output_graph.graphml] [options]`
+- Run tool: `uv run cp_graph.py <pipeline.json> [output_graph.graphml] [options]`
 - Visualization: `dot -Tpng <output_file>.dot -o <output_file>.png`
-
-### Common Options
-- `--highlight-filtered`: Highlight nodes that would be filtered instead of removing them (uses yellow/salmon coloring with dashed borders)
-- `--root-nodes=<name1,name2>`: Filter to only keep paths from specified root nodes
-- `--remove-unused-data`: Remove or highlight image nodes not used as inputs
-- `--include-disabled`: Include disabled modules in the graph
-- `--exclude-module-types=<type1,type2>`: Exclude specific module types from the graph
 
 ## Code Style
 - Python 3.11+ with type annotations
 - Use NetworkX for graph operations
-- Consistent 4-space indentation 
+- Consistent 4-space indentation
 - Descriptive variable names (snake_case for variables/functions)
 - DocStrings for functions explaining purpose and parameters
 - Maintain backwards compatibility with existing CellProfiler JSON structures
@@ -45,3 +37,23 @@ The primary purpose of this tool is to provide a standardized way to represent a
 - Use Path library for handling file paths
 - Follow the established CLI pattern using Click for command-line options
 - Use consistent error handling patterns with appropriate exceptions and messages
+
+## Implementation Notes
+
+### Module Identification
+Modules use stable SHA-256 hash-based IDs combining module type and I/O pattern:
+- Format: `ModuleType_8hexchars` (e.g., `SaveImages_46180921`)
+- Ensures consistent IDs across pipeline reorderings
+- Hash input: sorted inputs + sorted outputs
+
+### Data Node Unification
+Each data item (image/object) has a single node regardless of usage:
+- Node ID format: `type__name` (e.g., `image__DNA`, `object__Cells`)
+- Edge types preserve connection semantics (regular vs list inputs)
+- List inputs normalized to base type for node creation
+
+### Graph Filtering Philosophy
+Filters can remove or highlight nodes/edges:
+- All filter functions return `(filtered_graph, count_affected)`
+- Highlight mode preserves structure while marking filtered elements
+- Single parent enforcement keeps highest module_num as parent (last producer wins)

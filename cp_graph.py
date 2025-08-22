@@ -22,14 +22,26 @@ from typing import Dict, List, Tuple, Any, Optional, TypedDict
 # ----- CONSTANTS AND CONFIGURATION -----
 # CellProfiler setting types
 # Input types
-INPUT_IMAGE_TYPE = "cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber"
-INPUT_LABEL_TYPE = (
-    "cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber"
+INPUT_IMAGE_TYPES = (
+    "cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber",
+    "cellprofiler_core.setting.subscriber.image_subscriber._crop_image_subscriber.CropImageSubscriber",
+    "cellprofiler_core.setting.subscriber.image_subscriber._file_image_subscriber.FileImageSubscriber",
+    "cellprofiler_core.setting.subscriber.image_subscriber._outline_image_subscriber.OutlineImageSubscriber",
 )
-INPUT_IMAGE_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber"
-INPUT_LABEL_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber"
+INPUT_LABEL_TYPES = (
+    "cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber",
+)
+INPUT_IMAGE_LIST_TYPES = (
+    "cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber",
+)
+INPUT_LABEL_LIST_TYPES = (
+    "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber",
+)
 
-# Note: The following additional input types exist but are not currently captured:
+# TODO: Support input grid?
+# "cellprofiler_core.setting.subscriber._grid_subscriber.GridSubscriber",
+
+# NOTE: The following additional input types exist but are not currently captured:
 # - cellprofiler.modules.measureobjectintensitydistribution.MORDObjectNameSubscriber
 # - cellprofiler.modules.measureobjectintensitydistribution.MORDImageNameSubscriber
 # - cellprofiler.modules.exporttospreadsheet.EEObjectNameSubscriber
@@ -38,12 +50,19 @@ INPUT_LABEL_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._l
 # https://github.com/CellProfiler/CellProfiler/blob/3186518c42fbb58f762e5b92c495fa38e4aeb42d/src/frontend/cellprofiler/modules/exporttospreadsheet.py#L1670-L1681
 
 # Output types
-OUTPUT_IMAGE_TYPE = (
-    "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName"
+OUTPUT_IMAGE_TYPES = (
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._crop_image_name.CropImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._external_image_name.ExternalImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._file_image_name.FileImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._outline_image_name.OutlineImageName",
 )
-OUTPUT_LABEL_TYPE = (
-    "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName"
+OUTPUT_LABEL_TYPES = (
+    "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName",
 )
+
+# TODO: Support output grid?
+# "cellprofiler_core.setting.text.alphanumeric.name._grid_name.GridName"
 
 # Node types
 NODE_TYPE_MODULE = "module"
@@ -163,23 +182,23 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
             continue
 
         # Process input settings
-        if setting_name == INPUT_IMAGE_TYPE:
+        if setting_name in INPUT_IMAGE_TYPES:
             inputs[NODE_TYPE_IMAGE].append(setting_value)
-        elif setting_name == INPUT_LABEL_TYPE:
+        elif setting_name in INPUT_LABEL_TYPES:
             inputs[NODE_TYPE_OBJECT].append(setting_value)
-        elif setting_name == INPUT_IMAGE_LIST_TYPE:
+        elif setting_name in INPUT_IMAGE_LIST_TYPES:
             # Split comma-separated list and add each item
             values = [v.strip() for v in setting_value.split(",") if v.strip()]
             inputs[NODE_TYPE_IMAGE_LIST].extend(values)
-        elif setting_name == INPUT_LABEL_LIST_TYPE:
+        elif setting_name in INPUT_LABEL_LIST_TYPES:
             # Split comma-separated list and add each item
             values = [v.strip() for v in setting_value.split(",") if v.strip()]
             inputs[NODE_TYPE_OBJECT_LIST].extend(values)
 
         # Process output settings
-        elif setting_name == OUTPUT_IMAGE_TYPE:
+        elif setting_name in OUTPUT_IMAGE_TYPES:
             outputs[NODE_TYPE_IMAGE].append(setting_value)
-        elif setting_name == OUTPUT_LABEL_TYPE:
+        elif setting_name in OUTPUT_LABEL_TYPES:
             outputs[NODE_TYPE_OBJECT].append(setting_value)
 
     # Construct and return the module information
@@ -283,7 +302,7 @@ def _create_stable_module_id(
 
     # Process inputs - normalize list types to regular types
     for input_type, inputs in module_info["inputs"].items():
-        if not inputs:
+        if not inputs or type(inputs) is not list:
             continue
 
         # Normalize list types to their regular counterparts for node IDs
@@ -299,7 +318,7 @@ def _create_stable_module_id(
 
     # Process outputs
     for output_type, outputs in module_info["outputs"].items():
-        if not outputs:
+        if not outputs or type(outputs) is not list:
             continue
 
         # Create output identifiers (already normalized as there are no list outputs)
@@ -413,7 +432,7 @@ def _add_input_connections(
     """
     # Process each input type
     for input_type, inputs in module_info["inputs"].items():
-        if not inputs:
+        if not inputs or type(inputs) is not list:
             continue
 
         # Ensure module_id is properly formatted
@@ -457,7 +476,7 @@ def _add_output_connections(
     """
     # Process each output type
     for output_type, outputs in module_info["outputs"].items():
-        if not outputs:
+        if not outputs or type(outputs) is not list:
             continue
 
         # Ensure module_id is properly formatted
@@ -1019,7 +1038,7 @@ def filter_exclude_module_types(
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, highlight_filtered: bool = False
+    G: nx.DiGraph, highlight_filtered: bool = False, filter_objects: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to remove image nodes that are not inputs to any module.
@@ -1029,6 +1048,7 @@ def filter_remove_unused_data(
     Args:
         G: The original NetworkX graph
         highlight_filtered: If True, mark filtered nodes instead of removing them
+        filter_objects: If true, also mark/filter objects
 
     Returns:
         A tuple of (filtered graph, number of nodes affected)
@@ -1041,6 +1061,7 @@ def filter_remove_unused_data(
         node
         for node, attrs in G.nodes(data=True)
         if attrs.get("type") == NODE_TYPE_IMAGE
+        or (filter_objects and attrs.get("type") == NODE_TYPE_OBJECT)
     ]
 
     # Check which ones are unused (not inputs to any module)
@@ -1068,6 +1089,63 @@ def filter_remove_unused_data(
     return filtered_graph, len(unused_data)
 
 
+def filter_multiple_parents(
+    G: nx.DiGraph, highlight_filtered: bool = False
+) -> Tuple[nx.DiGraph, int]:
+    """
+    Ensure images and objects only have a single parent.
+    Last module in pipeline marked as parent is kept as parent.
+
+    Args:
+        G: The original NetworkX graph
+        highlight_filtered: If True, mark edges as filtered instead of removing them
+
+    Returns:
+        A tuple of (filtered graph, number of edges affected)
+    """
+    filtered_graph = G.copy()
+    edges_affected = 0
+
+    data_nodes = [
+        node
+        for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_IMAGE or attrs.get("type") == NODE_TYPE_OBJECT
+    ]
+
+    for node in data_nodes:
+        parents = list(G.predecessors(node))
+        if len(parents) <= 1:
+            continue
+
+        # image, object should only have modules as parents
+        # but filter just in case this is not true
+        module_parents = [
+            p for p in parents if G.nodes[p].get("type") == NODE_TYPE_MODULE
+        ]
+
+        if not module_parents:
+            continue
+
+        # only the last module in the pipeline should be the "true" parent
+        keep_parent = max(module_parents, key=lambda p: G.nodes[p].get("module_num", 0))
+
+        # remove or mark edges from other parents
+        for parent in parents:
+            if parent != keep_parent:
+                if filtered_graph.has_edge(parent, node):
+                    if highlight_filtered:
+                        # Mark the edge as filtered with a visual style
+                        filtered_graph.edges[parent, node]["filtered"] = True
+                        filtered_graph.edges[parent, node]["style"] = "dashed"
+                        filtered_graph.edges[parent, node]["color"] = "red"
+                    else:
+                        # Remove the edge
+                        filtered_graph.remove_edge(parent, node)
+                    edges_affected += 1
+
+    return filtered_graph, edges_affected
+
+
 def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
@@ -1075,6 +1153,8 @@ def apply_graph_filters(
     exclude_module_types: Optional[List[str]] = None,
     highlight_filtered: bool = False,
     quiet: bool = False,
+    filter_objects: bool = False,
+    no_single_parent: bool = False,
 ) -> nx.DiGraph:
     """
     Apply multiple graph filters based on specified parameters.
@@ -1086,6 +1166,8 @@ def apply_graph_filters(
         exclude_module_types: Optional list of module type names to exclude
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
+        filter_objects: Whether to supress objects along with images
+        no_single_parent: Disable trimming of multiple parents
 
     Returns:
         A filtered NetworkX DiGraph
@@ -1124,7 +1206,7 @@ def apply_graph_filters(
         if not quiet:
             print(f"{action_verb} unused image nodes")
         filtered_graph, nodes_affected = filter_remove_unused_data(
-            filtered_graph, highlight_filtered
+            filtered_graph, highlight_filtered, filter_objects
         )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
@@ -1147,6 +1229,22 @@ def apply_graph_filters(
                 print(f"  Highlighted {nodes_affected} modules of specified types")
             else:
                 print(f"  Removed {nodes_affected} modules of specified types")
+
+    # Ensure images and objects only have a single parent
+    # Last module in pipeline marked as parent is kept as parent
+    if not no_single_parent:
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
+        if not quiet:
+            print(f"{action_verb} edges from multiple parents")
+        filtered_graph, edges_affected = filter_multiple_parents(
+            filtered_graph, highlight_filtered
+        )
+        total_affected += edges_affected
+        if not quiet and edges_affected > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {edges_affected} edges from duplicate parents")
+            else:
+                print(f"  Removed {edges_affected} edges from duplicate parents")
 
     # Report total filtering results
     if not quiet and total_affected > 0:
@@ -1175,6 +1273,8 @@ def process_pipeline(
     exclude_module_types: Optional[List[str]] = None,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
+    filter_objects: bool = False,
+    no_single_parent: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -1197,6 +1297,8 @@ def process_pipeline(
         exclude_module_types: Optional list of module type names to exclude from the graph
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
+        filter_objects: Whether to include objects for filtering along with images
+        no_single_parent: Disable trimming of multiple parents
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -1224,6 +1326,8 @@ def process_pipeline(
         exclude_module_types=exclude_module_types,
         highlight_filtered=highlight_filtered,
         quiet=quiet,
+        filter_objects=filter_objects,
+        no_single_parent=no_single_parent,
     )
 
     # Print information about the pipeline if not quiet
@@ -1311,6 +1415,16 @@ def process_pipeline(
     "--exclude-module-types",
     help="Comma-separated list of module types to exclude (e.g., ExportToSpreadsheet)",
 )
+@click.option(
+    "--filter-objects",
+    is_flag=True,
+    help="Filter unused objects along with images",
+)
+@click.option(
+    "--no-single-parent",
+    is_flag=True,
+    help="Allow images and objects to have more than one parent",
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
@@ -1327,6 +1441,8 @@ def cli(
     remove_unused_data: bool,
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
+    filter_objects: bool,
+    no_single_parent: bool,
     quiet: bool,
 ) -> None:
     """
@@ -1378,6 +1494,10 @@ def cli(
     \b
     # Position source and sink nodes while ignoring filtered nodes
     python cp_graph.py examples/illum.json examples/output/illum_clean_ranked.dot --root-nodes=OrigDNA --highlight-filtered --rank-nodes --rank-ignore-filtered
+
+    \b
+    # Exclude unused and objects
+    python cp_graph.py --remove-unused-data --highlight-filtered --rank-nodes --filter-objects examples/ExampleFly.json examples/output/ExampleFly.dot
     """
     # Process root nodes if provided
     root_node_list = None
@@ -1410,6 +1530,8 @@ def cli(
             exclude_module_types=exclude_module_types_list,
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
+            filter_objects=filter_objects,
+            no_single_parent=no_single_parent,
         )
     except click.ClickException as e:
         e.show()

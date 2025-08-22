@@ -87,7 +87,7 @@ Despite these limitations, this approach of working directly with the JSON file 
 The tool creates intuitive graph visualizations showing data flow through pipelines:
 
 - **Images**: Gray ovals
-- **Objects**: Green ovals 
+- **Objects**: Green ovals
 - **Modules**: Blue boxes with the module name and number
 - **Disabled Modules**: Pink boxes with dashed borders (when included)
 - **Filtered Nodes**: Yellow (modules) or salmon (data) nodes with dashed borders (when using `--highlight-filtered`)
@@ -120,9 +120,11 @@ uv run --script cp_graph.py <pipeline.json> <output_file> [options]
 **Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph
 - `--root-nodes=<name1,name2>` - Keep only paths from specified root nodes
-- `--remove-unused-data` - Remove image nodes not used as inputs
+- `--remove-unused-data` - Remove unused data nodes (images by default, objects with `--filter-objects`)
+- `--filter-objects` - Include objects when filtering unused data nodes
 - `--highlight-filtered` - Highlight nodes that would be filtered instead of removing them (uses distinct colors and dashed borders)
 - `--exclude-module-types=<type1,type2>` - Exclude specific module types (e.g., ExportToSpreadsheet)
+- `--no-single-parent` - Allow images and objects to have more than one parent (disables duplicate parent removal)
 
 ## Pipeline Filtering & Highlighting
 
@@ -231,3 +233,32 @@ uv run --script cp_graph.py examples/analysis.json examples/output/analysis_rank
 # Combine node ranking with highlighted filtering, ignoring filtered nodes in ranking
 uv run --script cp_graph.py examples/analysis.json examples/output/analysis_clean_ranked.dot --rank-nodes --rank-ignore-filtered --root-nodes=CorrPhalloidin,CorrZO1 --highlight-filtered
 ```
+
+## Technical Details
+
+### How Stable Module IDs Work
+
+The tool generates consistent module identifiers using SHA-256 hashing of the module's I/O pattern. This ensures that structurally identical pipelines produce identical graphs, regardless of module numbering or reordering. For example, a SaveImages module that takes `IllumDNA` as input will always get the same ID like `SaveImages_46180921`, whether it's module #10 or #22 in the pipeline.
+
+### CellProfiler JSON Format
+
+The tool parses CellProfiler v6 JSON pipelines, which contain:
+- **Module attributes**: enabled status, module type, original number
+- **Settings**: Input/output specifications with fully qualified class names
+- **Data connections**: Named references between modules (e.g., one module outputs "DNA", another inputs "DNA")
+
+Key setting types the tool recognizes:
+- **Image inputs**: ImageSubscriber, CropImageSubscriber, FileImageSubscriber, OutlineImageSubscriber
+- **Image outputs**: ImageName, CropImageName, FileImageName, OutlineImageName, ExternalImageName
+- **Object inputs**: LabelSubscriber
+- **Object outputs**: LabelName
+- **List inputs**: ImageListSubscriber, LabelListSubscriber (inputs only, no list outputs)
+
+### Graph Structure
+
+The generated graph uses:
+- **Unified nodes**: Each data item (image/object) has one node, regardless of how many modules use it
+- **Typed edges**: Preserve connection semantics (e.g., `image_input` vs `image_list_input`)
+- **Deterministic ordering**: Nodes and edges are sorted for consistent output
+
+For version history and recent changes, see [CHANGELOG.md](CHANGELOG.md).
