@@ -54,19 +54,6 @@ dot -Tpng examples/output/illum.dot -o examples/output/illum.png
 diff examples/output/illum_ultra.dot examples/output/illum_mod_ultra.dot
 ```
 
-### Alternative: Manual Installation
-
-If you prefer traditional installation or need Windows support:
-
-```bash
-# Install dependencies
-pip install networkx pydot click
-# Also install GraphViz separately (apt/brew/choco)
-
-# Run with Python
-python cp_graph.py <pipeline.json> <output_file> [options]
-```
-
 ## Core Capabilities
 
 - **Standardized Representation**: Consistent pipeline encoding for reliable comparison
