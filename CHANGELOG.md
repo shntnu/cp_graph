@@ -26,6 +26,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fixed typo: changed 'quit' to 'quiet' in filter output messages
 
 ### Changed
+- **BREAKING**: Switched from `uv run --script` to Pixi shebang for dependency management
+  - Script is now directly executable: `./cp_graph.py` instead of `uv run --script cp_graph.py`
+  - GraphViz is automatically provided by Pixi (no separate installation needed)
 - Enhanced edge tracking and reporting for duplicate parent filtering
 - Improved visual feedback when highlighting filtered edges (dashed red lines)
 
