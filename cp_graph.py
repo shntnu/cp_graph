@@ -1038,7 +1038,7 @@ def filter_exclude_module_types(
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, highlight_filtered: bool = False
+    G: nx.DiGraph, highlight_filtered: bool = False, filter_objects: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to remove image nodes that are not inputs to any module.
@@ -1048,6 +1048,7 @@ def filter_remove_unused_data(
     Args:
         G: The original NetworkX graph
         highlight_filtered: If True, mark filtered nodes instead of removing them
+        filter_objects: If true, also mark/filter objects
 
     Returns:
         A tuple of (filtered graph, number of nodes affected)
@@ -1060,6 +1061,7 @@ def filter_remove_unused_data(
         node
         for node, attrs in G.nodes(data=True)
         if attrs.get("type") == NODE_TYPE_IMAGE
+        or (filter_objects and attrs.get("type") == NODE_TYPE_OBJECT)
     ]
 
     # Check which ones are unused (not inputs to any module)
@@ -1094,6 +1096,7 @@ def apply_graph_filters(
     exclude_module_types: Optional[List[str]] = None,
     highlight_filtered: bool = False,
     quiet: bool = False,
+    filter_objects: bool = False,
 ) -> nx.DiGraph:
     """
     Apply multiple graph filters based on specified parameters.
@@ -1105,6 +1108,7 @@ def apply_graph_filters(
         exclude_module_types: Optional list of module type names to exclude
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
+        filter_objects: Whether to supress objects along with images
 
     Returns:
         A filtered NetworkX DiGraph
@@ -1143,7 +1147,7 @@ def apply_graph_filters(
         if not quiet:
             print(f"{action_verb} unused image nodes")
         filtered_graph, nodes_affected = filter_remove_unused_data(
-            filtered_graph, highlight_filtered
+            filtered_graph, highlight_filtered, filter_objects
         )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
@@ -1194,6 +1198,7 @@ def process_pipeline(
     exclude_module_types: Optional[List[str]] = None,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
+    filter_objects: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -1216,6 +1221,7 @@ def process_pipeline(
         exclude_module_types: Optional list of module type names to exclude from the graph
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
+        filter_objects: Whether to include objects for filtering along with images
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -1243,6 +1249,7 @@ def process_pipeline(
         exclude_module_types=exclude_module_types,
         highlight_filtered=highlight_filtered,
         quiet=quiet,
+        filter_objects=filter_objects,
     )
 
     # Print information about the pipeline if not quiet
@@ -1330,6 +1337,11 @@ def process_pipeline(
     "--exclude-module-types",
     help="Comma-separated list of module types to exclude (e.g., ExportToSpreadsheet)",
 )
+@click.option(
+    "--filter-objects",
+    is_flag=True,
+    help="Filter unused objects along with images"
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
@@ -1346,6 +1358,7 @@ def cli(
     remove_unused_data: bool,
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
+    filter_objects: bool,
     quiet: bool,
 ) -> None:
     """
@@ -1397,6 +1410,10 @@ def cli(
     \b
     # Position source and sink nodes while ignoring filtered nodes
     python cp_graph.py examples/illum.json examples/output/illum_clean_ranked.dot --root-nodes=OrigDNA --highlight-filtered --rank-nodes --rank-ignore-filtered
+    
+    \b
+    # Exclude unused and objects
+    python cp_graph.py --remove-unused-data --highlight-filtered --rank-nodes --filter-objects examples/ExampleFly.json examples/output/ExampleFly.dot
     """
     # Process root nodes if provided
     root_node_list = None
@@ -1429,6 +1446,7 @@ def cli(
             exclude_module_types=exclude_module_types_list,
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
+            filter_objects=filter_objects,
         )
     except click.ClickException as e:
         e.show()
