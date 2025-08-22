@@ -38,7 +38,6 @@ NamesAndTypes_a64add3 -> image__OrigBlue [type="image_output"];
 NamesAndTypes_a64add3 -> image__OrigGreen [type="image_output"];
 NamesAndTypes_a64add3 -> image__OrigRed [type="image_output"];
 NamesAndTypes_a64add3 -> object__Cell [type="object_output"];
-NamesAndTypes_a64add3 -> object__Cytoplasm [type="object_output"];
 NamesAndTypes_a64add3 -> object__Nucleus [type="object_output"];
 image__CropBlue -> Crop_332d8a68 [type="image_input"];
 image__CropBlue -> Crop_39198e21 [type="image_input"];

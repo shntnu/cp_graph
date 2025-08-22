@@ -1089,6 +1089,51 @@ def filter_remove_unused_data(
     return filtered_graph, len(unused_data)
 
 
+def filter_multiple_parents(
+    G: nx.DiGraph,
+) -> nx.DiGraph:
+    """
+    Ensure images and objects only have a single parent.
+    Last module in pipeline marked as parent is kept as parent.
+    """
+    filtered_graph = G.copy()
+
+    data_nodes = [
+        node
+        for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_IMAGE
+        or attrs.get("type") == NODE_TYPE_OBJECT
+    ]
+
+    for node in data_nodes:
+        parents = list(G.predecessors(node))
+        if len(parents) <= 1:
+            continue
+
+        # image, object should only have modules as parents
+        # but filter just in case this is not true
+        module_parents = [
+            p for p in parents
+            if G.nodes[p].get("type") == NODE_TYPE_MODULE
+        ]
+
+        if not module_parents:
+            continue
+
+        # only the last module in the pipeline should be the "true" parent
+        keep_parent = max(
+            module_parents,
+            key=lambda p: G.nodes[p].get("module_num", 0)
+        )
+
+        # remove edges from other parents so the graph is clean
+        for parent in parents:
+            if parent != keep_parent:
+                if filtered_graph.has_edge(parent, node):
+                    filtered_graph.remove_edge(parent, node)
+
+    return filtered_graph
+
 def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
@@ -1097,6 +1142,7 @@ def apply_graph_filters(
     highlight_filtered: bool = False,
     quiet: bool = False,
     filter_objects: bool = False,
+    no_single_parent: bool = False,
 ) -> nx.DiGraph:
     """
     Apply multiple graph filters based on specified parameters.
@@ -1109,6 +1155,7 @@ def apply_graph_filters(
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
         filter_objects: Whether to supress objects along with images
+        no_single_parent: Disable trimming of multiple parents
 
     Returns:
         A filtered NetworkX DiGraph
@@ -1171,6 +1218,13 @@ def apply_graph_filters(
             else:
                 print(f"  Removed {nodes_affected} modules of specified types")
 
+    # Ensure images and objects only have a single parent
+    # Last module in pipeline marked as parent is kept as parent
+    if not no_single_parent:
+        if not quit:
+            print(f"Trimming multiple parents")
+        filtered_graph = filter_multiple_parents(filtered_graph)
+
     # Report total filtering results
     if not quiet and total_affected > 0:
         if highlight_filtered:
@@ -1199,6 +1253,7 @@ def process_pipeline(
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
     filter_objects: bool = False,
+    no_single_parent: bool = False,
 ) -> GraphData:
     """
     Process a CellProfiler pipeline and create a dependency graph.
@@ -1222,6 +1277,7 @@ def process_pipeline(
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
         filter_objects: Whether to include objects for filtering along with images
+        no_single_parent: Disable trimming of multiple parents
 
     Returns:
         A tuple of (graph, modules_info) where:
@@ -1250,6 +1306,7 @@ def process_pipeline(
         highlight_filtered=highlight_filtered,
         quiet=quiet,
         filter_objects=filter_objects,
+        no_single_parent=no_single_parent,
     )
 
     # Print information about the pipeline if not quiet
@@ -1340,7 +1397,12 @@ def process_pipeline(
 @click.option(
     "--filter-objects",
     is_flag=True,
-    help="Filter unused objects along with images"
+    help="Filter unused objects along with images",
+)
+@click.option(
+    "--no-single-parent",
+    is_flag=True,
+    help="Allow images and objects to have more than one parent",
 )
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
@@ -1359,6 +1421,7 @@ def cli(
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
     filter_objects: bool,
+    no_single_parent: bool,
     quiet: bool,
 ) -> None:
     """
@@ -1447,6 +1510,7 @@ def cli(
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
             filter_objects=filter_objects,
+            no_single_parent=no_single_parent,
         )
     except click.ClickException as e:
         e.show()
