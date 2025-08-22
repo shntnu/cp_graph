@@ -32,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Enhanced edge tracking and reporting for duplicate parent filtering
 - Improved visual feedback when highlighting filtered edges (dashed red lines)
 
-## [1.0.0] - 2024-11-01
+## [0.10.0] - 2025-04-13
 
 ### Added
 - Core graph generation from CellProfiler v6 JSON pipelines
