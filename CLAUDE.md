@@ -30,7 +30,7 @@ The primary purpose of this tool is to provide a standardized way to represent a
 ## Code Style
 - Python 3.11+ with type annotations
 - Use NetworkX for graph operations
-- Consistent 4-space indentation 
+- Consistent 4-space indentation
 - Descriptive variable names (snake_case for variables/functions)
 - DocStrings for functions explaining purpose and parameters
 - Maintain backwards compatibility with existing CellProfiler JSON structures

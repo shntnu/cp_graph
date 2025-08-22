@@ -38,7 +38,7 @@ INPUT_LABEL_LIST_TYPES = (
     "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber",
 )
 
-# TODO: Support input grid? 
+# TODO: Support input grid?
 # "cellprofiler_core.setting.subscriber._grid_subscriber.GridSubscriber",
 
 # NOTE: The following additional input types exist but are not currently captured:
@@ -61,7 +61,7 @@ OUTPUT_LABEL_TYPES = (
     "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName",
 )
 
-# TODO: Support output grid? 
+# TODO: Support output grid?
 # "cellprofiler_core.setting.text.alphanumeric.name._grid_name.GridName"
 
 # Node types
@@ -1101,8 +1101,7 @@ def filter_multiple_parents(
     data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_IMAGE
-        or attrs.get("type") == NODE_TYPE_OBJECT
+        if attrs.get("type") == NODE_TYPE_IMAGE or attrs.get("type") == NODE_TYPE_OBJECT
     ]
 
     for node in data_nodes:
@@ -1113,18 +1112,14 @@ def filter_multiple_parents(
         # image, object should only have modules as parents
         # but filter just in case this is not true
         module_parents = [
-            p for p in parents
-            if G.nodes[p].get("type") == NODE_TYPE_MODULE
+            p for p in parents if G.nodes[p].get("type") == NODE_TYPE_MODULE
         ]
 
         if not module_parents:
             continue
 
         # only the last module in the pipeline should be the "true" parent
-        keep_parent = max(
-            module_parents,
-            key=lambda p: G.nodes[p].get("module_num", 0)
-        )
+        keep_parent = max(module_parents, key=lambda p: G.nodes[p].get("module_num", 0))
 
         # remove edges from other parents so the graph is clean
         for parent in parents:
@@ -1133,6 +1128,7 @@ def filter_multiple_parents(
                     filtered_graph.remove_edge(parent, node)
 
     return filtered_graph
+
 
 def apply_graph_filters(
     G: nx.DiGraph,
@@ -1222,7 +1218,7 @@ def apply_graph_filters(
     # Last module in pipeline marked as parent is kept as parent
     if not no_single_parent:
         if not quit:
-            print(f"Trimming multiple parents")
+            print("Trimming multiple parents")
         filtered_graph = filter_multiple_parents(filtered_graph)
 
     # Report total filtering results
@@ -1473,7 +1469,7 @@ def cli(
     \b
     # Position source and sink nodes while ignoring filtered nodes
     python cp_graph.py examples/illum.json examples/output/illum_clean_ranked.dot --root-nodes=OrigDNA --highlight-filtered --rank-nodes --rank-ignore-filtered
-    
+
     \b
     # Exclude unused and objects
     python cp_graph.py --remove-unused-data --highlight-filtered --rank-nodes --filter-objects examples/ExampleFly.json examples/output/ExampleFly.dot

@@ -157,7 +157,7 @@ The script uses a modular design with:
 - Consistent styling and formatting throughout
 
 ## Core Features
-1. **Standardized Graph Representation**: 
+1. **Standardized Graph Representation**:
    - Uses stable module identifiers based on module type and I/O connections
    - Implements deterministic SHA-256 hashing for consistent identifiers across runs
    - Consistently orders nodes and edges for reliable comparisons
@@ -306,7 +306,7 @@ The latest improvement is the unification of data node representation. Previousl
 The key changes:
 
 1. Data items are now represented as a single node regardless of how they're consumed
-2. Edge types preserve the original connection semantics (regular vs. list inputs) 
+2. Edge types preserve the original connection semantics (regular vs. list inputs)
 3. Graph visualization is cleaner and more accurately represents the true data flow
 4. Hash-based module identifiers normalize these representations for consistent comparisons
 

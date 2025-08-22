@@ -1,0 +1,17 @@
+exclude: \.json$
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: check-added-large-files
+    args: [--maxkb=10240]
+  - id: check-yaml
+  - id: end-of-file-fixer
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.9.1
+  hooks:
+  - id: ruff
+    args: [--fix]
+  - id: ruff-format

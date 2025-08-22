@@ -87,7 +87,7 @@ Despite these limitations, this approach of working directly with the JSON file 
 The tool creates intuitive graph visualizations showing data flow through pipelines:
 
 - **Images**: Gray ovals
-- **Objects**: Green ovals 
+- **Objects**: Green ovals
 - **Modules**: Blue boxes with the module name and number
 - **Disabled Modules**: Pink boxes with dashed borders (when included)
 - **Filtered Nodes**: Yellow (modules) or salmon (data) nodes with dashed borders (when using `--highlight-filtered`)
