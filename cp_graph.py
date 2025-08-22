@@ -22,14 +22,26 @@ from typing import Dict, List, Tuple, Any, Optional, TypedDict
 # ----- CONSTANTS AND CONFIGURATION -----
 # CellProfiler setting types
 # Input types
-INPUT_IMAGE_TYPE = "cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber"
-INPUT_LABEL_TYPE = (
-    "cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber"
+INPUT_IMAGE_TYPES = (
+    "cellprofiler_core.setting.subscriber.image_subscriber._image_subscriber.ImageSubscriber",
+    "cellprofiler_core.setting.subscriber.image_subscriber._crop_image_subscriber.CropImageSubscriber",
+    "cellprofiler_core.setting.subscriber.image_subscriber._file_image_subscriber.FileImageSubscriber",
+    "cellprofiler_core.setting.subscriber.image_subscriber._outline_image_subscriber.OutlineImageSubscriber",
 )
-INPUT_IMAGE_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber"
-INPUT_LABEL_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber"
+INPUT_LABEL_TYPES = (
+    "cellprofiler_core.setting.subscriber._label_subscriber.LabelSubscriber",
+)
+INPUT_IMAGE_LIST_TYPES = (
+    "cellprofiler_core.setting.subscriber.list_subscriber._image_list_subscriber.ImageListSubscriber",
+)
+INPUT_LABEL_LIST_TYPES = (
+    "cellprofiler_core.setting.subscriber.list_subscriber._label_list_subscriber.LabelListSubscriber",
+)
 
-# Note: The following additional input types exist but are not currently captured:
+# TODO: Support input grid? 
+# "cellprofiler_core.setting.subscriber._grid_subscriber.GridSubscriber",
+
+# NOTE: The following additional input types exist but are not currently captured:
 # - cellprofiler.modules.measureobjectintensitydistribution.MORDObjectNameSubscriber
 # - cellprofiler.modules.measureobjectintensitydistribution.MORDImageNameSubscriber
 # - cellprofiler.modules.exporttospreadsheet.EEObjectNameSubscriber
@@ -38,12 +50,19 @@ INPUT_LABEL_LIST_TYPE = "cellprofiler_core.setting.subscriber.list_subscriber._l
 # https://github.com/CellProfiler/CellProfiler/blob/3186518c42fbb58f762e5b92c495fa38e4aeb42d/src/frontend/cellprofiler/modules/exporttospreadsheet.py#L1670-L1681
 
 # Output types
-OUTPUT_IMAGE_TYPE = (
-    "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName"
+OUTPUT_IMAGE_TYPES = (
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._image_name.ImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._crop_image_name.CropImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._external_image_name.ExternalImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._file_image_name.FileImageName",
+    "cellprofiler_core.setting.text.alphanumeric.name.image_name._outline_image_name.OutlineImageName",
 )
-OUTPUT_LABEL_TYPE = (
-    "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName"
+OUTPUT_LABEL_TYPES = (
+    "cellprofiler_core.setting.text.alphanumeric.name._label_name.LabelName",
 )
+
+# TODO: Support output grid? 
+# "cellprofiler_core.setting.text.alphanumeric.name._grid_name.GridName"
 
 # Node types
 NODE_TYPE_MODULE = "module"
@@ -163,23 +182,23 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
             continue
 
         # Process input settings
-        if setting_name == INPUT_IMAGE_TYPE:
+        if setting_name in INPUT_IMAGE_TYPES:
             inputs[NODE_TYPE_IMAGE].append(setting_value)
-        elif setting_name == INPUT_LABEL_TYPE:
+        elif setting_name in INPUT_LABEL_TYPES:
             inputs[NODE_TYPE_OBJECT].append(setting_value)
-        elif setting_name == INPUT_IMAGE_LIST_TYPE:
+        elif setting_name in INPUT_IMAGE_LIST_TYPES:
             # Split comma-separated list and add each item
             values = [v.strip() for v in setting_value.split(",") if v.strip()]
             inputs[NODE_TYPE_IMAGE_LIST].extend(values)
-        elif setting_name == INPUT_LABEL_LIST_TYPE:
+        elif setting_name in INPUT_LABEL_LIST_TYPES:
             # Split comma-separated list and add each item
             values = [v.strip() for v in setting_value.split(",") if v.strip()]
             inputs[NODE_TYPE_OBJECT_LIST].extend(values)
 
         # Process output settings
-        elif setting_name == OUTPUT_IMAGE_TYPE:
+        elif setting_name in OUTPUT_IMAGE_TYPES:
             outputs[NODE_TYPE_IMAGE].append(setting_value)
-        elif setting_name == OUTPUT_LABEL_TYPE:
+        elif setting_name in OUTPUT_LABEL_TYPES:
             outputs[NODE_TYPE_OBJECT].append(setting_value)
 
     # Construct and return the module information
@@ -283,7 +302,7 @@ def _create_stable_module_id(
 
     # Process inputs - normalize list types to regular types
     for input_type, inputs in module_info["inputs"].items():
-        if not inputs:
+        if not inputs or type(inputs) is not list:
             continue
 
         # Normalize list types to their regular counterparts for node IDs
@@ -299,7 +318,7 @@ def _create_stable_module_id(
 
     # Process outputs
     for output_type, outputs in module_info["outputs"].items():
-        if not outputs:
+        if not outputs or type(outputs) is not list:
             continue
 
         # Create output identifiers (already normalized as there are no list outputs)
@@ -413,7 +432,7 @@ def _add_input_connections(
     """
     # Process each input type
     for input_type, inputs in module_info["inputs"].items():
-        if not inputs:
+        if not inputs or type(inputs) is not list:
             continue
 
         # Ensure module_id is properly formatted
@@ -457,7 +476,7 @@ def _add_output_connections(
     """
     # Process each output type
     for output_type, outputs in module_info["outputs"].items():
-        if not outputs:
+        if not outputs or type(outputs) is not list:
             continue
 
         # Ensure module_id is properly formatted
