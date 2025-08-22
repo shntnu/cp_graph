@@ -1090,13 +1090,21 @@ def filter_remove_unused_data(
 
 
 def filter_multiple_parents(
-    G: nx.DiGraph,
-) -> nx.DiGraph:
+    G: nx.DiGraph, highlight_filtered: bool = False
+) -> Tuple[nx.DiGraph, int]:
     """
     Ensure images and objects only have a single parent.
     Last module in pipeline marked as parent is kept as parent.
+
+    Args:
+        G: The original NetworkX graph
+        highlight_filtered: If True, mark edges as filtered instead of removing them
+
+    Returns:
+        A tuple of (filtered graph, number of edges affected)
     """
     filtered_graph = G.copy()
+    edges_affected = 0
 
     data_nodes = [
         node
@@ -1121,13 +1129,21 @@ def filter_multiple_parents(
         # only the last module in the pipeline should be the "true" parent
         keep_parent = max(module_parents, key=lambda p: G.nodes[p].get("module_num", 0))
 
-        # remove edges from other parents so the graph is clean
+        # remove or mark edges from other parents
         for parent in parents:
             if parent != keep_parent:
                 if filtered_graph.has_edge(parent, node):
-                    filtered_graph.remove_edge(parent, node)
+                    if highlight_filtered:
+                        # Mark the edge as filtered with a visual style
+                        filtered_graph.edges[parent, node]["filtered"] = True
+                        filtered_graph.edges[parent, node]["style"] = "dashed"
+                        filtered_graph.edges[parent, node]["color"] = "red"
+                    else:
+                        # Remove the edge
+                        filtered_graph.remove_edge(parent, node)
+                    edges_affected += 1
 
-    return filtered_graph
+    return filtered_graph, edges_affected
 
 
 def apply_graph_filters(
@@ -1217,9 +1233,18 @@ def apply_graph_filters(
     # Ensure images and objects only have a single parent
     # Last module in pipeline marked as parent is kept as parent
     if not no_single_parent:
-        if not quit:
-            print("Trimming multiple parents")
-        filtered_graph = filter_multiple_parents(filtered_graph)
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
+        if not quiet:
+            print(f"{action_verb} edges from multiple parents")
+        filtered_graph, edges_affected = filter_multiple_parents(
+            filtered_graph, highlight_filtered
+        )
+        total_affected += edges_affected
+        if not quiet and edges_affected > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {edges_affected} edges from duplicate parents")
+            else:
+                print(f"  Removed {edges_affected} edges from duplicate parents")
 
     # Report total filtering results
     if not quiet and total_affected > 0:
