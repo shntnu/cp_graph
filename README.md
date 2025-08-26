@@ -16,7 +16,7 @@ This tool converts CellProfiler pipelines into standardized graph representation
    --highlight-filtered \
    --rank-ignore-filtered \
    --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI,Cycle01_A,Cycle01_T,Cycle01_G,Cycle01_C,Cycle02_DAPI,Cycle02_A,Cycle02_T,Cycle02_G,Cycle02_C,Cycle03_DAPI,Cycle03_A,Cycle03_T,Cycle03_G,Cycle03_C && \
-   dot -Tpng \
+   pixi exec --spec "graphviz" dot -Tpng \
    examples/output/analysis_filtered.dot \
    -o examples/output/analysis_filtered.png
 ```
@@ -46,7 +46,7 @@ First run may take a moment as Pixi sets up the environment. Subsequent runs wil
 
 # Create visualization (GraphViz included automatically)
 ./cp_graph.py examples/illum.json examples/output/illum.dot
-dot -Tpng examples/output/illum.dot -o examples/output/illum.png
+pixi exec --spec "graphviz" dot -Tpng examples/output/illum.dot -o examples/output/illum.png
 
 # Compare pipeline structures
 ./cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
@@ -89,7 +89,7 @@ The tool creates intuitive graph visualizations showing data flow through pipeli
 - **Connections**: Arrows showing the flow between data and modules
 
 Output formats include:
-- **DOT files**: For Graphviz visualization with `dot -Tpng <file>.dot -o <file>.png`
+- **DOT files**: For Graphviz visualization with `pixi exec --spec "graphviz" dot -Tpng <file>.dot -o <file>.png`
 - **GraphML**: For tools like yEd and Cytoscape
 - **GEXF**: For Gephi visualization
 

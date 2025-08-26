@@ -11,7 +11,7 @@
       "WebFetch(domain:graphviz.org)",
       "Bash(./cp_graph.py examples/illum.json examples/output/test_shebang.dot --quiet)",
       "Bash(./cp_graph.py:*)",
-      "Bash(dot:*)"
+      "Bash(pixi exec --spec 'graphviz' dot:*)"
     ],
     "deny": [],
     "ask": [],
@@ -21,3 +21,4 @@
     ]
   }
 }
+
