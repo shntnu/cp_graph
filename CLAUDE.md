@@ -16,8 +16,9 @@ The primary purpose of this tool is to provide a standardized way to represent a
 - Visualize pipeline structure as a directed graph with intuitive color coding for different data types
 
 ## Commands
-- Run tool: `uv run cp_graph.py <pipeline.json> [output_graph.graphml] [options]`
+- Run tool: `./cp_graph.py <pipeline.json> [output_graph.graphml] [options]`
 - Visualization: `dot -Tpng <output_file>.dot -o <output_file>.png`
+- Note: The tool uses a pixi shebang to automatically provide all dependencies including GraphViz
 
 ## Code Style
 - Python 3.11+ with type annotations

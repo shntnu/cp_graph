@@ -26,10 +26,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fixed typo: changed 'quit' to 'quiet' in filter output messages
 
 ### Changed
+- **BREAKING**: Switched from `uv run --script` to Pixi shebang for dependency management
+  - Script is now directly executable: `./cp_graph.py` instead of `uv run --script cp_graph.py`
+  - GraphViz is automatically provided by Pixi (no separate installation needed)
+  - `dot` command prefixed with `pixi exec --spec "graphviz"`
 - Enhanced edge tracking and reporting for duplicate parent filtering
 - Improved visual feedback when highlighting filtered edges (dashed red lines)
 
-## [1.0.0] - 2024-11-01
+## [0.10.0] - 2025-04-13
 
 ### Added
 - Core graph generation from CellProfiler v6 JSON pipelines

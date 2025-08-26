@@ -2,9 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(gh pr diff:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "WebSearch",
+      "WebFetch(domain:pixi.sh)",
+      "WebFetch(domain:prefix.dev)",
+      "Bash(pixi exec:*)",
+      "WebFetch(domain:forum.graphviz.org)",
+      "WebFetch(domain:graphviz.org)",
+      "Bash(./cp_graph.py examples/illum.json examples/output/test_shebang.dot --quiet)",
+      "Bash(./cp_graph.py:*)",
+      "Bash(pixi exec --spec 'graphviz' dot:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/shsingh/.pixi",
+      "/Users/shsingh/Library/Caches/rattler/cache/cached-envs-v0/which-362b0f80287d8ae9/lib/graphviz"
+    ]
   }
 }
+

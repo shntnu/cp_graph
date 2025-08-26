@@ -7,7 +7,7 @@ This tool converts CellProfiler pipelines into standardized graph representation
 <details>
 
 ```sh
-uv run --script cp_graph.py \
+./cp_graph.py \
    examples/analysis.json \
    examples/output/analysis_filtered.dot \
    --rank-nodes \
@@ -16,7 +16,7 @@ uv run --script cp_graph.py \
    --highlight-filtered \
    --rank-ignore-filtered \
    --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI,Cycle01_A,Cycle01_T,Cycle01_G,Cycle01_C,Cycle02_DAPI,Cycle02_A,Cycle02_T,Cycle02_G,Cycle02_C,Cycle03_DAPI,Cycle03_A,Cycle03_T,Cycle03_G,Cycle03_C && \
-   dot -Tpng \
+   pixi exec --spec "graphviz" dot -Tpng \
    examples/output/analysis_filtered.dot \
    -o examples/output/analysis_filtered.png
 ```
@@ -24,38 +24,33 @@ uv run --script cp_graph.py \
 
 ## Installation & Running
 
-- Python 3.11+
-- Dependencies: NetworkX, PyDot, Click
+**Requirements**: [Pixi](https://pixi.sh) package manager (handles all dependencies automatically)
 
-The **recommended way** to run the tool is with `uv run --script`, which automatically handles all dependencies in an isolated environment without requiring manual installation:
-
-```bash
-# Run directly (no installation needed)
-uv run --script cp_graph.py <pipeline.json> <output_file> [options]
-```
-
-If you prefer manual installation:
+The tool is a self-contained executable script that uses Pixi to automatically provide all dependencies including Python packages and GraphViz:
 
 ```bash
-# Install dependencies
-pip install networkx pydot click
+# One-time setup: make script executable
+chmod +x cp_graph.py
 
-# Then run directly
-python cp_graph.py <pipeline.json> <output_file> [options]
+# Run directly - all dependencies handled automatically
+./cp_graph.py <pipeline.json> <output_file> [options]
 ```
+
+First run may take a moment as Pixi sets up the environment. Subsequent runs will be fast using the cached environment.
 
 ## Quick Start
 
 ```bash
 # Basic usage
-uv run --script cp_graph.py examples/illum.json examples/output/illum.dot
+./cp_graph.py examples/illum.json examples/output/illum.dot
 
-# Create visualization
-dot -Tpng examples/output/illum.dot -o examples/output/illum.png
+# Create visualization (GraphViz included automatically)
+./cp_graph.py examples/illum.json examples/output/illum.dot
+pixi exec --spec "graphviz" dot -Tpng examples/output/illum.dot -o examples/output/illum.png
 
 # Compare pipeline structures
-uv run --script cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
-uv run --script cp_graph.py examples/illum_mod.json examples/output/illum_mod_ultra.dot --ultra-minimal
+./cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
+./cp_graph.py examples/illum_mod.json examples/output/illum_mod_ultra.dot --ultra-minimal
 diff examples/output/illum_ultra.dot examples/output/illum_mod_ultra.dot
 ```
 
@@ -94,16 +89,14 @@ The tool creates intuitive graph visualizations showing data flow through pipeli
 - **Connections**: Arrows showing the flow between data and modules
 
 Output formats include:
-- **DOT files**: For Graphviz visualization with `dot -Tpng <file>.dot -o <file>.png`
+- **DOT files**: For Graphviz visualization with `pixi exec --spec "graphviz" dot -Tpng <file>.dot -o <file>.png`
 - **GraphML**: For tools like yEd and Cytoscape
 - **GEXF**: For Gephi visualization
 
 ## Command Options
 
-As mentioned, the recommended way to run the tool is:
-
 ```bash
-uv run --script cp_graph.py <pipeline.json> <output_file> [options]
+./cp_graph.py <pipeline.json> <output_file> [options]
 ```
 
 - `pipeline.json` - CellProfiler pipeline file (v6 JSON format)
@@ -132,13 +125,13 @@ The tool provides filtering options to focus on specific parts of complex pipeli
 
 ```bash
 # Generate basic pipeline graph
-uv run --script cp_graph.py examples/illum.json examples/output/illum.dot
+./cp_graph.py examples/illum.json examples/output/illum.dot
 
 # Highlight filtered nodes instead of removing them (uses distinct colors and dashed borders)
-uv run --script cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-data --highlight-filtered
+./cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-data --highlight-filtered
 
 # Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
-uv run --script cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-data
+./cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-data
 ```
 
 <table>
@@ -210,28 +203,28 @@ The repository includes sample files:
 
 ```bash
 # Include disabled modules in visualization
-uv run --script cp_graph.py examples/illum.json examples/output/illum_disabled.dot --include-disabled
+./cp_graph.py examples/illum.json examples/output/illum_disabled.dot --include-disabled
 
 # Create minimal representation for exact structure comparison
-uv run --script cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
+./cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
 
 # Display detailed module ID mapping for reference
-uv run --script cp_graph.py examples/illum.json examples/output/illum_ids.dot --explain-ids
+./cp_graph.py examples/illum.json examples/output/illum_ids.dot --explain-ids
 
 # Improve graph layout with node ranking (source nodes at top, sink nodes at bottom)
-uv run --script cp_graph.py examples/illum.json examples/output/illum_ranked.dot --rank-nodes
+./cp_graph.py examples/illum.json examples/output/illum_ranked.dot --rank-nodes
 
 # Analyze complex pipeline with multiple data types
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis.dot
+./cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
+./cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
 
 # Combine node ranking with filtering for optimal visualization
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-data
+./cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-data
 
 # Combine node ranking with highlighted filtering, ignoring filtered nodes in ranking
-uv run --script cp_graph.py examples/analysis.json examples/output/analysis_clean_ranked.dot --rank-nodes --rank-ignore-filtered --root-nodes=CorrPhalloidin,CorrZO1 --highlight-filtered
+./cp_graph.py examples/analysis.json examples/output/analysis_clean_ranked.dot --rank-nodes --rank-ignore-filtered --root-nodes=CorrPhalloidin,CorrZO1 --highlight-filtered
 ```
 
 ## Technical Details

@@ -1,14 +1,4 @@
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#     "networkx",
-#     "pydot",
-#     "click",
-# ]
-#
-# ///
-
-#!/usr/bin/env python
+#!/usr/bin/env -S pixi exec --spec python>=3.11 --spec networkx --spec pydot --spec click --spec graphviz -- python
 
 # ----- IMPORTS -----
 import json
@@ -1452,52 +1442,7 @@ def cli(
 
     OUTPUT: Optional path for output graph file (.graphml, .gexf, or .dot)
 
-    Examples:
-
-    \b
-    # Basic usage - creates DOT file from pipeline
-    python cp_graph.py examples/illum.json examples/output/illum_graph.dot
-
-    \b
-    # Create ultra-minimal output for comparing pipeline structure
-    python cp_graph.py examples/illum.json examples/output/illum_ultra.dot --ultra-minimal
-
-    \b
-    # Include disabled modules in the graph
-    python cp_graph.py examples/illum_mod.json examples/output/illum_mod_include.dot --include-disabled
-
-    \b
-    # Filter graph to only include paths from specific root nodes
-    python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigBlue,OrigGreen
-
-    \b
-    # Remove image and object nodes that aren't used as inputs to any module
-    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --remove-unused-data
-
-    \b
-    # Apply multiple filters in combination
-    python cp_graph.py examples/illum.json examples/output/illum_clean.dot --root-nodes=OrigBlue,OrigGreen --remove-unused-data
-
-    \b
-    # Highlight filtered nodes instead of removing them (useful for previewing filter effects)
-    python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
-
-    \b
-    # Compare standard filtering to highlighted filtering to see what would be removed
-    python cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA
-    python cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --highlight-filtered
-
-    \b
-    # Position source nodes at top and sink nodes at bottom in the graph
-    python cp_graph.py examples/illum.json examples/output/illum_ranked.dot --rank-nodes
-
-    \b
-    # Position source and sink nodes while ignoring filtered nodes
-    python cp_graph.py examples/illum.json examples/output/illum_clean_ranked.dot --root-nodes=OrigDNA --highlight-filtered --rank-nodes --rank-ignore-filtered
-
-    \b
-    # Exclude unused and objects
-    python cp_graph.py --remove-unused-data --highlight-filtered --rank-nodes --filter-objects examples/ExampleFly.json examples/output/ExampleFly.dot
+    For detailed examples, see README.md
     """
     # Process root nodes if provided
     root_node_list = None
