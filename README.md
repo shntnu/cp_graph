@@ -237,7 +237,14 @@ A script is provided to validate the schema against pipline dependency graph JSO
 scripts/validate-schema.py [--summary] [--verbose] <path/to/cp5-dep-graph.json>
 ```
 
+`cp-graph` can take in the dependency graph JSON rather than the pipeline JSON by using the `--dependency-graph` flag.
 
+```bash
+# generate the dot file
+./cp_graph.py --dependency-graph "examples/ExampleFly-dep-graph.json" "examples/output/ExampleFly2.dot"
+# convert it to png
+pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly2.dot" -o "examples/output/ExampleFly2.png"
+```
 
 ## Technical Details
 
