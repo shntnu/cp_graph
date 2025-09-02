@@ -200,6 +200,86 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
         "enabled": module_enabled,
     }
 
+def extract_module_io_from_dependency_json(dependency_data: Dict[str, Any]) -> List[ModuleInfo]:
+    """
+    Extract module I/O information from a dependency graph JSON file.
+
+    Args:
+        dependency_data: The parsed dependency graph JSON data
+
+    Returns:
+        List of ModuleInfo objects extracted from the dependency graph
+    """
+    modules_info: List[ModuleInfo] = []
+
+    # Get modules from the dependency JSON
+    modules = dependency_data.get("modules", [])
+
+    for module_data in modules:
+        # Initialize input/output dictionaries
+        inputs: ModuleInputs = {
+            NODE_TYPE_IMAGE: [],
+            NODE_TYPE_OBJECT: [],
+            NODE_TYPE_IMAGE_LIST: [],
+            NODE_TYPE_OBJECT_LIST: [],
+        }
+
+        outputs: ModuleOutputs = {
+            NODE_TYPE_IMAGE: [],
+            NODE_TYPE_OBJECT: [],
+        }
+
+        # Extract basic module information
+        module_name = module_data.get("module_name", "Unknown")
+        module_num = module_data.get("module_num", 0)
+        # Dependency JSON doesn't typically contain enabled status, assume enabled
+        module_enabled = True
+
+        # Process inputs
+        for input_dep in module_data.get("inputs", []):
+            dep_type = input_dep.get("type", "")
+            dep_name = input_dep.get("name", "")
+
+            if not dep_name:
+                continue
+
+            if dep_type == "image":
+                inputs[NODE_TYPE_IMAGE].append(dep_name)
+            elif dep_type == "object":
+                inputs[NODE_TYPE_OBJECT].append(dep_name)
+            elif dep_type == "measurement":
+                # Skip measurements for now as they don't map directly to the current I/O model
+                pass
+
+        # Process outputs
+        for output_dep in module_data.get("outputs", []):
+            dep_type = output_dep.get("type", "")
+            dep_name = output_dep.get("name", "")
+
+            if not dep_name:
+                continue
+
+            if dep_type == "image":
+                outputs[NODE_TYPE_IMAGE].append(dep_name)
+            elif dep_type == "object":
+                outputs[NODE_TYPE_OBJECT].append(dep_name)
+            elif dep_type == "measurement":
+                # Skip measurements for now
+                pass
+
+        # Create ModuleInfo object
+        module_info: ModuleInfo = {
+            "module_num": module_num,
+            "module_name": module_name,
+            "inputs": inputs,
+            "outputs": outputs,
+            "enabled": module_enabled,
+        }
+
+        modules_info.append(module_info)
+
+    return modules_info
+
 
 # ----- GRAPH CONSTRUCTION FUNCTIONS -----
 def create_dependency_graph(
@@ -228,6 +308,40 @@ def create_dependency_graph(
         module_info = extract_module_io(module)
         modules_info.append(module_info)
 
+        # Skip disabled modules if not explicitly included
+        if not module_info["enabled"] and not include_disabled:
+            continue
+
+        # Skip modules with no I/O data
+        if not _module_has_relevant_io(module_info):
+            continue
+
+        # Generate stable module ID and add module node
+        stable_id = _create_stable_module_id(module_info)
+        _add_module_node(G, module_info, stable_id)
+
+        # Add data nodes and their connections to the module
+        _add_module_data_connections(G, module_info, stable_id)
+
+    return G, modules_info
+
+def create_dependency_graph_from_modules(
+    modules_info: List[ModuleInfo],
+    include_disabled: bool = False,
+) -> GraphData:
+    """
+    Create a dependency graph from pre-extracted module information.
+
+    Args:
+        modules_info: List of ModuleInfo objects
+        include_disabled: Whether to include disabled modules
+
+    Returns:
+        A tuple of (graph, modules_info)
+    """
+    G = nx.DiGraph()
+
+    for module_info in modules_info:
         # Skip disabled modules if not explicitly included
         if not module_info["enabled"] and not include_disabled:
             continue
@@ -1249,8 +1363,9 @@ def apply_graph_filters(
 
 # ----- MAIN EXECUTION AND CLI -----
 def process_pipeline(
-    pipeline_path: str,
+    pipeline_path: Optional[str],
     output_path: Optional[str] = None,
+    dependency_graph_path: Optional[str] = None,
     no_module_info: bool = False,
     include_disabled: bool = False,
     no_formatting: bool = False,
@@ -1275,6 +1390,7 @@ def process_pipeline(
     Args:
         pipeline_path: Path to the CellProfiler pipeline JSON file
         output_path: Path to save the generated graph file
+        dependency_graph_path: Optionally use CP5 pipeline dependency graph json
         no_module_info: Whether to hide module information on graph edges
         include_disabled: Whether to include disabled modules in the graph
         no_formatting: Whether to strip formatting information from graph output
@@ -1295,18 +1411,41 @@ def process_pipeline(
             - graph is a NetworkX DiGraph representing the pipeline
             - modules_info is a list of module information dictionaries
     """
-    # Load the pipeline JSON
-    try:
-        with open(pipeline_path, "r") as f:
-            pipeline = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        raise click.ClickException(f"Error loading pipeline file: {e}")
+    if dependency_graph_path:
+        try:
+            with open(dependency_graph_path, "r") as f:
+                dependency_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise click.ClickException(f"Error loading dependency JSON file: {e}")
 
-    # Create the graph
-    G, modules_info = create_dependency_graph(
-        pipeline,
-        include_disabled=include_disabled,
-    )
+        if not quiet:
+                print(f"Using dependency JSON: {dependency_graph_path}")
+
+        # Extract module information fromd dependency JSON
+        modules_info = extract_module_io_from_dependency_json(dependency_data)
+
+        # Create graph from extracted modules
+        G, modules_info = create_dependency_graph_from_modules(
+            modules_info,
+            include_disabled=include_disabled,
+        )
+
+    elif pipeline_path:
+        # Load the pipeline JSON
+        try:
+            with open(pipeline_path, "r") as f:
+                pipeline = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise click.ClickException(f"Error loading pipeline file: {e}")
+
+        # Create the graph
+        G, modules_info = create_dependency_graph(
+            pipeline,
+            include_disabled=include_disabled,
+        )
+
+    else:
+        raise click.ClickException("Must provide either pipeline or dependy graph json")
 
     # Apply filters
     G = apply_graph_filters(
@@ -1322,7 +1461,9 @@ def process_pipeline(
 
     # Print information about the pipeline if not quiet
     if not quiet:
-        print_pipeline_summary(G, pipeline_path)
+        if pipeline_path:
+            print_pipeline_summary(G, pipeline_path)
+
         print_connections(G)
 
         # Explain stable IDs if requested
@@ -1354,9 +1495,14 @@ def process_pipeline(
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
-@click.argument("pipeline", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.argument("pipeline-or-dep-graph", type=click.Path(exists=True, dir_okay=False, readable=True))
 @click.argument(
     "output", type=click.Path(dir_okay=False, writable=True), required=False
+)
+@click.option(
+    "--dependency-graph",
+    is_flag=True,
+    help="process JSON argument as cp5-style dependency graph rather than pipeline"
 )
 # Display options
 @click.option(
@@ -1418,8 +1564,9 @@ def process_pipeline(
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
-    pipeline: str,
+    pipeline_or_dep_graph: str,
     output: Optional[str],
+    dependency_graph: bool,
     no_module_info: bool,
     no_formatting: bool,
     ultra_minimal: bool,
@@ -1457,12 +1604,19 @@ def cli(
         exclude_module_types_list = [
             name.strip() for name in exclude_module_types.split(",") if name.strip()
         ]
+    if dependency_graph:
+        dependency_graph_path = pipeline_or_dep_graph
+        pipeline_path = None
+    else:
+        pipeline_path = pipeline_or_dep_graph
+        dependency_graph_path = None
 
     try:
         # Run the main processing function
         process_pipeline(
-            pipeline,
+            pipeline_path,
             output,
+            dependency_graph_path,
             no_module_info,
             include_disabled,
             no_formatting,
