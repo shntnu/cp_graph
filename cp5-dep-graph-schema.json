@@ -1,0 +1,276 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cellprofiler.org/schemas/dependency-graph.json",
+  "title": "CellProfiler Pipeline Dependency Graph",
+  "description": "JSON schema for CellProfiler pipeline dependency graph representation",
+  "type": "object",
+  "required": [
+    "modules",
+    "metadata"
+  ],
+  "properties": {
+    "modules": {
+      "type": "array",
+      "description": "List of all modules in the pipeline with their dependencies",
+      "items": {
+        "$ref": "#/$defs/module"
+      }
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    }
+  },
+  "$defs": {
+    "module": {
+      "type": "object",
+      "description": "A single module in the pipeline",
+      "required": [
+        "module_name",
+        "module_num",
+        "inputs",
+        "outputs"
+      ],
+      "properties": {
+        "module_name": {
+          "type": "string",
+          "description": "The name of the module (subtype of CellProfiler Module class)",
+          "examples": [
+            "LoadImages",
+            "IdentifyPrimaryObjects",
+            "MeasureObjectSizeShape"
+          ]
+        },
+        "module_num": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The 1-indexed position/index of the module in the pipeline"
+        },
+        "inputs": {
+          "type": "array",
+          "description": "List of data inputs this module depends on",
+          "items": {
+            "$ref": "#/$defs/input_dependency"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "description": "List of data outputs this module produces",
+          "items": {
+            "$ref": "#/$defs/output_dependency"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "input_dependency": {
+      "type": "object",
+      "description": "A dependency for module inputs",
+      "required": [
+        "type",
+        "name",
+        "source_module",
+        "source_module_num"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "image",
+            "object",
+            "measurement"
+          ],
+          "description": "The type of dependency"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the dependency (for measurements, this is object_name.feature)"
+        },
+        "source_module": {
+          "type": "string",
+          "description": "Name of the module that provides this dependency"
+        },
+        "source_module_num": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Module number of the source module"
+        },
+        "object_name": {
+          "type": "string",
+          "description": "The name of the object being measured (only for measurement type)"
+        },
+        "feature": {
+          "type": "string",
+          "description": "The specific feature/measurement name (only for measurement type)"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "measurement"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "object_name",
+              "feature"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "output_dependency": {
+      "type": "object",
+      "description": "A dependency for module outputs",
+      "required": [
+        "type",
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "image",
+            "object",
+            "measurement"
+          ],
+          "description": "The type of dependency"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the dependency (for measurements, this is object_name.feature)"
+        },
+        "destination_module": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Name of the module that consumes this output (null if unused)"
+        },
+        "destination_module_num": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "Module number of the destination module (null if unused)"
+        },
+        "object_name": {
+          "type": "string",
+          "description": "The name of the object being measured (only for measurement type)"
+        },
+        "feature": {
+          "type": "string",
+          "description": "The specific feature/measurement name (only for measurement type)"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "measurement"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "object_name",
+              "feature"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Summary metadata about the dependency graph",
+      "required": [
+        "total_modules",
+        "total_edges"
+      ],
+      "properties": {
+        "total_modules": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of modules in the pipeline"
+        },
+        "total_edges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of dependency edges in the graph"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "modules": [
+        {
+          "module_name": "LoadImages",
+          "module_num": 1,
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "image",
+              "name": "DNA",
+              "destination_module": "IdentifyPrimaryObjects",
+              "destination_module_num": 2
+            }
+          ]
+        },
+        {
+          "module_name": "IdentifyPrimaryObjects",
+          "module_num": 2,
+          "inputs": [
+            {
+              "type": "image",
+              "name": "DNA",
+              "source_module": "LoadImages",
+              "source_module_num": 1
+            }
+          ],
+          "outputs": [
+            {
+              "type": "object",
+              "name": "Nuclei",
+              "destination_module": "MeasureObjectSizeShape",
+              "destination_module_num": 3
+            }
+          ]
+        },
+        {
+          "module_name": "MeasureObjectSizeShape",
+          "module_num": 3,
+          "inputs": [
+            {
+              "type": "object",
+              "name": "Nuclei",
+              "source_module": "IdentifyPrimaryObjects",
+              "source_module_num": 2
+            }
+          ],
+          "outputs": [
+            {
+              "type": "measurement",
+              "name": "Nuclei.AreaShape_Area",
+              "object_name": "Nuclei",
+              "feature": "AreaShape_Area",
+              "destination_module": null,
+              "destination_module_num": null
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "total_modules": 3,
+        "total_edges": 3
+      }
+    }
+  ]
+}
