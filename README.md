@@ -262,7 +262,7 @@ The tool generates consistent module identifiers using SHA-256 hashing of the mo
 
 ### CellProfiler JSON Format
 
-The tool parses CellProfiler v6 JSON pipelines, which contain:
+Unless using the `--dependency-graph` option as detailed above, the tool parses CellProfiler v6 JSON pipelines, which contain:
 - **Module attributes**: enabled status, module type, original number
 - **Settings**: Input/output specifications with fully qualified class names
 - **Data connections**: Named references between modules (e.g., one module outputs "DNA", another inputs "DNA")
