@@ -73,9 +73,9 @@ This tool provides solutions through its filtering options:
 - Apply `--remove-unused-[images|objects|measurements]` to eliminate unused data nodes
 - Exclude problematic modules with `--exclude-module-types=ExportToSpreadsheet`
 
-Note that some limitations can't be completely resolved with filtering. For example, in the visualization at the top of this README, the CallBarcodes module actually processes multiple cycle images internally, but only the first cycle appears as an explicit input in the JSON. This is why the other cycles don't show connections to the module even though they're used.
-
-Despite these limitations, this approach of working directly with the JSON file is valuable because it allows you to analyze pipeline structure without needing the full CellProfiler codebase. You can quickly understand and compare pipelines by focusing on their key structural components.
+> [!CAUTION]
+> Some limitations can't be completely resolved with filtering. For example, in the visualization at the top of this README, the CallBarcodes module actually processes multiple cycle images internally, but only the first cycle appears as an explicit input in the JSON. This is why the other cycles don't show connections to the module even though they're used.
+> Despite these limitations, this approach of working directly with the JSON file is valuable because it allows you to analyze pipeline structure without needing the full CellProfiler codebase. You can quickly understand and compare pipelines by focusing on their key structural components.
 
 ## Pipeline Visualization
 
@@ -240,7 +240,8 @@ scripts/validate-schema.py [--summary] [--verbose] <path/to/cp5-dep-graph.json>
 
 `cp-graph` can take in the dependency graph JSON rather than the pipeline JSON by using the `--dependency-graph` flag.
 
-NOTE: below we use `ExampleFly-dep-graph.json` to generate `ExampleFly-measurement.dot`. This is the standard ExampleFly pipeline found in CellProfiler's example pipeline, but (arbitrarily) modified with an `ExpandOrShrinkObjects` module which takes in the `Image.Count_Cells` measurement. This is purely to illustrate the capability to show a measurement being used for input/output, and isn't normally a sensible thing to do in the ExampleFly pipeline.
+> [!NOTE]
+> Below we use `ExampleFly-dep-graph.json` to generate `ExampleFly-measurement.dot`. This is the standard ExampleFly pipeline found in CellProfiler's example pipeline, but (arbitrarily) modified with an `ExpandOrShrinkObjects` module which takes in the `Image.Count_Cells` measurement. This is purely to illustrate the capability to show a measurement being used for input/output, and isn't normally a sensible thing to do in the ExampleFly pipeline.
 
 ```bash
 # generate the dot file
@@ -252,7 +253,8 @@ pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.do
 The above example generates the following image:
 <img src="examples/output/ExampleFly-measurement.png" alt="Example Fly Graph with measurement">
 
-WARN: CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
+> [!IMPORTANT]
+> CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
 
 ## Technical Details
 
