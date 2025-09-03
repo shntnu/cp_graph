@@ -11,7 +11,7 @@ This tool converts CellProfiler pipelines into standardized graph representation
    examples/analysis.json \
    examples/output/analysis_filtered.dot \
    --rank-nodes \
-   --remove-unused-data \
+   --remove-unused-images \
    --exclude-module-types=ExportToSpreadsheet \
    --highlight-filtered \
    --rank-ignore-filtered \
@@ -70,7 +70,7 @@ CellProfiler pipeline JSON files present some inherent challenges:
 
 This tool provides solutions through its filtering options:
 - Use `--root-nodes` to focus on paths from known inputs
-- Apply `--remove-unused-data` to eliminate unused data nodes
+- Apply `--remove-unused-[images|objects|measurements]` to eliminate unused data nodes
 - Exclude problematic modules with `--exclude-module-types=ExportToSpreadsheet`
 
 Note that some limitations can't be completely resolved with filtering. For example, in the visualization at the top of this README, the CallBarcodes module actually processes multiple cycle images internally, but only the first cycle appears as an explicit input in the JSON. This is why the other cycles don't show connections to the module even though they're used.
@@ -113,8 +113,9 @@ Output formats include:
 **Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph
 - `--root-nodes=<name1,name2>` - Keep only paths from specified root nodes
-- `--remove-unused-data` - Remove unused data nodes (images by default, objects with `--filter-objects`)
-- `--filter-objects` - Include objects when filtering unused data nodes
+- `--remove-unused-images` - Remove unused image nodes (those not used as input to a module)
+- `--remove-unused-objects` - Remove unused object nodes (those not used as input to a module)
+- `--remove-unused-measurements` - Remove unused measurement nodes (those not used as input to a module; only applicable with the `--dependency-graph` option)
 - `--highlight-filtered` - Highlight nodes that would be filtered instead of removing them (uses distinct colors and dashed borders)
 - `--exclude-module-types=<type1,type2>` - Exclude specific module types (e.g., ExportToSpreadsheet)
 - `--no-single-parent` - Allow images and objects to have more than one parent (disables duplicate parent removal)
@@ -128,10 +129,10 @@ The tool provides filtering options to focus on specific parts of complex pipeli
 ./cp_graph.py examples/illum.json examples/output/illum.dot
 
 # Highlight filtered nodes instead of removing them (uses distinct colors and dashed borders)
-./cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-data --highlight-filtered
+./cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-images --highlight-filtered
 
 # Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
-./cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-data
+./cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-images
 ```
 
 <table>
@@ -218,10 +219,10 @@ The repository includes sample files:
 ./cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
-./cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
+./cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-images  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
 
 # Combine node ranking with filtering for optimal visualization
-./cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-data
+./cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-images
 
 # Combine node ranking with highlighted filtering, ignoring filtered nodes in ranking
 ./cp_graph.py examples/analysis.json examples/output/analysis_clean_ranked.dot --rank-nodes --rank-ignore-filtered --root-nodes=CorrPhalloidin,CorrZO1 --highlight-filtered
@@ -243,7 +244,7 @@ NOTE: below we use `ExampleFly-dep-graph.json` to generate `ExampleFly-measureme
 
 ```bash
 # generate the dot file
-./cp_graph.py --remove-unused-data --filter-measurements --filter-objects --dependency-graph "examples/ExampleFly-dep-graph.json" "examples/output/ExampleFly-measurement.dot"
+./cp_graph.py --remove-unused-objects --remove-unused-measurements --dependency-graph "examples/ExampleFly-dep-graph.json" "examples/output/ExampleFly-measurement.dot"
 # convert it to png
 pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.dot" -o "examples/output/ExampleFly-measurement.png"
 ```
@@ -251,7 +252,7 @@ pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.do
 The above example generates the following image:
 <img src="examples/output/illum_highlight.png" alt="Example Fly Graph with measurement">
 
-WARN: CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-data --filter-measurements` flags. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding those flags is still useful for the text summary of inputs and outputs.
+WARN: CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
 
 ## Technical Details
 

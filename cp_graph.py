@@ -1155,22 +1155,23 @@ def filter_exclude_module_types(
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, highlight_filtered: bool = False, filter_objects: bool = False, filter_measurements: bool = False
+    G: nx.DiGraph, highlight_filtered: bool = False, filter_images: bool = False, filter_objects: bool = False, filter_measurements: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
-    Filter graph to remove image nodes that are not inputs to any module.
-
-    Note: This only removes unused image nodes, not object nodes.
+    Filter graph to remove image, object, and/or measurement nodes that are not inputs to any module.
 
     Args:
         G: The original NetworkX graph
         highlight_filtered: If True, mark filtered nodes instead of removing them
-        filter_objects: If true, also mark/filter objects
-        filter_measuremjents: If true, also mark/filter measurements
+        filter_images: If true, mark/filter images
+        filter_objects: If true, mark/filter objects
+        filter_measurements: If true, mark/filter measurements
 
     Returns:
         A tuple of (filtered graph, number of nodes affected)
     """
+    if not filter_images and not filter_objects and not filter_measurements:
+        return G, 0
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
 
@@ -1178,7 +1179,7 @@ def filter_remove_unused_data(
     data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_IMAGE
+        if (filter_images and attrs.get("type") == NODE_TYPE_IMAGE)
         or (filter_objects and attrs.get("type") == NODE_TYPE_OBJECT)
         or (filter_measurements and attrs.get("type") == NODE_TYPE_MEASUREMENT)
     ]
@@ -1270,12 +1271,12 @@ def filter_multiple_parents(
 def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
-    remove_unused_data: bool = False,
+    remove_unused_images: bool = False,
+    remove_unused_objects: bool = False,
+    remove_unused_measurements: bool = False,
     exclude_module_types: Optional[List[str]] = None,
     highlight_filtered: bool = False,
     quiet: bool = False,
-    filter_objects: bool = False,
-    filter_measurements: bool = False,
     no_single_parent: bool = False,
 ) -> nx.DiGraph:
     """
@@ -1284,12 +1285,12 @@ def apply_graph_filters(
     Args:
         G: The original NetworkX graph
         root_nodes: List of root node names to include (None means include all)
-        remove_unused_data: Whether to remove unused image nodes
+        remove_unused_images: Whether to remove unused image nodes
+        remove_unused_objects: Whether to remove unused object nodes
+        remove_unused_measurements: Whether to remove unused measurement nodes
         exclude_module_types: Optional list of module type names to exclude
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
-        filter_objects: Whether to supress objects along with images
-        filter_measurements: Whether to supress measurements along with images
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1324,17 +1325,19 @@ def apply_graph_filters(
                 )
 
     # Apply unused data filtering if specified
-    if remove_unused_data:
+    if remove_unused_images or remove_unused_objects or remove_unused_measurements:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"{action_verb} unused image nodes", end="")
-            if filter_objects:
-                print(" and object nodes", end="")
-            if filter_measurements:
-                print(" and measurement nodes", end="")
-            print("")
+            node_types = []
+            if remove_unused_images:
+                node_types.append(NODE_TYPE_IMAGE)
+            if remove_unused_objects:
+                node_types.append(NODE_TYPE_OBJECT)
+            if remove_unused_measurements:
+                node_types.append(NODE_TYPE_MEASUREMENT)
+            print(f"{action_verb} unused {', '.join(node_types)} nodes")
         filtered_graph, nodes_affected = filter_remove_unused_data(
-            filtered_graph, highlight_filtered, filter_objects, filter_measurements
+            filtered_graph, highlight_filtered, remove_unused_images, remove_unused_objects, remove_unused_measurements
         )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
@@ -1397,13 +1400,13 @@ def process_pipeline(
     explain_ids: bool = False,
     quiet: bool = False,
     root_nodes: Optional[List[str]] = None,
-    remove_unused_data: bool = False,
+    remove_unused_images: bool = False,
+    remove_unused_objects: bool = False,
+    remove_unused_measurements: bool = False,
     highlight_filtered: bool = False,
     exclude_module_types: Optional[List[str]] = None,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
-    filter_objects: bool = False,
-    filter_measurements: bool = False,
     no_single_parent: bool = False,
 ) -> GraphData:
     """
@@ -1423,13 +1426,13 @@ def process_pipeline(
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
         root_nodes: Optional list of root node names to filter the graph by
-        remove_unused_data: Whether to remove unused image nodes
+        remove_unused_images: Whether to remove unused image nodes
+        remove_unused_objects: Whether to remove unused object nodes
+        remove_unused_measurements: Whether to remove unused measurement nodes
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         exclude_module_types: Optional list of module type names to exclude from the graph
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
-        filter_objects: Whether to include objects for filtering along with images
-        filter_measurements: Whether to include measurements for filtering along with images
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1477,12 +1480,12 @@ def process_pipeline(
     G = apply_graph_filters(
         G,
         root_nodes=root_nodes,
-        remove_unused_data=remove_unused_data,
+        remove_unused_images=remove_unused_images,
+        remove_unused_objects=remove_unused_objects,
+        remove_unused_measurements=remove_unused_measurements,
         exclude_module_types=exclude_module_types,
         highlight_filtered=highlight_filtered,
         quiet=quiet,
-        filter_objects=filter_objects,
-        filter_measurements=filter_measurements,
         no_single_parent=no_single_parent,
     )
 
@@ -1565,9 +1568,19 @@ def process_pipeline(
     help="Comma-separated list of root node names to filter the graph by",
 )
 @click.option(
-    "--remove-unused-data",
+    "--remove-unused-images",
     is_flag=True,
     help="Remove image nodes not used as inputs",
+)
+@click.option(
+    "--remove-unused-objects",
+    is_flag=True,
+    help="Remove object nodes not used as inputs",
+)
+@click.option(
+    "--remove-unused-measurements",
+    is_flag=True,
+    help="Remove measurement nodes not used as inputs",
 )
 @click.option(
     "--highlight-filtered",
@@ -1577,16 +1590,6 @@ def process_pipeline(
 @click.option(
     "--exclude-module-types",
     help="Comma-separated list of module types to exclude (e.g., ExportToSpreadsheet)",
-)
-@click.option(
-    "--filter-objects",
-    is_flag=True,
-    help="Filter unused objects along with images",
-)
-@click.option(
-    "--filter-measurements",
-    is_flag=True,
-    help="Filter unused measurements along with images",
 )
 @click.option(
     "--no-single-parent",
@@ -1607,11 +1610,11 @@ def cli(
     rank_ignore_filtered: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
-    remove_unused_data: bool,
+    remove_unused_images: bool,
+    remove_unused_objects: bool,
+    remove_unused_measurements: bool,
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
-    filter_objects: bool,
-    filter_measurements: bool,
     no_single_parent: bool,
     quiet: bool,
 ) -> None:
@@ -1657,13 +1660,13 @@ def cli(
             explain_ids=explain_ids,
             quiet=quiet,
             root_nodes=root_node_list,
-            remove_unused_data=remove_unused_data,
+            remove_unused_images=remove_unused_images,
+            remove_unused_objects=remove_unused_objects,
+            remove_unused_measurements=remove_unused_measurements,
             highlight_filtered=highlight_filtered,
             exclude_module_types=exclude_module_types_list,
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
-            filter_objects=filter_objects,
-            filter_measurements=filter_measurements,
             no_single_parent=no_single_parent,
         )
     except click.ClickException as e:
