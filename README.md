@@ -250,7 +250,7 @@ pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.do
 ```
 
 The above example generates the following image:
-<img src="examples/output/illum_highlight.png" alt="Example Fly Graph with measurement">
+<img src="examples/output/ExampleFly-measurement.png" alt="Example Fly Graph with measurement">
 
 WARN: CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
 
