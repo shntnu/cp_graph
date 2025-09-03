@@ -58,6 +58,7 @@ OUTPUT_LABEL_TYPES = (
 NODE_TYPE_MODULE = "module"
 NODE_TYPE_IMAGE = "image"
 NODE_TYPE_OBJECT = "object"
+NODE_TYPE_MEASUREMENT = "measurement" # dep graph only
 # List types are kept for input/edge classification but don't create separate nodes
 NODE_TYPE_IMAGE_LIST = "image_list"
 NODE_TYPE_OBJECT_LIST = "object_list"
@@ -72,7 +73,7 @@ RANK_MAX = "max"
 
 # Node ranking configuration
 # Source nodes: typically root data nodes (input images)
-SOURCE_NODE_TYPES = [NODE_TYPE_IMAGE]
+SOURCE_NODE_TYPES = ["Images", "Metadata", "NamesAndTypes", "Groups"]
 # Sink nodes: typically terminal modules like SaveImages or Measure*
 SINK_MODULE_PATTERNS = ["SaveImages", "Measure*", "Export*"]
 
@@ -85,6 +86,7 @@ STYLE_COLORS = {
     },
     NODE_TYPE_IMAGE: {"normal": "lightgray", "filtered": "lightsalmon"},
     NODE_TYPE_OBJECT: {"normal": "lightgreen", "filtered": "lightsalmon"},
+    NODE_TYPE_MEASUREMENT: {"normal": "darkorange", "filtered": "lightsalmon"},
 }
 
 # Graph styles
@@ -92,24 +94,37 @@ STYLE_SHAPES = {
     NODE_TYPE_MODULE: "box",
     NODE_TYPE_IMAGE: "ellipse",
     NODE_TYPE_OBJECT: "ellipse",
+    NODE_TYPE_MEASUREMENT: "note",
 }
 
 
 # Type definitions
-class ModuleInputs(TypedDict):
+class _ModuleInputs(TypedDict):
     """Dictionary of module inputs by data type"""
 
     image: List[str]
     object: List[str]
+
+class ModuleInputsPipe(_ModuleInputs):
+    """Dictionary of module inputs by data type - specific to pipeline files"""
+
     image_list: List[str]
     object_list: List[str]
 
 
+class ModuleInputsDepGraph(_ModuleInputs):
+    """Dictionary of module inputs by data type - specific to dependency graph files"""
+    measurement: List[str]
+
 class ModuleOutputs(TypedDict):
-    """Dictionary of module outputs by data type"""
+    """Dictionary of module outputs by data type - specific to pipeline files"""
 
     image: List[str]
     object: List[str]
+
+class ModuleOutputsDepGraph(ModuleOutputs):
+    """Dictionary of module outputs by data type - specifi to dependency graph files"""
+    measurement: List[str]
 
 
 class ModuleInfo(TypedDict):
@@ -117,8 +132,8 @@ class ModuleInfo(TypedDict):
 
     module_num: int
     module_name: str
-    inputs: ModuleInputs
-    outputs: ModuleOutputs
+    inputs: ModuleInputsPipe | ModuleInputsDepGraph
+    outputs: ModuleOutputs | ModuleOutputsDepGraph
     enabled: bool
 
 
@@ -143,7 +158,7 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
             - enabled: Boolean indicating if the module is enabled
     """
     # Initialize dictionaries for different types of inputs/outputs with proper typing
-    inputs: ModuleInputs = {
+    inputs: ModuleInputsPipe = {
         NODE_TYPE_IMAGE: [],
         NODE_TYPE_OBJECT: [],
         NODE_TYPE_IMAGE_LIST: [],
@@ -200,7 +215,7 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
         "enabled": module_enabled,
     }
 
-def extract_module_io_from_dependency_json(dependency_data: Dict[str, Any]) -> List[ModuleInfo]:
+def extract_module_io_from_dependency_graph(dependency_data: Dict[str, Any]) -> List[ModuleInfo]:
     """
     Extract module I/O information from a dependency graph JSON file.
 
@@ -217,16 +232,16 @@ def extract_module_io_from_dependency_json(dependency_data: Dict[str, Any]) -> L
 
     for module_data in modules:
         # Initialize input/output dictionaries
-        inputs: ModuleInputs = {
+        inputs: ModuleInputsDepGraph = {
             NODE_TYPE_IMAGE: [],
             NODE_TYPE_OBJECT: [],
-            NODE_TYPE_IMAGE_LIST: [],
-            NODE_TYPE_OBJECT_LIST: [],
+            NODE_TYPE_MEASUREMENT: [],
         }
 
-        outputs: ModuleOutputs = {
+        outputs: ModuleOutputsDepGraph = {
             NODE_TYPE_IMAGE: [],
             NODE_TYPE_OBJECT: [],
+            NODE_TYPE_MEASUREMENT: [],
         }
 
         # Extract basic module information
@@ -248,8 +263,7 @@ def extract_module_io_from_dependency_json(dependency_data: Dict[str, Any]) -> L
             elif dep_type == "object":
                 inputs[NODE_TYPE_OBJECT].append(dep_name)
             elif dep_type == "measurement":
-                # Skip measurements for now as they don't map directly to the current I/O model
-                pass
+                inputs[NODE_TYPE_MEASUREMENT].append(dep_name)
 
         # Process outputs
         for output_dep in module_data.get("outputs", []):
@@ -264,8 +278,7 @@ def extract_module_io_from_dependency_json(dependency_data: Dict[str, Any]) -> L
             elif dep_type == "object":
                 outputs[NODE_TYPE_OBJECT].append(dep_name)
             elif dep_type == "measurement":
-                # Skip measurements for now
-                pass
+                outputs[NODE_TYPE_MEASUREMENT].append(dep_name)
 
         # Create ModuleInfo object
         module_info: ModuleInfo = {
@@ -627,8 +640,8 @@ def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
         if node_type == NODE_TYPE_MODULE:
             # Module node styling
             _apply_module_node_styling(G, node, attrs)
-        elif node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
-            # Data nodes (image, object) styling
+        elif node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT, NODE_TYPE_MEASUREMENT):
+            # Data nodes (image, object, measurement) styling
             _apply_data_node_styling(G, node, node_type)
 
 
@@ -1064,7 +1077,7 @@ def filter_keep_reachable_from_roots(
     specified_root_ids = []
     for root_node in all_root_nodes:
         node_type = G.nodes[root_node].get("type")
-        if node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+        if node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT, NODE_TYPE_MEASUREMENT):
             # Extract name from node attributes or from the node ID
             node_name = G.nodes[root_node].get("name")
             if not node_name and "__" in root_node:
@@ -1142,7 +1155,7 @@ def filter_exclude_module_types(
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, highlight_filtered: bool = False, filter_objects: bool = False
+    G: nx.DiGraph, highlight_filtered: bool = False, filter_objects: bool = False, filter_measurements: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to remove image nodes that are not inputs to any module.
@@ -1153,6 +1166,7 @@ def filter_remove_unused_data(
         G: The original NetworkX graph
         highlight_filtered: If True, mark filtered nodes instead of removing them
         filter_objects: If true, also mark/filter objects
+        filter_measuremjents: If true, also mark/filter measurements
 
     Returns:
         A tuple of (filtered graph, number of nodes affected)
@@ -1166,6 +1180,7 @@ def filter_remove_unused_data(
         for node, attrs in G.nodes(data=True)
         if attrs.get("type") == NODE_TYPE_IMAGE
         or (filter_objects and attrs.get("type") == NODE_TYPE_OBJECT)
+        or (filter_measurements and attrs.get("type") == NODE_TYPE_MEASUREMENT)
     ]
 
     # Check which ones are unused (not inputs to any module)
@@ -1197,7 +1212,7 @@ def filter_multiple_parents(
     G: nx.DiGraph, highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
-    Ensure images and objects only have a single parent.
+    Ensure images, objects, and measurements only have a single parent.
     Last module in pipeline marked as parent is kept as parent.
 
     Args:
@@ -1213,7 +1228,9 @@ def filter_multiple_parents(
     data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_IMAGE or attrs.get("type") == NODE_TYPE_OBJECT
+        if attrs.get("type") == NODE_TYPE_IMAGE
+        or attrs.get("type") == NODE_TYPE_OBJECT
+        or attrs.get("type") == NODE_TYPE_MEASUREMENT
     ]
 
     for node in data_nodes:
@@ -1258,6 +1275,7 @@ def apply_graph_filters(
     highlight_filtered: bool = False,
     quiet: bool = False,
     filter_objects: bool = False,
+    filter_measurements: bool = False,
     no_single_parent: bool = False,
 ) -> nx.DiGraph:
     """
@@ -1271,6 +1289,7 @@ def apply_graph_filters(
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
         filter_objects: Whether to supress objects along with images
+        filter_measurements: Whether to supress measurements along with images
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1308,16 +1327,21 @@ def apply_graph_filters(
     if remove_unused_data:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"{action_verb} unused image nodes")
+            print(f"{action_verb} unused image nodes", end="")
+            if filter_objects:
+                print(" and object nodes", end="")
+            if filter_measurements:
+                print(" and measurement nodes", end="")
+            print("")
         filtered_graph, nodes_affected = filter_remove_unused_data(
-            filtered_graph, highlight_filtered, filter_objects
+            filtered_graph, highlight_filtered, filter_objects, filter_measurements
         )
         total_affected += nodes_affected
         if not quiet and nodes_affected > 0:
             if highlight_filtered:
-                print(f"  Highlighted {nodes_affected} unused image nodes")
+                print(f"  Highlighted {nodes_affected} unused nodes")
             else:
-                print(f"  Removed {nodes_affected} unused image nodes")
+                print(f"  Removed {nodes_affected} unused nodes")
 
     # Apply module type exclusion if specified
     if exclude_module_types:
@@ -1379,6 +1403,7 @@ def process_pipeline(
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
     filter_objects: bool = False,
+    filter_measurements: bool = False,
     no_single_parent: bool = False,
 ) -> GraphData:
     """
@@ -1404,6 +1429,7 @@ def process_pipeline(
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
         filter_objects: Whether to include objects for filtering along with images
+        filter_measurements: Whether to include measurements for filtering along with images
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1422,7 +1448,7 @@ def process_pipeline(
                 print(f"Using dependency JSON: {dependency_graph_path}")
 
         # Extract module information fromd dependency JSON
-        modules_info = extract_module_io_from_dependency_json(dependency_data)
+        modules_info = extract_module_io_from_dependency_graph(dependency_data)
 
         # Create graph from extracted modules
         G, modules_info = create_dependency_graph_from_modules(
@@ -1456,6 +1482,7 @@ def process_pipeline(
         highlight_filtered=highlight_filtered,
         quiet=quiet,
         filter_objects=filter_objects,
+        filter_measurements=filter_measurements,
         no_single_parent=no_single_parent,
     )
 
@@ -1557,6 +1584,11 @@ def process_pipeline(
     help="Filter unused objects along with images",
 )
 @click.option(
+    "--filter-measurements",
+    is_flag=True,
+    help="Filter unused measurements along with images",
+)
+@click.option(
     "--no-single-parent",
     is_flag=True,
     help="Allow images and objects to have more than one parent",
@@ -1579,6 +1611,7 @@ def cli(
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
     filter_objects: bool,
+    filter_measurements: bool,
     no_single_parent: bool,
     quiet: bool,
 ) -> None:
@@ -1630,6 +1663,7 @@ def cli(
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
             filter_objects=filter_objects,
+            filter_measurements=filter_measurements,
             no_single_parent=no_single_parent,
         )
     except click.ClickException as e:

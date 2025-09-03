@@ -239,12 +239,19 @@ scripts/validate-schema.py [--summary] [--verbose] <path/to/cp5-dep-graph.json>
 
 `cp-graph` can take in the dependency graph JSON rather than the pipeline JSON by using the `--dependency-graph` flag.
 
+NOTE: below we use `ExampleFly-dep-graph.json` to generate `ExampleFly-measurement.dot`. This is the standard ExampleFly pipeline found in CellProfiler's example pipeline, but (arbitrarily) modified with an `ExpandOrShrinkObjects` module which takes in the `Image.Count_Cells` measurement. This is purely to illustrate the capability to show a measurement being used for input/output, and isn't normally a sensible thing to do in the ExampleFly pipeline.
+
 ```bash
 # generate the dot file
-./cp_graph.py --dependency-graph "examples/ExampleFly-dep-graph.json" "examples/output/ExampleFly2.dot"
+./cp_graph.py --remove-unused-data --filter-measurements --filter-objects --dependency-graph "examples/ExampleFly-dep-graph.json" "examples/output/ExampleFly-measurement.dot"
 # convert it to png
-pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly2.dot" -o "examples/output/ExampleFly2.png"
+pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.dot" -o "examples/output/ExampleFly-measurement.png"
 ```
+
+The above example generates the following image:
+<img src="examples/output/illum_highlight.png" alt="Example Fly Graph with measurement">
+
+WARN: CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-data --filter-measurements` flags. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding those flags is still useful for the text summary of inputs and outputs.
 
 ## Technical Details
 
