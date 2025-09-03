@@ -1267,6 +1267,63 @@ def filter_multiple_parents(
 
     return filtered_graph, edges_affected
 
+def filter_voided_modules(
+    G: nx.DiGraph, highlight_filtered: bool = False
+) -> Tuple[nx.DiGraph, int]:
+    """
+    Filter graph to remove or mark module nodes that have no inputs and no outputs.
+
+    Args:
+        G: The original NetworkX graph
+        highlight_filtered: If True, mark filtered nodes instead of removing them
+
+    Returns:
+        A tuple of (filtered graph, number of nodes affected)
+    """
+    filtered_graph = G.copy()
+
+    # Find all module nodes
+    module_nodes = [
+        node
+        for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_MODULE
+    ]
+
+    voided_modules = []
+
+    for node in module_nodes:
+        # Skip if already marked as filtered
+        if G.nodes[node].get("filtered", False):
+            continue
+
+        predecessors = list(G.predecessors(node))
+        successors = list(G.successors(node))
+
+        # Count non-filtered predecessors and successors
+        active_predecessors = [
+            p for p in predecessors 
+            if not G.nodes[p].get("filtered", False)
+        ]
+        active_successors = [
+            s for s in successors 
+            if not G.nodes[s].get("filtered", False)
+        ]
+
+        # Module is voided if it has no active inputs or no active outputs
+        if not active_predecessors and not active_successors:
+            voided_modules.append(node)
+
+    if highlight_filtered:
+        # Mark nodes as filtered instead of removing them
+        for node in voided_modules:
+            filtered_graph.nodes[node]["filtered"] = True
+    else:
+        # Remove voided module nodes
+        if voided_modules:
+            filtered_graph.remove_nodes_from(voided_modules)
+
+    return filtered_graph, len(voided_modules)
+
 
 def apply_graph_filters(
     G: nx.DiGraph,
@@ -1324,6 +1381,7 @@ def apply_graph_filters(
                     f"  Removed {nodes_affected} nodes not reachable from specified roots"
                 )
 
+    remove_voided_modules = False
     # Apply unused data filtering if specified
     if remove_unused_images or remove_unused_objects or remove_unused_measurements:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
@@ -1340,11 +1398,13 @@ def apply_graph_filters(
             filtered_graph, highlight_filtered, remove_unused_images, remove_unused_objects, remove_unused_measurements
         )
         total_affected += nodes_affected
-        if not quiet and nodes_affected > 0:
-            if highlight_filtered:
-                print(f"  Highlighted {nodes_affected} unused nodes")
-            else:
-                print(f"  Removed {nodes_affected} unused nodes")
+        if nodes_affected > 0:
+            remove_voided_modules = True
+            if not quiet:
+                if highlight_filtered:
+                    print(f"  Highlighted {nodes_affected} unused nodes")
+                else:
+                    print(f"  Removed {nodes_affected} unused nodes")
 
     # Apply module type exclusion if specified
     if exclude_module_types:
@@ -1360,6 +1420,30 @@ def apply_graph_filters(
                 print(f"  Highlighted {nodes_affected} modules of specified types")
             else:
                 print(f"  Removed {nodes_affected} modules of specified types")
+
+    # Remove voided modules (modules with no inputs and outputs)
+    if remove_voided_modules:
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
+        if not quiet:
+            print(f"{action_verb} voided modules (no inputs and no outputs)")
+
+        # Keep applying until no more voided modules are found
+        # (removing one module might orphan others)
+        total_voided = 0
+        while True:
+            filtered_graph, nodes_affected = filter_voided_modules(
+                filtered_graph, highlight_filtered
+            )
+            total_voided += nodes_affected
+            if nodes_affected == 0:
+                break
+
+        total_affected += total_voided
+        if not quiet and total_voided > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {total_voided} voided modules")
+            else:
+                print(f"  Removed {total_voided} voided modules")
 
     # Ensure images and objects only have a single parent
     # Last module in pipeline marked as parent is kept as parent
