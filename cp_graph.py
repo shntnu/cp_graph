@@ -58,7 +58,7 @@ OUTPUT_LABEL_TYPES = (
 NODE_TYPE_MODULE = "module"
 NODE_TYPE_IMAGE = "image"
 NODE_TYPE_OBJECT = "object"
-NODE_TYPE_MEASUREMENT = "measurement" # dep graph only
+NODE_TYPE_MEASUREMENT = "measurement"  # dep graph only
 # List types are kept for input/edge classification but don't create separate nodes
 NODE_TYPE_IMAGE_LIST = "image_list"
 NODE_TYPE_OBJECT_LIST = "object_list"
@@ -105,6 +105,7 @@ class _ModuleInputs(TypedDict):
     image: List[str]
     object: List[str]
 
+
 class ModuleInputsPipe(_ModuleInputs):
     """Dictionary of module inputs by data type - specific to pipeline files"""
 
@@ -114,7 +115,9 @@ class ModuleInputsPipe(_ModuleInputs):
 
 class ModuleInputsDepGraph(_ModuleInputs):
     """Dictionary of module inputs by data type - specific to dependency graph files"""
+
     measurement: List[str]
+
 
 class ModuleOutputs(TypedDict):
     """Dictionary of module outputs by data type - specific to pipeline files"""
@@ -122,8 +125,10 @@ class ModuleOutputs(TypedDict):
     image: List[str]
     object: List[str]
 
+
 class ModuleOutputsDepGraph(ModuleOutputs):
     """Dictionary of module outputs by data type - specifi to dependency graph files"""
+
     measurement: List[str]
 
 
@@ -215,7 +220,10 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
         "enabled": module_enabled,
     }
 
-def extract_module_io_from_dependency_graph(dependency_data: Dict[str, Any]) -> List[ModuleInfo]:
+
+def extract_module_io_from_dependency_graph(
+    dependency_data: Dict[str, Any],
+) -> List[ModuleInfo]:
     """
     Extract module I/O information from a dependency graph JSON file.
 
@@ -337,6 +345,7 @@ def create_dependency_graph(
         _add_module_data_connections(G, module_info, stable_id)
 
     return G, modules_info
+
 
 def create_dependency_graph_from_modules(
     modules_info: List[ModuleInfo],
@@ -1155,7 +1164,11 @@ def filter_exclude_module_types(
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, highlight_filtered: bool = False, filter_images: bool = False, filter_objects: bool = False, filter_measurements: bool = False
+    G: nx.DiGraph,
+    highlight_filtered: bool = False,
+    filter_images: bool = False,
+    filter_objects: bool = False,
+    filter_measurements: bool = False,
 ) -> Tuple[nx.DiGraph, int]:
     """
     Filter graph to remove image, object, and/or measurement nodes that are not inputs to any module.
@@ -1267,6 +1280,7 @@ def filter_multiple_parents(
 
     return filtered_graph, edges_affected
 
+
 def filter_voided_modules(
     G: nx.DiGraph, highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
@@ -1301,12 +1315,10 @@ def filter_voided_modules(
 
         # Count non-filtered predecessors and successors
         active_predecessors = [
-            p for p in predecessors 
-            if not G.nodes[p].get("filtered", False)
+            p for p in predecessors if not G.nodes[p].get("filtered", False)
         ]
         active_successors = [
-            s for s in successors 
-            if not G.nodes[s].get("filtered", False)
+            s for s in successors if not G.nodes[s].get("filtered", False)
         ]
 
         # Module is voided if it has no active inputs or no active outputs
@@ -1395,7 +1407,11 @@ def apply_graph_filters(
                 node_types.append(NODE_TYPE_MEASUREMENT)
             print(f"{action_verb} unused {', '.join(node_types)} nodes")
         filtered_graph, nodes_affected = filter_remove_unused_data(
-            filtered_graph, highlight_filtered, remove_unused_images, remove_unused_objects, remove_unused_measurements
+            filtered_graph,
+            highlight_filtered,
+            remove_unused_images,
+            remove_unused_objects,
+            remove_unused_measurements,
         )
         total_affected += nodes_affected
         if nodes_affected > 0:
@@ -1532,7 +1548,7 @@ def process_pipeline(
             raise click.ClickException(f"Error loading dependency JSON file: {e}")
 
         if not quiet:
-                print(f"Using dependency JSON: {dependency_graph_path}")
+            print(f"Using dependency JSON: {dependency_graph_path}")
 
         # Extract module information fromd dependency JSON
         modules_info = extract_module_io_from_dependency_graph(dependency_data)
@@ -1609,14 +1625,16 @@ def process_pipeline(
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
-@click.argument("pipeline-or-dep-graph", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.argument(
+    "pipeline-or-dep-graph", type=click.Path(exists=True, dir_okay=False, readable=True)
+)
 @click.argument(
     "output", type=click.Path(dir_okay=False, writable=True), required=False
 )
 @click.option(
     "--dependency-graph",
     is_flag=True,
-    help="process JSON argument as cp5-style dependency graph rather than pipeline"
+    help="process JSON argument as cp5-style dependency graph rather than pipeline",
 )
 # Display options
 @click.option(

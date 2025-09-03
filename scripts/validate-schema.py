@@ -9,6 +9,7 @@ import json
 import sys
 import argparse
 from pathlib import Path
+
 try:
     import jsonschema
     from jsonschema import validate, ValidationError, SchemaError
@@ -20,7 +21,7 @@ except ImportError:
 def load_json_file(file_path):
     """Load and parse a JSON file"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found")
@@ -39,26 +40,26 @@ def validate_json_against_schema(json_data, schema_data, json_file_path):
         # First, validate that the schema itself is valid
         jsonschema.Draft7Validator.check_schema(schema_data)
         # print("✓ Schema is valid")
-        
+
         # Then validate the JSON data against the schema
         validate(instance=json_data, schema=schema_data)
         print(f"✓ '{json_file_path}' is valid against the schema")
         return True
-        
+
     except SchemaError as e:
         print(f"✗ Schema error: {e.message}")
-        if hasattr(e, 'path') and e.path:
+        if hasattr(e, "path") and e.path:
             print(f"  Path: {' -> '.join(str(p) for p in e.path)}")
         return False
-        
+
     except ValidationError as e:
         print(f"✗ Validation error in '{json_file_path}': {e.message}")
-        if hasattr(e, 'absolute_path') and e.absolute_path:
+        if hasattr(e, "absolute_path") and e.absolute_path:
             print(f"  Path: {' -> '.join(str(p) for p in e.absolute_path)}")
-        if hasattr(e, 'instance'):
+        if hasattr(e, "instance"):
             print(f"  Invalid value: {e.instance}")
         return False
-        
+
     except Exception as e:
         print(f"✗ Unexpected error during validation: {e}")
         return False
@@ -67,33 +68,33 @@ def validate_json_against_schema(json_data, schema_data, json_file_path):
 def print_summary(json_data):
     """Print a summary of the dependency graph"""
     try:
-        if 'metadata' in json_data:
-            metadata = json_data['metadata']
-            print(f"\nDependency Graph Summary:")
+        if "metadata" in json_data:
+            metadata = json_data["metadata"]
+            print("\nDependency Graph Summary:")
             print(f"  Total modules: {metadata.get('total_modules', 'unknown')}")
             print(f"  Total edges: {metadata.get('total_edges', 'unknown')}")
-        
-        if 'modules' in json_data:
-            modules = json_data['modules']
+
+        if "modules" in json_data:
+            modules = json_data["modules"]
             print(f"  Module count (actual): {len(modules)}")
-            
+
             # Count dependency types
             image_deps = object_deps = measurement_deps = 0
             for module in modules:
-                for dep_list in [module.get('inputs', []), module.get('outputs', [])]:
+                for dep_list in [module.get("inputs", []), module.get("outputs", [])]:
                     for dep in dep_list:
-                        dep_type = dep.get('type', '')
-                        if dep_type == 'image':
+                        dep_type = dep.get("type", "")
+                        if dep_type == "image":
                             image_deps += 1
-                        elif dep_type == 'object':
+                        elif dep_type == "object":
                             object_deps += 1
-                        elif dep_type == 'measurement':
+                        elif dep_type == "measurement":
                             measurement_deps += 1
-            
+
             print(f"  Image dependencies: {image_deps}")
             print(f"  Object dependencies: {object_deps}")
             print(f"  Measurement dependencies: {measurement_deps}")
-            
+
     except Exception as e:
         print(f"Warning: Could not generate summary: {e}")
 
@@ -106,67 +107,63 @@ def main():
 Examples:
   python validate_dependency_json.py data.json
   python validate_dependency_json.py --summary pipeline-deps.json
-        """
+        """,
     )
-    
+
+    parser.add_argument("json_file", help="Path to the JSON file to validate")
+
     parser.add_argument(
-        'json_file',
-        help='Path to the JSON file to validate'
+        "--summary",
+        "-s",
+        action="store_true",
+        help="Print a summary of the dependency graph after validation",
     )
-    
+
     parser.add_argument(
-        '--summary', '-s',
-        action='store_true',
-        help='Print a summary of the dependency graph after validation'
+        "--verbose", "-v", action="store_true", help="Enable verbose output"
     )
-    
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Enable verbose output'
-    )
-    
+
     args = parser.parse_args()
-    
+
     # Fixed schema path
     schema_path = Path(__file__).resolve().parent
     schema_path = Path(f"{schema_path}/../cp5-dep-graph-schema.json")
     json_path = Path(args.json_file).expanduser()
-    
+
     if not schema_path.exists():
         print(f"Error: Schema file '{schema_path}' does not exist")
         print("Make sure the schema file is located at '../cp5-dep-graph-schema.json'")
         sys.exit(1)
-        
+
     if not json_path.exists():
         print(f"Error: JSON file '{json_path}' does not exist")
         sys.exit(1)
-    
+
     if args.verbose:
         print(f"Schema file: {schema_path} (fixed location)")
         print(f"JSON file: {json_path}")
         print()
-    
+
     # Load files
     print("Loading files...")
 
     schema_data = load_json_file(schema_path)
     json_data = load_json_file(json_path)
-    
+
     if args.verbose:
         print(f"✓ Loaded schema ({len(json.dumps(schema_data))} bytes)")
         print(f"✓ Loaded JSON data ({len(json.dumps(json_data))} bytes)")
         print()
-    
+
     # Validate
     print("Validating...")
 
     is_valid = validate_json_against_schema(json_data, schema_data, json_path)
-    
+
     # Print summary if requested and validation passed
     if args.summary and is_valid:
         print_summary(json_data)
-    
+
     # Exit with appropriate code
     sys.exit(0 if is_valid else 1)
 
