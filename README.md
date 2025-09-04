@@ -264,6 +264,14 @@ All example images and graphs in this documentation can be regenerated using:
 ./scripts/regenerate_all_examples.sh
 ```
 
+## Testing
+
+```bash
+python test_cp_graph.py  # Compares outputs against examples/output/ references
+```
+
+**Note:** `regenerate_all_examples.sh` overwrites these references - only run it from verified-correct code.
+
 ## Technical Details
 
 ### How Stable Module IDs Work

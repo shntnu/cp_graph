@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Regenerate all example outputs for the cp_graph documentation
-# This script creates all the .dot and .png files in examples/output/
+# ⚠️  WARNING: Overwrites test reference files! Only run from main branch or after verifying fixes.
 #
 # Usage: ./scripts/regenerate_all_examples.sh
 
