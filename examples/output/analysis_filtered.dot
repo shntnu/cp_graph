@@ -337,5 +337,6 @@ object__ResizeNuclei -> OverlayOutlines_cfebace4 [type="object_input"];
 object__Resize_Foci -> OverlayOutlines_5eab99c7 [type="object_input"];
 object__WellEdgeObjects -> MaskImage_5b78475 [type="object_input"];
 
+  {rank = min; image__CorrDNA; image__Cycle01_DAPI; image__CorrZO1; image__CorrPhalloidin; image__Cycle01_A; image__Cycle01_C; image__Cycle01_G; image__Cycle01_T; image__Cycle02_A; image__Cycle02_C; image__Cycle02_G; image__Cycle02_T; image__Cycle03_A; image__Cycle03_C; image__Cycle03_G; image__Cycle03_T;}
   {rank = max; MeasureImageIntensity_b80df925; MeasureColocalization_11dc7f83; MeasureImageIntensity_cd880b23; MeasureImageAreaOccupied_6bb28693; MeasureObjectIntensity_40d9dc39; MeasureObjectIntensity_f0c4470c; MeasureColocalization_b64ad458; MeasureObjectIntensity_5adac90b; MeasureObjectIntensity_93a3ea7d; MeasureObjectSizeShape_33e152a1; MeasureColocalization_42947605; SaveImages_c7ae0a8c; SaveImages_bef43005; SaveImages_22818067; SaveImages_e910b9eb; SaveImages_2c5c819a;}
 }
