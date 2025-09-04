@@ -76,7 +76,7 @@ RANK_MAX = "max"
 
 # Node ranking configuration
 # Source nodes: typically root data nodes (input images)
-SOURCE_NODE_TYPES = ["Images", "Metadata", "NamesAndTypes", "Groups"]
+SOURCE_NODE_TYPES = [NODE_TYPE_IMAGE]
 # Sink nodes: typically terminal modules like SaveImages or Measure*
 SINK_MODULE_PATTERNS = ["SaveImages", "Measure*", "Export*"]
 
