@@ -1,4 +1,4 @@
-#!/usr/bin/env -S pixi exec --spec python>=3.11 --spec networkx --spec pydot --spec click --spec graphviz -- python
+#!/usr/bin/env -S pixi exec --spec python>=3.11 --spec networkx --spec pydot --spec click --spec graphviz --spec pydantic -- python
 
 # ----- IMPORTS -----
 import json
@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 import networkx as nx
 import click
-from typing import Dict, List, Tuple, Any, Optional, TypedDict
+from typing import Dict, List, Tuple, Any, Optional, TypedDict, Literal
+
+# Pydantic import for dependency graph validation
+from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
 
 # ----- CONSTANTS AND CONFIGURATION -----
 # CellProfiler setting types
@@ -144,6 +147,104 @@ class ModuleInfo(TypedDict):
 
 # Return type for main functions
 GraphData = Tuple[nx.DiGraph, List[ModuleInfo]]
+
+
+# ----- PYDANTIC MODELS FOR DEPENDENCY GRAPH VALIDATION -----
+# These models are used only when validating CP5 dependency graph JSON files
+class DepGraphInput(BaseModel):
+    """Input dependency in a CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")  # Strict validation
+
+    type: Literal["image", "object", "measurement"]
+    name: str
+    source_module: str
+    source_module_num: int = Field(ge=1)
+    # Optional fields for measurements
+    object_name: Optional[str] = None
+    feature: Optional[str] = None
+
+    @field_validator("object_name", "feature", mode="after")
+    @classmethod
+    def validate_measurement_fields(cls, v, info):
+        """Ensure measurement dependencies have object_name and feature."""
+        if info.data.get("type") == "measurement" and v is None:
+            raise ValueError("Required for measurement type")
+        return v
+
+
+class DepGraphOutput(BaseModel):
+    """Output dependency in a CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: Literal["image", "object", "measurement"]
+    name: str
+    destination_module: Optional[str] = None
+    destination_module_num: Optional[int] = Field(None, ge=1)
+    object_name: Optional[str] = None
+    feature: Optional[str] = None
+
+    @field_validator("object_name", "feature", mode="after")
+    @classmethod
+    def validate_measurement_fields(cls, v, info):
+        """Ensure measurement dependencies have object_name and feature."""
+        if info.data.get("type") == "measurement" and v is None:
+            raise ValueError("Required for measurement type")
+        return v
+
+
+class DepGraphModule(BaseModel):
+    """Module in a CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    module_name: str
+    module_num: int = Field(ge=1)
+    inputs: List[DepGraphInput] = []
+    outputs: List[DepGraphOutput] = []
+
+
+class DepGraphMetadata(BaseModel):
+    """Metadata for CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    total_modules: int = Field(ge=0)
+    total_edges: int = Field(ge=0)
+
+
+class DependencyGraph(BaseModel):
+    """Complete CP5 dependency graph structure."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    modules: List[DepGraphModule]
+    metadata: DepGraphMetadata
+
+    def summary(self) -> str:
+        """Generate a summary of the dependency graph."""
+        lines = ["Dependency Graph Summary:"]
+        lines.append(f"  Total modules: {self.metadata.total_modules}")
+        lines.append(f"  Total edges: {self.metadata.total_edges}")
+        lines.append(f"  Module count (actual): {len(self.modules)}")
+
+        # Count dependency types
+        image_deps = object_deps = measurement_deps = 0
+        for module in self.modules:
+            for dep in module.inputs + module.outputs:
+                if dep.type == "image":
+                    image_deps += 1
+                elif dep.type == "object":
+                    object_deps += 1
+                elif dep.type == "measurement":
+                    measurement_deps += 1
+
+        lines.append(f"  Image dependencies: {image_deps}")
+        lines.append(f"  Object dependencies: {object_deps}")
+        lines.append(f"  Measurement dependencies: {measurement_deps}")
+
+        return "\n".join(lines)
 
 
 # ----- PIPELINE PARSING FUNCTIONS -----
@@ -300,6 +401,36 @@ def extract_module_io_from_dependency_graph(
         modules_info.append(module_info)
 
     return modules_info
+
+
+def validate_dependency_graph_with_pydantic(
+    dependency_data: Dict[str, Any],
+) -> Tuple[bool, str, Optional["DependencyGraph"]]:
+    """
+    Validate a dependency graph using Pydantic models.
+
+    Args:
+        dependency_data: The parsed dependency graph JSON data
+
+    Returns:
+        Tuple of (is_valid, message, validated_graph or None)
+    """
+    try:
+        # Pydantic automatically validates the structure and types
+        validated_graph = DependencyGraph(**dependency_data)
+        return True, "✓ Dependency graph is valid", validated_graph
+    except ValidationError as e:
+        # Format validation errors nicely
+        errors = []
+        for error in e.errors():
+            loc = " -> ".join(str(li) for li in error["loc"])
+            msg = error["msg"]
+            errors.append(f"  {loc}: {msg}")
+
+        error_message = "Validation errors:\n" + "\n".join(errors)
+        return False, error_message, None
+    except Exception as e:
+        return False, f"Unexpected error during validation: {e}", None
 
 
 # ----- GRAPH CONSTRUCTION FUNCTIONS -----
@@ -1698,6 +1829,17 @@ def process_pipeline(
     is_flag=True,
     help="Allow images and objects to have more than one parent",
 )
+# Validation options (for dependency graph only)
+@click.option(
+    "--validate-only",
+    is_flag=True,
+    help="Only validate dependency graph against schema (requires --dependency-graph)",
+)
+@click.option(
+    "--summary",
+    is_flag=True,
+    help="Print dependency graph summary (use with --validate-only or --dependency-graph)",
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
@@ -1718,6 +1860,8 @@ def cli(
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
     no_single_parent: bool,
+    validate_only: bool,
+    summary: bool,
     quiet: bool,
 ) -> None:
     """
@@ -1748,6 +1892,61 @@ def cli(
     else:
         pipeline_path = pipeline_or_dep_graph
         dependency_graph_path = None
+
+    # Handle validation-only mode for dependency graphs
+    if validate_only:
+        if not dependency_graph:
+            raise click.ClickException(
+                "--validate-only requires --dependency-graph flag"
+            )
+
+        try:
+            with open(dependency_graph_path, "r") as f:
+                dependency_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise click.ClickException(f"Error loading dependency graph: {e}")
+
+        # Validate using Pydantic
+        is_valid, message, validated_graph = validate_dependency_graph_with_pydantic(
+            dependency_data
+        )
+
+        # Print validation result
+        click.echo(message)
+
+        # Print summary if requested and validation passed
+        if summary and is_valid and validated_graph:
+            click.echo()
+            click.echo(validated_graph.summary())
+
+        # Exit with appropriate code
+        sys.exit(0 if is_valid else 1)
+
+    # Validate before processing if requested
+    if dependency_graph and summary and not validate_only:
+        try:
+            with open(dependency_graph_path, "r") as f:
+                dependency_data = json.load(f)
+
+            # Validate and show summary if successful
+            is_valid, message, validated_graph = (
+                validate_dependency_graph_with_pydantic(dependency_data)
+            )
+
+            if not quiet:
+                click.echo(message)
+
+            if is_valid and validated_graph and not quiet:
+                click.echo()
+                click.echo(validated_graph.summary())
+                click.echo()
+        except Exception as e:
+            if not quiet:
+                click.echo(f"Warning: Could not validate/summarize: {e}", err=True)
+
+    # Check output file is provided for processing
+    if not output:
+        raise click.ClickException("Output file required unless using --validate-only")
 
     try:
         # Run the main processing function
