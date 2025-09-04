@@ -25,14 +25,10 @@ image__OrigZO1 [type=image, label=OrigZO1, shape=ellipse, style=filled, fillcolo
 image__UpsampledIllumDNA [type=image, label=UpsampledIllumDNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__UpsampledIllumPhalloidin [type=image, label=UpsampledIllumPhalloidin, shape=ellipse, style=filled, fillcolor=lightgray];
 image__UpsampledIllumZO1 [type=image, label=UpsampledIllumZO1, shape=ellipse, style=filled, fillcolor=lightgray];
-CorrectIlluminationCalculate_2ab137a7 -> image__IllumBlueAvg [type="image_output"];
-CorrectIlluminationCalculate_2ab137a7 -> image__IllumBlueDilated [type="image_output"];
 CorrectIlluminationCalculate_2ab137a7 -> image__IllumPhalloidin [type="image_output"];
 CorrectIlluminationCalculate_cd0871b -> image__IllumBlueAvg [type="image_output"];
 CorrectIlluminationCalculate_cd0871b -> image__IllumBlueDilated [type="image_output"];
 CorrectIlluminationCalculate_cd0871b -> image__IllumZO1 [type="image_output"];
-CorrectIlluminationCalculate_e3750f2a -> image__IllumBlueAvg [type="image_output"];
-CorrectIlluminationCalculate_e3750f2a -> image__IllumBlueDilated [type="image_output"];
 CorrectIlluminationCalculate_e3750f2a -> image__IllumDNA [type="image_output"];
 Resize_32606b38 -> image__DownsampledDNA [type="image_output"];
 Resize_6f9ec43f -> image__UpsampledIllumZO1 [type="image_output"];

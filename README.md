@@ -219,7 +219,7 @@ The repository includes sample files:
 ./cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
-./cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-images  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
+./cp_graph.py examples/analysis.json examples/output/analysis_filtered_simple.dot --remove-unused-images  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
 
 # Combine node ranking with filtering for optimal visualization
 ./cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-images
@@ -255,6 +255,14 @@ The above example generates the following image:
 
 > [!IMPORTANT]
 > CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
+
+## Regenerating Example Outputs
+
+All example images and graphs in this documentation can be regenerated using:
+
+```bash
+./scripts/regenerate_all_examples.sh
+```
 
 ## Technical Details
 
