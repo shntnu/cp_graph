@@ -17,6 +17,7 @@ The primary purpose of this tool is to provide a standardized way to represent a
 
 ## Commands
 - Run tool: `./cp_graph.py <pipeline.json> [output_graph.graphml] [options]`
+- Run tests: `python test_cp_graph.py`
 - Visualization: `dot -Tpng <output_file>.dot -o <output_file>.png`
 - Note: The tool uses a pixi shebang to automatically provide all dependencies including GraphViz
 

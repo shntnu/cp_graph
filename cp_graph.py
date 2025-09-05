@@ -1,4 +1,4 @@
-#!/usr/bin/env -S pixi exec --spec python>=3.11 --spec networkx --spec pydot --spec click --spec graphviz -- python
+#!/usr/bin/env -S pixi exec --spec python>=3.11 --spec networkx --spec pydot --spec click --spec graphviz --spec pydantic -- python
 
 # ----- IMPORTS -----
 import json
@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 import networkx as nx
 import click
-from typing import Dict, List, Tuple, Any, Optional, TypedDict
+from typing import Dict, List, Tuple, Any, Optional, TypedDict, Literal
+
+# Pydantic import for dependency graph validation
+from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
 
 # ----- CONSTANTS AND CONFIGURATION -----
 # CellProfiler setting types
@@ -58,6 +61,7 @@ OUTPUT_LABEL_TYPES = (
 NODE_TYPE_MODULE = "module"
 NODE_TYPE_IMAGE = "image"
 NODE_TYPE_OBJECT = "object"
+NODE_TYPE_MEASUREMENT = "measurement"  # dep graph only
 # List types are kept for input/edge classification but don't create separate nodes
 NODE_TYPE_IMAGE_LIST = "image_list"
 NODE_TYPE_OBJECT_LIST = "object_list"
@@ -71,8 +75,7 @@ RANK_MIN = "min"
 RANK_MAX = "max"
 
 # Node ranking configuration
-# Source nodes: typically root data nodes (input images)
-SOURCE_NODE_TYPES = [NODE_TYPE_IMAGE]
+SOURCE_MODULES = ["LoadData", "NamesAndTypes"]
 # Sink nodes: typically terminal modules like SaveImages or Measure*
 SINK_MODULE_PATTERNS = ["SaveImages", "Measure*", "Export*"]
 
@@ -85,6 +88,7 @@ STYLE_COLORS = {
     },
     NODE_TYPE_IMAGE: {"normal": "lightgray", "filtered": "lightsalmon"},
     NODE_TYPE_OBJECT: {"normal": "lightgreen", "filtered": "lightsalmon"},
+    NODE_TYPE_MEASUREMENT: {"normal": "darkorange", "filtered": "lightsalmon"},
 }
 
 # Graph styles
@@ -92,24 +96,42 @@ STYLE_SHAPES = {
     NODE_TYPE_MODULE: "box",
     NODE_TYPE_IMAGE: "ellipse",
     NODE_TYPE_OBJECT: "ellipse",
+    NODE_TYPE_MEASUREMENT: "note",
 }
 
 
 # Type definitions
-class ModuleInputs(TypedDict):
+class _ModuleInputs(TypedDict):
     """Dictionary of module inputs by data type"""
 
     image: List[str]
     object: List[str]
+
+
+class ModuleInputsPipe(_ModuleInputs):
+    """Dictionary of module inputs by data type - specific to pipeline files"""
+
     image_list: List[str]
     object_list: List[str]
 
 
+class ModuleInputsDepGraph(_ModuleInputs):
+    """Dictionary of module inputs by data type - specific to dependency graph files"""
+
+    measurement: List[str]
+
+
 class ModuleOutputs(TypedDict):
-    """Dictionary of module outputs by data type"""
+    """Dictionary of module outputs by data type - specific to pipeline files"""
 
     image: List[str]
     object: List[str]
+
+
+class ModuleOutputsDepGraph(ModuleOutputs):
+    """Dictionary of module outputs by data type - specifi to dependency graph files"""
+
+    measurement: List[str]
 
 
 class ModuleInfo(TypedDict):
@@ -117,13 +139,111 @@ class ModuleInfo(TypedDict):
 
     module_num: int
     module_name: str
-    inputs: ModuleInputs
-    outputs: ModuleOutputs
+    inputs: ModuleInputsPipe | ModuleInputsDepGraph
+    outputs: ModuleOutputs | ModuleOutputsDepGraph
     enabled: bool
 
 
 # Return type for main functions
 GraphData = Tuple[nx.DiGraph, List[ModuleInfo]]
+
+
+# ----- PYDANTIC MODELS FOR DEPENDENCY GRAPH VALIDATION -----
+# These models are used only when validating CP5 dependency graph JSON files
+class DepGraphInput(BaseModel):
+    """Input dependency in a CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")  # Strict validation
+
+    type: Literal["image", "object", "measurement"]
+    name: str
+    source_module: str
+    source_module_num: int = Field(ge=1)
+    # Optional fields for measurements
+    object_name: Optional[str] = None
+    feature: Optional[str] = None
+
+    @field_validator("object_name", "feature", mode="after")
+    @classmethod
+    def validate_measurement_fields(cls, v, info):
+        """Ensure measurement dependencies have object_name and feature."""
+        if info.data.get("type") == "measurement" and v is None:
+            raise ValueError("Required for measurement type")
+        return v
+
+
+class DepGraphOutput(BaseModel):
+    """Output dependency in a CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: Literal["image", "object", "measurement"]
+    name: str
+    destination_module: Optional[str] = None
+    destination_module_num: Optional[int] = Field(None, ge=1)
+    object_name: Optional[str] = None
+    feature: Optional[str] = None
+
+    @field_validator("object_name", "feature", mode="after")
+    @classmethod
+    def validate_measurement_fields(cls, v, info):
+        """Ensure measurement dependencies have object_name and feature."""
+        if info.data.get("type") == "measurement" and v is None:
+            raise ValueError("Required for measurement type")
+        return v
+
+
+class DepGraphModule(BaseModel):
+    """Module in a CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    module_name: str
+    module_num: int = Field(ge=1)
+    inputs: List[DepGraphInput] = []
+    outputs: List[DepGraphOutput] = []
+
+
+class DepGraphMetadata(BaseModel):
+    """Metadata for CP5 dependency graph."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    total_modules: int = Field(ge=0)
+    total_edges: int = Field(ge=0)
+
+
+class DependencyGraph(BaseModel):
+    """Complete CP5 dependency graph structure."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    modules: List[DepGraphModule]
+    metadata: DepGraphMetadata
+
+    def summary(self) -> str:
+        """Generate a summary of the dependency graph."""
+        lines = ["Dependency Graph Summary:"]
+        lines.append(f"  Total modules: {self.metadata.total_modules}")
+        lines.append(f"  Total edges: {self.metadata.total_edges}")
+        lines.append(f"  Module count (actual): {len(self.modules)}")
+
+        # Count dependency types
+        image_deps = object_deps = measurement_deps = 0
+        for module in self.modules:
+            for dep in module.inputs + module.outputs:
+                if dep.type == "image":
+                    image_deps += 1
+                elif dep.type == "object":
+                    object_deps += 1
+                elif dep.type == "measurement":
+                    measurement_deps += 1
+
+        lines.append(f"  Image dependencies: {image_deps}")
+        lines.append(f"  Object dependencies: {object_deps}")
+        lines.append(f"  Measurement dependencies: {measurement_deps}")
+
+        return "\n".join(lines)
 
 
 # ----- PIPELINE PARSING FUNCTIONS -----
@@ -143,7 +263,7 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
             - enabled: Boolean indicating if the module is enabled
     """
     # Initialize dictionaries for different types of inputs/outputs with proper typing
-    inputs: ModuleInputs = {
+    inputs: ModuleInputsPipe = {
         NODE_TYPE_IMAGE: [],
         NODE_TYPE_OBJECT: [],
         NODE_TYPE_IMAGE_LIST: [],
@@ -201,6 +321,117 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
     }
 
 
+def extract_module_io_from_dependency_graph(
+    dependency_data: Dict[str, Any],
+) -> List[ModuleInfo]:
+    """
+    Extract module I/O information from a dependency graph JSON file.
+
+    Args:
+        dependency_data: The parsed dependency graph JSON data
+
+    Returns:
+        List of ModuleInfo objects extracted from the dependency graph
+    """
+    modules_info: List[ModuleInfo] = []
+
+    # Get modules from the dependency JSON
+    modules = dependency_data.get("modules", [])
+
+    for module_data in modules:
+        # Initialize input/output dictionaries
+        inputs: ModuleInputsDepGraph = {
+            NODE_TYPE_IMAGE: [],
+            NODE_TYPE_OBJECT: [],
+            NODE_TYPE_MEASUREMENT: [],
+        }
+
+        outputs: ModuleOutputsDepGraph = {
+            NODE_TYPE_IMAGE: [],
+            NODE_TYPE_OBJECT: [],
+            NODE_TYPE_MEASUREMENT: [],
+        }
+
+        # Extract basic module information
+        module_name = module_data.get("module_name", "Unknown")
+        module_num = module_data.get("module_num", 0)
+        # Dependency JSON doesn't typically contain enabled status, assume enabled
+        module_enabled = True
+
+        # Process inputs
+        for input_dep in module_data.get("inputs", []):
+            dep_type = input_dep.get("type", "")
+            dep_name = input_dep.get("name", "")
+
+            if not dep_name:
+                continue
+
+            if dep_type == "image":
+                inputs[NODE_TYPE_IMAGE].append(dep_name)
+            elif dep_type == "object":
+                inputs[NODE_TYPE_OBJECT].append(dep_name)
+            elif dep_type == "measurement":
+                inputs[NODE_TYPE_MEASUREMENT].append(dep_name)
+
+        # Process outputs
+        for output_dep in module_data.get("outputs", []):
+            dep_type = output_dep.get("type", "")
+            dep_name = output_dep.get("name", "")
+
+            if not dep_name:
+                continue
+
+            if dep_type == "image":
+                outputs[NODE_TYPE_IMAGE].append(dep_name)
+            elif dep_type == "object":
+                outputs[NODE_TYPE_OBJECT].append(dep_name)
+            elif dep_type == "measurement":
+                outputs[NODE_TYPE_MEASUREMENT].append(dep_name)
+
+        # Create ModuleInfo object
+        module_info: ModuleInfo = {
+            "module_num": module_num,
+            "module_name": module_name,
+            "inputs": inputs,
+            "outputs": outputs,
+            "enabled": module_enabled,
+        }
+
+        modules_info.append(module_info)
+
+    return modules_info
+
+
+def validate_dependency_graph_with_pydantic(
+    dependency_data: Dict[str, Any],
+) -> Tuple[bool, str, Optional["DependencyGraph"]]:
+    """
+    Validate a dependency graph using Pydantic models.
+
+    Args:
+        dependency_data: The parsed dependency graph JSON data
+
+    Returns:
+        Tuple of (is_valid, message, validated_graph or None)
+    """
+    try:
+        # Pydantic automatically validates the structure and types
+        validated_graph = DependencyGraph(**dependency_data)
+        return True, "✓ Dependency graph is valid", validated_graph
+    except ValidationError as e:
+        # Format validation errors nicely
+        errors = []
+        for error in e.errors():
+            loc = " -> ".join(str(li) for li in error["loc"])
+            msg = error["msg"]
+            errors.append(f"  {loc}: {msg}")
+
+        error_message = "Validation errors:\n" + "\n".join(errors)
+        return False, error_message, None
+    except Exception as e:
+        return False, f"Unexpected error during validation: {e}", None
+
+
 # ----- GRAPH CONSTRUCTION FUNCTIONS -----
 def create_dependency_graph(
     pipeline_json: Dict[str, Any],
@@ -242,6 +473,76 @@ def create_dependency_graph(
 
         # Add data nodes and their connections to the module
         _add_module_data_connections(G, module_info, stable_id)
+
+    return G, modules_info
+
+
+def create_dependency_graph_from_modules(
+    modules_info: List[ModuleInfo],
+    include_disabled: bool = False,
+) -> GraphData:
+    """
+    Create a dependency graph from pre-extracted module information.
+
+    Args:
+        modules_info: List of ModuleInfo objects
+        include_disabled: Whether to include disabled modules
+
+    Returns:
+        A tuple of (graph, modules_info)
+    """
+    G = nx.DiGraph()
+
+    for module_info in modules_info:
+        # Skip disabled modules if not explicitly included
+        if not module_info["enabled"] and not include_disabled:
+            continue
+
+        # Skip modules with no I/O data
+        if not _module_has_relevant_io(module_info):
+            continue
+
+        # Generate stable module ID and add module node
+        stable_id = _create_stable_module_id(module_info)
+        _add_module_node(G, module_info, stable_id)
+
+        # Add data nodes and their connections to the module
+        _add_module_data_connections(G, module_info, stable_id)
+
+    return G, modules_info
+
+
+def adjust_load_data(
+    modules_info: List[ModuleInfo],
+    G: nx.DiGraph,
+) -> GraphData:
+    """
+    When LoadData is present and active in a pipeline, NamesAndTypes is disabled,
+    and LoadData does not enumerate its named image outputs.
+    From the perspective of the pipeline files, there will be some number of images
+    which are not outputs of any module, but are inputs to downstream modules.
+    These images are the ones produced by LoadData.
+    """
+    i = next(
+        (
+            i
+            for i, module_info in enumerate(modules_info)
+            if module_info["enabled"] and module_info["module_name"] == "LoadData"
+        ),
+        -1,
+    )
+    if i == -1:
+        return G, modules_info
+
+    load_data_info = modules_info[i]
+    stable_id = _create_stable_module_id(load_data_info)
+
+    for node, attr in G.nodes(data=True):
+        if attr.get("type") == NODE_TYPE_IMAGE and G.in_degree(node) == 0:
+            load_data_info["outputs"][NODE_TYPE_IMAGE].append(attr["name"])
+
+    _add_module_node(G, load_data_info, stable_id)
+    _add_module_data_connections(G, load_data_info, stable_id)
 
     return G, modules_info
 
@@ -513,8 +814,8 @@ def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
         if node_type == NODE_TYPE_MODULE:
             # Module node styling
             _apply_module_node_styling(G, node, attrs)
-        elif node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
-            # Data nodes (image, object) styling
+        elif node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT, NODE_TYPE_MEASUREMENT):
+            # Data nodes (image, object, measurement) styling
             _apply_data_node_styling(G, node, node_type)
 
 
@@ -584,8 +885,8 @@ def _identify_source_nodes(G: nx.DiGraph, ignore_filtered: bool = False) -> List
     source_nodes = []
 
     # Find nodes that match source criteria:
-    # 1. Node type is in SOURCE_NODE_TYPES
-    # 2. No incoming edges (in_degree = 0)
+    # 1. Node type is NODE_TYPE_MODULE
+    # 2. Module name matches one of SOURCE_MODULES
     # 3. Not filtered if ignore_filtered is True
     for node, attrs in G.nodes(data=True):
         node_type = attrs.get("type")
@@ -593,9 +894,12 @@ def _identify_source_nodes(G: nx.DiGraph, ignore_filtered: bool = False) -> List
         if ignore_filtered and attrs.get("filtered", False):
             continue
 
-        if node_type in SOURCE_NODE_TYPES and G.in_degree(node) == 0:
-            # Node IDs are already properly formatted in the graph
-            source_nodes.append(node)
+        if node_type == NODE_TYPE_MODULE:
+            module_name = attrs.get("module_name", "")
+
+            if module_name in SOURCE_MODULES:
+                # Node IDs are already properly formatted in the graph
+                source_nodes.append(node)
 
     return source_nodes
 
@@ -939,8 +1243,16 @@ def filter_keep_reachable_from_roots(
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
 
-    # Find all root nodes (nodes with no incoming edges)
-    all_root_nodes = [node for node in G.nodes() if G.in_degree(node) == 0]
+    # Find all root image nodes (nodes with a source module as parent)
+    all_root_nodes = [
+        node
+        for node in G.nodes()
+        if any(
+            G.nodes[p].get("type") == NODE_TYPE_MODULE
+            and G.nodes[p].get("module_name") in SOURCE_MODULES
+            for p in G.predecessors(node)
+        )
+    ]
 
     # If no root nodes specified, return the original graph
     if not root_node_names:
@@ -950,7 +1262,7 @@ def filter_keep_reachable_from_roots(
     specified_root_ids = []
     for root_node in all_root_nodes:
         node_type = G.nodes[root_node].get("type")
-        if node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+        if node_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT, NODE_TYPE_MEASUREMENT):
             # Extract name from node attributes or from the node ID
             node_name = G.nodes[root_node].get("name")
             if not node_name and "__" in root_node:
@@ -973,6 +1285,9 @@ def filter_keep_reachable_from_roots(
         reachable_nodes.update(bfs_tree.nodes())
         # Add the root itself
         reachable_nodes.add(root_id)
+
+        # Add direct parents of this root node
+        reachable_nodes.update(G.predecessors(root_id))
 
     # Get nodes that aren't reachable
     nodes_to_process = [node for node in G.nodes() if node not in reachable_nodes]
@@ -1028,21 +1343,27 @@ def filter_exclude_module_types(
 
 
 def filter_remove_unused_data(
-    G: nx.DiGraph, highlight_filtered: bool = False, filter_objects: bool = False
+    G: nx.DiGraph,
+    highlight_filtered: bool = False,
+    filter_images: bool = False,
+    filter_objects: bool = False,
+    filter_measurements: bool = False,
 ) -> Tuple[nx.DiGraph, int]:
     """
-    Filter graph to remove image nodes that are not inputs to any module.
-
-    Note: This only removes unused image nodes, not object nodes.
+    Filter graph to remove image, object, and/or measurement nodes that are not inputs to any module.
 
     Args:
         G: The original NetworkX graph
         highlight_filtered: If True, mark filtered nodes instead of removing them
-        filter_objects: If true, also mark/filter objects
+        filter_images: If true, mark/filter images
+        filter_objects: If true, mark/filter objects
+        filter_measurements: If true, mark/filter measurements
 
     Returns:
         A tuple of (filtered graph, number of nodes affected)
     """
+    if not filter_images and not filter_objects and not filter_measurements:
+        return G, 0
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
 
@@ -1050,8 +1371,9 @@ def filter_remove_unused_data(
     data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_IMAGE
+        if (filter_images and attrs.get("type") == NODE_TYPE_IMAGE)
         or (filter_objects and attrs.get("type") == NODE_TYPE_OBJECT)
+        or (filter_measurements and attrs.get("type") == NODE_TYPE_MEASUREMENT)
     ]
 
     # Check which ones are unused (not inputs to any module)
@@ -1083,7 +1405,7 @@ def filter_multiple_parents(
     G: nx.DiGraph, highlight_filtered: bool = False
 ) -> Tuple[nx.DiGraph, int]:
     """
-    Ensure images and objects only have a single parent.
+    Ensure images, objects, and measurements only have a single parent.
     Last module in pipeline marked as parent is kept as parent.
 
     Args:
@@ -1099,7 +1421,9 @@ def filter_multiple_parents(
     data_nodes = [
         node
         for node, attrs in G.nodes(data=True)
-        if attrs.get("type") == NODE_TYPE_IMAGE or attrs.get("type") == NODE_TYPE_OBJECT
+        if attrs.get("type") == NODE_TYPE_IMAGE
+        or attrs.get("type") == NODE_TYPE_OBJECT
+        or attrs.get("type") == NODE_TYPE_MEASUREMENT
     ]
 
     for node in data_nodes:
@@ -1136,14 +1460,71 @@ def filter_multiple_parents(
     return filtered_graph, edges_affected
 
 
+def filter_voided_modules(
+    G: nx.DiGraph, highlight_filtered: bool = False
+) -> Tuple[nx.DiGraph, int]:
+    """
+    Filter graph to remove or mark module nodes that have no inputs and no outputs.
+
+    Args:
+        G: The original NetworkX graph
+        highlight_filtered: If True, mark filtered nodes instead of removing them
+
+    Returns:
+        A tuple of (filtered graph, number of nodes affected)
+    """
+    filtered_graph = G.copy()
+
+    # Find all module nodes
+    module_nodes = [
+        node
+        for node, attrs in G.nodes(data=True)
+        if attrs.get("type") == NODE_TYPE_MODULE
+    ]
+
+    voided_modules = []
+
+    for node in module_nodes:
+        # Skip if already marked as filtered
+        if G.nodes[node].get("filtered", False):
+            continue
+
+        predecessors = list(G.predecessors(node))
+        successors = list(G.successors(node))
+
+        # Count non-filtered predecessors and successors
+        active_predecessors = [
+            p for p in predecessors if not G.nodes[p].get("filtered", False)
+        ]
+        active_successors = [
+            s for s in successors if not G.nodes[s].get("filtered", False)
+        ]
+
+        # Module is voided if it has no active inputs or no active outputs
+        if not active_predecessors and not active_successors:
+            voided_modules.append(node)
+
+    if highlight_filtered:
+        # Mark nodes as filtered instead of removing them
+        for node in voided_modules:
+            filtered_graph.nodes[node]["filtered"] = True
+    else:
+        # Remove voided module nodes
+        if voided_modules:
+            filtered_graph.remove_nodes_from(voided_modules)
+
+    return filtered_graph, len(voided_modules)
+
+
 def apply_graph_filters(
     G: nx.DiGraph,
     root_nodes: Optional[List[str]] = None,
-    remove_unused_data: bool = False,
+    remove_unused_images: bool = False,
+    remove_unused_objects: bool = False,
+    remove_unused_measurements: bool = False,
     exclude_module_types: Optional[List[str]] = None,
     highlight_filtered: bool = False,
     quiet: bool = False,
-    filter_objects: bool = False,
     no_single_parent: bool = False,
 ) -> nx.DiGraph:
     """
@@ -1152,11 +1533,12 @@ def apply_graph_filters(
     Args:
         G: The original NetworkX graph
         root_nodes: List of root node names to include (None means include all)
-        remove_unused_data: Whether to remove unused image nodes
+        remove_unused_images: Whether to remove unused image nodes
+        remove_unused_objects: Whether to remove unused object nodes
+        remove_unused_measurements: Whether to remove unused measurement nodes
         exclude_module_types: Optional list of module type names to exclude
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         quiet: Whether to suppress filter information output
-        filter_objects: Whether to supress objects along with images
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1190,20 +1572,34 @@ def apply_graph_filters(
                     f"  Removed {nodes_affected} nodes not reachable from specified roots"
                 )
 
+    remove_voided_modules = False
     # Apply unused data filtering if specified
-    if remove_unused_data:
+    if remove_unused_images or remove_unused_objects or remove_unused_measurements:
         action_verb = "Highlighting" if highlight_filtered else "Removing"
         if not quiet:
-            print(f"{action_verb} unused image nodes")
+            node_types = []
+            if remove_unused_images:
+                node_types.append(NODE_TYPE_IMAGE)
+            if remove_unused_objects:
+                node_types.append(NODE_TYPE_OBJECT)
+            if remove_unused_measurements:
+                node_types.append(NODE_TYPE_MEASUREMENT)
+            print(f"{action_verb} unused {', '.join(node_types)} nodes")
         filtered_graph, nodes_affected = filter_remove_unused_data(
-            filtered_graph, highlight_filtered, filter_objects
+            filtered_graph,
+            highlight_filtered,
+            remove_unused_images,
+            remove_unused_objects,
+            remove_unused_measurements,
         )
         total_affected += nodes_affected
-        if not quiet and nodes_affected > 0:
-            if highlight_filtered:
-                print(f"  Highlighted {nodes_affected} unused image nodes")
-            else:
-                print(f"  Removed {nodes_affected} unused image nodes")
+        if nodes_affected > 0:
+            remove_voided_modules = True
+            if not quiet:
+                if highlight_filtered:
+                    print(f"  Highlighted {nodes_affected} unused nodes")
+                else:
+                    print(f"  Removed {nodes_affected} unused nodes")
 
     # Apply module type exclusion if specified
     if exclude_module_types:
@@ -1219,6 +1615,30 @@ def apply_graph_filters(
                 print(f"  Highlighted {nodes_affected} modules of specified types")
             else:
                 print(f"  Removed {nodes_affected} modules of specified types")
+
+    # Remove voided modules (modules with no inputs and outputs)
+    if remove_voided_modules:
+        action_verb = "Highlighting" if highlight_filtered else "Removing"
+        if not quiet:
+            print(f"{action_verb} voided modules (no inputs and no outputs)")
+
+        # Keep applying until no more voided modules are found
+        # (removing one module might orphan others)
+        total_voided = 0
+        while True:
+            filtered_graph, nodes_affected = filter_voided_modules(
+                filtered_graph, highlight_filtered
+            )
+            total_voided += nodes_affected
+            if nodes_affected == 0:
+                break
+
+        total_affected += total_voided
+        if not quiet and total_voided > 0:
+            if highlight_filtered:
+                print(f"  Highlighted {total_voided} voided modules")
+            else:
+                print(f"  Removed {total_voided} voided modules")
 
     # Ensure images and objects only have a single parent
     # Last module in pipeline marked as parent is kept as parent
@@ -1249,8 +1669,9 @@ def apply_graph_filters(
 
 # ----- MAIN EXECUTION AND CLI -----
 def process_pipeline(
-    pipeline_path: str,
+    pipeline_path: Optional[str],
     output_path: Optional[str] = None,
+    dependency_graph_path: Optional[str] = None,
     no_module_info: bool = False,
     include_disabled: bool = False,
     no_formatting: bool = False,
@@ -1258,12 +1679,13 @@ def process_pipeline(
     explain_ids: bool = False,
     quiet: bool = False,
     root_nodes: Optional[List[str]] = None,
-    remove_unused_data: bool = False,
+    remove_unused_images: bool = False,
+    remove_unused_objects: bool = False,
+    remove_unused_measurements: bool = False,
     highlight_filtered: bool = False,
     exclude_module_types: Optional[List[str]] = None,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
-    filter_objects: bool = False,
     no_single_parent: bool = False,
 ) -> GraphData:
     """
@@ -1275,6 +1697,7 @@ def process_pipeline(
     Args:
         pipeline_path: Path to the CellProfiler pipeline JSON file
         output_path: Path to save the generated graph file
+        dependency_graph_path: Optionally use CP5 pipeline dependency graph json
         no_module_info: Whether to hide module information on graph edges
         include_disabled: Whether to include disabled modules in the graph
         no_formatting: Whether to strip formatting information from graph output
@@ -1282,12 +1705,13 @@ def process_pipeline(
         explain_ids: Whether to print a mapping of stable IDs
         quiet: Whether to suppress output
         root_nodes: Optional list of root node names to filter the graph by
-        remove_unused_data: Whether to remove unused image nodes
+        remove_unused_images: Whether to remove unused image nodes
+        remove_unused_objects: Whether to remove unused object nodes
+        remove_unused_measurements: Whether to remove unused measurement nodes
         highlight_filtered: Whether to highlight filtered nodes instead of removing them
         exclude_module_types: Optional list of module type names to exclude from the graph
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
-        filter_objects: Whether to include objects for filtering along with images
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1295,34 +1719,63 @@ def process_pipeline(
             - graph is a NetworkX DiGraph representing the pipeline
             - modules_info is a list of module information dictionaries
     """
-    # Load the pipeline JSON
-    try:
-        with open(pipeline_path, "r") as f:
-            pipeline = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        raise click.ClickException(f"Error loading pipeline file: {e}")
+    if dependency_graph_path:
+        try:
+            with open(dependency_graph_path, "r") as f:
+                dependency_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise click.ClickException(f"Error loading dependency JSON file: {e}")
 
-    # Create the graph
-    G, modules_info = create_dependency_graph(
-        pipeline,
-        include_disabled=include_disabled,
-    )
+        if not quiet:
+            print(f"Using dependency JSON: {dependency_graph_path}")
+
+        # Extract module information fromd dependency JSON
+        modules_info = extract_module_io_from_dependency_graph(dependency_data)
+
+        # Create graph from extracted modules
+        G, modules_info = create_dependency_graph_from_modules(
+            modules_info,
+            include_disabled=include_disabled,
+        )
+
+    elif pipeline_path:
+        # Load the pipeline JSON
+        try:
+            with open(pipeline_path, "r") as f:
+                pipeline = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise click.ClickException(f"Error loading pipeline file: {e}")
+
+        # Create the graph
+        G, modules_info = create_dependency_graph(
+            pipeline,
+            include_disabled=include_disabled,
+        )
+
+        # Make special adjustments for LoadData module
+        G, modules_info = adjust_load_data(modules_info, G)
+
+    else:
+        raise click.ClickException("Must provide either pipeline or dependy graph json")
 
     # Apply filters
     G = apply_graph_filters(
         G,
         root_nodes=root_nodes,
-        remove_unused_data=remove_unused_data,
+        remove_unused_images=remove_unused_images,
+        remove_unused_objects=remove_unused_objects,
+        remove_unused_measurements=remove_unused_measurements,
         exclude_module_types=exclude_module_types,
         highlight_filtered=highlight_filtered,
         quiet=quiet,
-        filter_objects=filter_objects,
         no_single_parent=no_single_parent,
     )
 
     # Print information about the pipeline if not quiet
     if not quiet:
-        print_pipeline_summary(G, pipeline_path)
+        if pipeline_path:
+            print_pipeline_summary(G, pipeline_path)
+
         print_connections(G)
 
         # Explain stable IDs if requested
@@ -1354,9 +1807,16 @@ def process_pipeline(
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
-@click.argument("pipeline", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.argument(
+    "pipeline-or-dep-graph", type=click.Path(exists=True, dir_okay=False, readable=True)
+)
 @click.argument(
     "output", type=click.Path(dir_okay=False, writable=True), required=False
+)
+@click.option(
+    "--dependency-graph",
+    is_flag=True,
+    help="process JSON argument as cp5-style dependency graph rather than pipeline",
 )
 # Display options
 @click.option(
@@ -1392,9 +1852,19 @@ def process_pipeline(
     help="Comma-separated list of root node names to filter the graph by",
 )
 @click.option(
-    "--remove-unused-data",
+    "--remove-unused-images",
     is_flag=True,
     help="Remove image nodes not used as inputs",
+)
+@click.option(
+    "--remove-unused-objects",
+    is_flag=True,
+    help="Remove object nodes not used as inputs",
+)
+@click.option(
+    "--remove-unused-measurements",
+    is_flag=True,
+    help="Remove measurement nodes not used as inputs",
 )
 @click.option(
     "--highlight-filtered",
@@ -1406,20 +1876,27 @@ def process_pipeline(
     help="Comma-separated list of module types to exclude (e.g., ExportToSpreadsheet)",
 )
 @click.option(
-    "--filter-objects",
-    is_flag=True,
-    help="Filter unused objects along with images",
-)
-@click.option(
     "--no-single-parent",
     is_flag=True,
     help="Allow images and objects to have more than one parent",
 )
+# Validation options (for dependency graph only)
+@click.option(
+    "--validate-only",
+    is_flag=True,
+    help="Only validate dependency graph against schema (requires --dependency-graph)",
+)
+@click.option(
+    "--summary",
+    is_flag=True,
+    help="Print dependency graph summary (use with --validate-only or --dependency-graph)",
+)
 # Output options
 @click.option("--quiet", "-q", is_flag=True, help="Suppress informational output")
 def cli(
-    pipeline: str,
+    pipeline_or_dep_graph: str,
     output: Optional[str],
+    dependency_graph: bool,
     no_module_info: bool,
     no_formatting: bool,
     ultra_minimal: bool,
@@ -1428,11 +1905,14 @@ def cli(
     rank_ignore_filtered: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
-    remove_unused_data: bool,
+    remove_unused_images: bool,
+    remove_unused_objects: bool,
+    remove_unused_measurements: bool,
     highlight_filtered: bool,
     exclude_module_types: Optional[str],
-    filter_objects: bool,
     no_single_parent: bool,
+    validate_only: bool,
+    summary: bool,
     quiet: bool,
 ) -> None:
     """
@@ -1457,12 +1937,74 @@ def cli(
         exclude_module_types_list = [
             name.strip() for name in exclude_module_types.split(",") if name.strip()
         ]
+    if dependency_graph:
+        dependency_graph_path = pipeline_or_dep_graph
+        pipeline_path = None
+    else:
+        pipeline_path = pipeline_or_dep_graph
+        dependency_graph_path = None
+
+    # Handle validation-only mode for dependency graphs
+    if validate_only:
+        if not dependency_graph:
+            raise click.ClickException(
+                "--validate-only requires --dependency-graph flag"
+            )
+
+        try:
+            with open(dependency_graph_path, "r") as f:
+                dependency_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise click.ClickException(f"Error loading dependency graph: {e}")
+
+        # Validate using Pydantic
+        is_valid, message, validated_graph = validate_dependency_graph_with_pydantic(
+            dependency_data
+        )
+
+        # Print validation result
+        click.echo(message)
+
+        # Print summary if requested and validation passed
+        if summary and is_valid and validated_graph:
+            click.echo()
+            click.echo(validated_graph.summary())
+
+        # Exit with appropriate code
+        sys.exit(0 if is_valid else 1)
+
+    # Validate before processing if requested
+    if dependency_graph and summary and not validate_only:
+        try:
+            with open(dependency_graph_path, "r") as f:
+                dependency_data = json.load(f)
+
+            # Validate and show summary if successful
+            is_valid, message, validated_graph = (
+                validate_dependency_graph_with_pydantic(dependency_data)
+            )
+
+            if not quiet:
+                click.echo(message)
+
+            if is_valid and validated_graph and not quiet:
+                click.echo()
+                click.echo(validated_graph.summary())
+                click.echo()
+        except Exception as e:
+            if not quiet:
+                click.echo(f"Warning: Could not validate/summarize: {e}", err=True)
+
+    # Check output file is provided for processing
+    if not output:
+        raise click.ClickException("Output file required unless using --validate-only")
 
     try:
         # Run the main processing function
         process_pipeline(
-            pipeline,
+            pipeline_path,
             output,
+            dependency_graph_path,
             no_module_info,
             include_disabled,
             no_formatting,
@@ -1470,12 +2012,13 @@ def cli(
             explain_ids=explain_ids,
             quiet=quiet,
             root_nodes=root_node_list,
-            remove_unused_data=remove_unused_data,
+            remove_unused_images=remove_unused_images,
+            remove_unused_objects=remove_unused_objects,
+            remove_unused_measurements=remove_unused_measurements,
             highlight_filtered=highlight_filtered,
             exclude_module_types=exclude_module_types_list,
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
-            filter_objects=filter_objects,
             no_single_parent=no_single_parent,
         )
     except click.ClickException as e:

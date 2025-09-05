@@ -11,7 +11,7 @@ This tool converts CellProfiler pipelines into standardized graph representation
    examples/analysis.json \
    examples/output/analysis_filtered.dot \
    --rank-nodes \
-   --remove-unused-data \
+   --remove-unused-images \
    --exclude-module-types=ExportToSpreadsheet \
    --highlight-filtered \
    --rank-ignore-filtered \
@@ -70,12 +70,12 @@ CellProfiler pipeline JSON files present some inherent challenges:
 
 This tool provides solutions through its filtering options:
 - Use `--root-nodes` to focus on paths from known inputs
-- Apply `--remove-unused-data` to eliminate unused data nodes
+- Apply `--remove-unused-[images|objects|measurements]` to eliminate unused data nodes
 - Exclude problematic modules with `--exclude-module-types=ExportToSpreadsheet`
 
-Note that some limitations can't be completely resolved with filtering. For example, in the visualization at the top of this README, the CallBarcodes module actually processes multiple cycle images internally, but only the first cycle appears as an explicit input in the JSON. This is why the other cycles don't show connections to the module even though they're used.
-
-Despite these limitations, this approach of working directly with the JSON file is valuable because it allows you to analyze pipeline structure without needing the full CellProfiler codebase. You can quickly understand and compare pipelines by focusing on their key structural components.
+> [!CAUTION]
+> Some limitations can't be completely resolved with filtering. For example, in the visualization at the top of this README, the CallBarcodes module actually processes multiple cycle images internally, but only the first cycle appears as an explicit input in the JSON. This is why the other cycles don't show connections to the module even though they're used.
+> Despite these limitations, this approach of working directly with the JSON file is valuable because it allows you to analyze pipeline structure without needing the full CellProfiler codebase. You can quickly understand and compare pipelines by focusing on their key structural components.
 
 ## Pipeline Visualization
 
@@ -113,8 +113,9 @@ Output formats include:
 **Filtering Options:**
 - `--include-disabled` - Include disabled modules in the graph
 - `--root-nodes=<name1,name2>` - Keep only paths from specified root nodes
-- `--remove-unused-data` - Remove unused data nodes (images by default, objects with `--filter-objects`)
-- `--filter-objects` - Include objects when filtering unused data nodes
+- `--remove-unused-images` - Remove unused image nodes (those not used as input to a module)
+- `--remove-unused-objects` - Remove unused object nodes (those not used as input to a module)
+- `--remove-unused-measurements` - Remove unused measurement nodes (those not used as input to a module; only applicable with the `--dependency-graph` option)
 - `--highlight-filtered` - Highlight nodes that would be filtered instead of removing them (uses distinct colors and dashed borders)
 - `--exclude-module-types=<type1,type2>` - Exclude specific module types (e.g., ExportToSpreadsheet)
 - `--no-single-parent` - Allow images and objects to have more than one parent (disables duplicate parent removal)
@@ -128,10 +129,10 @@ The tool provides filtering options to focus on specific parts of complex pipeli
 ./cp_graph.py examples/illum.json examples/output/illum.dot
 
 # Highlight filtered nodes instead of removing them (uses distinct colors and dashed borders)
-./cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-data --highlight-filtered
+./cp_graph.py examples/illum.json examples/output/illum_highlight.dot --root-nodes=OrigDNA --remove-unused-images --highlight-filtered
 
 # Filter to show only nodes reachable from OrigDNA (removes unreachable nodes)
-./cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-data
+./cp_graph.py examples/illum.json examples/output/illum_filtered.dot --root-nodes=OrigDNA --remove-unused-images
 ```
 
 <table>
@@ -218,14 +219,58 @@ The repository includes sample files:
 ./cp_graph.py examples/analysis.json examples/output/analysis.dot
 
 # Filter complex analysis pipeline by specifying multiple root nodes
-./cp_graph.py examples/analysis.json examples/output/analysis_filtered.dot --remove-unused-data  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
+./cp_graph.py examples/analysis.json examples/output/analysis_filtered_simple.dot --remove-unused-images  --exclude-module-types=ExportToSpreadsheet --root-nodes=CorrPhalloidin,CorrZO1,CorrDNA,Cycle01_DAPI  --highlight-filtered
 
 # Combine node ranking with filtering for optimal visualization
-./cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-data
+./cp_graph.py examples/analysis.json examples/output/analysis_ranked_filtered.dot --rank-nodes --root-nodes=CorrPhalloidin,CorrZO1 --remove-unused-images
 
 # Combine node ranking with highlighted filtering, ignoring filtered nodes in ranking
 ./cp_graph.py examples/analysis.json examples/output/analysis_clean_ranked.dot --rank-nodes --rank-ignore-filtered --root-nodes=CorrPhalloidin,CorrZO1 --highlight-filtered
 ```
+
+## CellProfiler 5
+
+CellProfiler 5 has the ability to export dependency graphs (in the GUI: File -> Export -> Pipeline Dependency Graph...). This is a JSON file which describes inputs and outputs of the pipeline in a more robust way than pipeline JSON files.
+The [jsonschema](https://python-jsonschema.readthedocs.io/en/stable/) for CP5 dependency graph JSON files is provided in `cp5-dep-graph-schema.json`.
+A script is provided to validate the schema against pipline dependency graph JSON files generated by CellProfiler5.
+
+```bash
+scripts/validate-schema.py [--summary] [--verbose] <path/to/cp5-dep-graph.json>
+```
+
+`cp-graph` can take in the dependency graph JSON rather than the pipeline JSON by using the `--dependency-graph` flag.
+
+> [!NOTE]
+> Below we use `ExampleFly-dep-graph.json` to generate `ExampleFly-measurement.dot`. This is the standard ExampleFly pipeline found in CellProfiler's example pipeline, but (arbitrarily) modified with an `ExpandOrShrinkObjects` module which takes in the `Image.Count_Cells` measurement. This is purely to illustrate the capability to show a measurement being used for input/output, and isn't normally a sensible thing to do in the ExampleFly pipeline.
+
+```bash
+# generate the dot file
+./cp_graph.py --remove-unused-objects --remove-unused-measurements --dependency-graph "examples/ExampleFly-dep-graph.json" "examples/output/ExampleFly-measurement.dot"
+# convert it to png
+pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.dot" -o "examples/output/ExampleFly-measurement.png"
+```
+
+The above example generates the following image:
+<img src="examples/output/ExampleFly-measurement.png" alt="Example Fly Graph with measurement">
+
+> [!IMPORTANT]
+> CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
+
+## Regenerating Example Outputs
+
+All example images and graphs in this documentation can be regenerated using:
+
+```bash
+./scripts/regenerate_all_examples.sh
+```
+
+## Testing
+
+```bash
+python test_cp_graph.py  # Compares outputs against examples/output/ references
+```
+
+**Note:** `regenerate_all_examples.sh` overwrites these references - only run it from verified-correct code.
 
 ## Technical Details
 
@@ -235,7 +280,7 @@ The tool generates consistent module identifiers using SHA-256 hashing of the mo
 
 ### CellProfiler JSON Format
 
-The tool parses CellProfiler v6 JSON pipelines, which contain:
+Unless using the `--dependency-graph` option as detailed above, the tool parses CellProfiler v6 JSON pipelines, which contain:
 - **Module attributes**: enabled status, module type, original number
 - **Settings**: Input/output specifications with fully qualified class names
 - **Data connections**: Named references between modules (e.g., one module outputs "DNA", another inputs "DNA")
