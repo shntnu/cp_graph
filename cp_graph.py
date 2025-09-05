@@ -511,6 +511,7 @@ def create_dependency_graph_from_modules(
 
     return G, modules_info
 
+
 def adjust_load_data(
     modules_info: List[ModuleInfo],
     G: nx.DiGraph,
@@ -522,7 +523,14 @@ def adjust_load_data(
     which are not outputs of any module, but are inputs to downstream modules.
     These images are the ones produced by LoadData.
     """
-    i = next((i for i, module_info in enumerate(modules_info) if module_info["enabled"] and module_info["module_name"] == "LoadData"), -1)
+    i = next(
+        (
+            i
+            for i, module_info in enumerate(modules_info)
+            if module_info["enabled"] and module_info["module_name"] == "LoadData"
+        ),
+        -1,
+    )
     if i == -1:
         return G, modules_info
 
@@ -1734,9 +1742,7 @@ def process_pipeline(
         )
 
         # Make special adjustments for LoadData module
-        G, modules_info = adjust_load_data(
-            modules_info, G
-        )
+        G, modules_info = adjust_load_data(modules_info, G)
 
     else:
         raise click.ClickException("Must provide either pipeline or dependy graph json")
