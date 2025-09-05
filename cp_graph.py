@@ -1243,8 +1243,11 @@ def filter_keep_reachable_from_roots(
     # Create a copy of the graph to modify
     filtered_graph = G.copy()
 
-    # Find all root nodes (nodes with no incoming edges)
-    all_root_nodes = [node for node in G.nodes() if G.in_degree(node) == 0]
+    # Find all root image nodes (nodes with a source module as parent)
+    all_root_nodes = [
+        node for node in G.nodes()
+        if any(G.nodes[p].get("type") == NODE_TYPE_MODULE and G.nodes[p].get("module_name") in SOURCE_MODULES for p in G.predecessors(node))
+    ]
 
     # If no root nodes specified, return the original graph
     if not root_node_names:
@@ -1277,6 +1280,9 @@ def filter_keep_reachable_from_roots(
         reachable_nodes.update(bfs_tree.nodes())
         # Add the root itself
         reachable_nodes.add(root_id)
+
+        # Add direct parents of this root node
+        reachable_nodes.update(G.predecessors(root_id))
 
     # Get nodes that aren't reachable
     nodes_to_process = [node for node in G.nodes() if node not in reachable_nodes]
