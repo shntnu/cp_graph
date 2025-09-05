@@ -125,7 +125,7 @@ def main():
         # CellProfiler 5 Dependency Graphs
         (
             "ExampleFly basic",
-            "./cp_graph.py examples/ExampleFly.json examples/output/ExampleFly.dot --highlight-filtered --rank-nodes --remove-unused-objects",
+            "./cp_graph.py examples/ExampleFly.json examples/output/ExampleFly.dot --highlight-filtered --rank-nodes --remove-unused-objects --remove-unused-images",
             Path("examples/output/ExampleFly.dot"),
         ),
         (
