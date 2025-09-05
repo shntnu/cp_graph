@@ -75,8 +75,7 @@ RANK_MIN = "min"
 RANK_MAX = "max"
 
 # Node ranking configuration
-# Source nodes: typically root data nodes (input images)
-SOURCE_NODE_TYPES = [NODE_TYPE_IMAGE]
+SOURCE_MODULES = ["LoadData", "NamesAndTypes"]
 # Sink nodes: typically terminal modules like SaveImages or Measure*
 SINK_MODULE_PATTERNS = ["SaveImages", "Measure*", "Export*"]
 
@@ -512,6 +511,33 @@ def create_dependency_graph_from_modules(
 
     return G, modules_info
 
+def adjust_load_data(
+    modules_info: List[ModuleInfo],
+    G: nx.DiGraph,
+) -> GraphData:
+    """
+    When LoadData is present and active in a pipeline, NamesAndTypes is disabled,
+    and LoadData does not enumerate its named image outputs.
+    From the perspective of the pipeline files, there will be some number of images
+    which are not outputs of any module, but are inputs to downstream modules.
+    These images are the ones produced by LoadData.
+    """
+    i = next((i for i, module_info in enumerate(modules_info) if module_info["enabled"] and module_info["module_name"] == "LoadData"), -1)
+    if i == -1:
+        return G, modules_info
+
+    load_data_info = modules_info[i]
+    stable_id = _create_stable_module_id(load_data_info)
+
+    for node, attr in G.nodes(data=True):
+        if attr.get("type") == NODE_TYPE_IMAGE and G.in_degree(node) == 0:
+            load_data_info["outputs"][NODE_TYPE_IMAGE].append(attr["name"])
+
+    _add_module_node(G, load_data_info, stable_id)
+    _add_module_data_connections(G, load_data_info, stable_id)
+
+    return G, modules_info
+
 
 def _module_has_relevant_io(
     module_info: ModuleInfo,
@@ -851,8 +877,8 @@ def _identify_source_nodes(G: nx.DiGraph, ignore_filtered: bool = False) -> List
     source_nodes = []
 
     # Find nodes that match source criteria:
-    # 1. Node type is in SOURCE_NODE_TYPES
-    # 2. No incoming edges (in_degree = 0)
+    # 1. Node type is NODE_TYPE_MODULE
+    # 2. Module name matches one of SOURCE_MODULES
     # 3. Not filtered if ignore_filtered is True
     for node, attrs in G.nodes(data=True):
         node_type = attrs.get("type")
@@ -860,9 +886,12 @@ def _identify_source_nodes(G: nx.DiGraph, ignore_filtered: bool = False) -> List
         if ignore_filtered and attrs.get("filtered", False):
             continue
 
-        if node_type in SOURCE_NODE_TYPES and G.in_degree(node) == 0:
-            # Node IDs are already properly formatted in the graph
-            source_nodes.append(node)
+        if node_type == NODE_TYPE_MODULE:
+            module_name = attrs.get("module_name", "")
+
+            if module_name in SOURCE_MODULES:
+                # Node IDs are already properly formatted in the graph
+                source_nodes.append(node)
 
     return source_nodes
 
@@ -1702,6 +1731,11 @@ def process_pipeline(
         G, modules_info = create_dependency_graph(
             pipeline,
             include_disabled=include_disabled,
+        )
+
+        # Make special adjustments for LoadData module
+        G, modules_info = adjust_load_data(
+            modules_info, G
         )
 
     else:
