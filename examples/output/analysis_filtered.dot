@@ -1,5 +1,5 @@
 strict digraph {
-"image__Leave this black" [type=image, label="Leave this black", shape=ellipse, style=filled, fillcolor=lightgray];
+"image__Leave this black" [type=image, label="Leave this black", filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 Align_d0c009c5 [type=module, label="Align #4", module_name=Align, module_num=4, original_num=4, stable_id="Align_d0c009c5", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 CallBarcodes_bc36b96a [type=module, label="CallBarcodes #42", module_name=CallBarcodes, module_num=42, original_num=42, stable_id="CallBarcodes_bc36b96a", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 ConvertObjectsToImage_3c1046f2 [type=module, label="ConvertObjectsToImage #79", module_name=ConvertObjectsToImage, module_num=79, original_num=79, stable_id="ConvertObjectsToImage_3c1046f2", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
@@ -71,7 +71,7 @@ image__BarcodeScores_IntValues [type=image, label="BarcodeScores_IntValues", sha
 image__Barcodes_Barcodes [type=image, label="Barcodes_Barcodes", shape=ellipse, style=filled, fillcolor=lightgray];
 image__Barcodes_IntValues [type=image, label="Barcodes_IntValues", shape=ellipse, style=filled, fillcolor=lightgray];
 image__Barcodes_Scores [type=image, label="Barcodes_Scores", shape=ellipse, style=filled, fillcolor=lightgray];
-image__Barcodes_Thresh [type=image, label="Barcodes_Thresh", shape=ellipse, style=filled, fillcolor=lightgray];
+image__Barcodes_Thresh [type=image, label="Barcodes_Thresh", filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 image__CellOutlineImage [type=image, label=CellOutlineImage, shape=ellipse, style=filled, fillcolor=lightgray];
 image__Cells_Objects [type=image, label="Cells_Objects", shape=ellipse, style=filled, fillcolor=lightgray];
 image__ColorImage [type=image, label=ColorImage, shape=ellipse, style=filled, fillcolor=lightgray];
@@ -129,7 +129,7 @@ object__Foci [type=object, label=Foci, shape=ellipse, style=filled, fillcolor=li
 object__Foci_NonCellEdge [type=object, label="Foci_NonCellEdge", shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Foci_PreMask [type=object, label="Foci_PreMask", shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Nuclei [type=object, label=Nuclei, shape=ellipse, style=filled, fillcolor=lightgreen];
-object__PaddedObjects_Both [type=object, label="PaddedObjects_Both", shape=ellipse, style=filled, fillcolor=lightgreen];
+object__PaddedObjects_Both [type=object, label="PaddedObjects_Both", filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 object__PreCells [type=object, label=PreCells, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__RelateObjects [type=object, label=RelateObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__RemovedObjects [type=object, label=RemovedObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
@@ -137,7 +137,7 @@ object__ResizeCells [type=object, label=ResizeCells, shape=ellipse, style=filled
 object__ResizeConfluent [type=object, label=ResizeConfluent, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__ResizeNuclei [type=object, label=ResizeNuclei, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Resize_Foci [type=object, label="Resize_Foci", shape=ellipse, style=filled, fillcolor=lightgreen];
-object__WellEdgeObjects [type=object, label=WellEdgeObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
+object__WellEdgeObjects [type=object, label=WellEdgeObjects, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 "image__Leave this black" -> GrayToColor_e2eac13e [type="image_input"];
 Align_d0c009c5 -> image__AlignedRed [type="image_output"];
 Align_d0c009c5 -> image__DAPI_Painting [type="image_output"];
