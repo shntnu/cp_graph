@@ -100,7 +100,7 @@ pixi exec --spec "graphviz" dot -Tpng examples/output/analysis_filtered.dot -o e
 echo "Generating CP5 dependency graph examples..."
 
 # Basic ExampleFly dependency graph
-./cp_graph.py examples/ExampleFly.json examples/output/ExampleFly.dot --highlight-filtered --rank-nodes --remove-unused-objects
+./cp_graph.py examples/ExampleFly.json examples/output/ExampleFly.dot --highlight-filtered --rank-nodes --remove-unused-objects --remove-unused-images
 pixi exec --spec "graphviz" dot -Tpng examples/output/ExampleFly.dot -o examples/output/ExampleFly.png
 
 # ExampleFly with measurements shown (filtered)

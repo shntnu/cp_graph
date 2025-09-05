@@ -14,7 +14,7 @@ SaveImages_c2b508af [type=module, label="SaveImages #15", module_name=SaveImages
 image__CropBlue [type=image, label=CropBlue, shape=ellipse, style=filled, fillcolor=lightgray];
 image__CropGreen [type=image, label=CropGreen, shape=ellipse, style=filled, fillcolor=lightgray];
 image__CropRed [type=image, label=CropRed, shape=ellipse, style=filled, fillcolor=lightgray];
-image__DNA [type=image, label=DNA, shape=ellipse, style=filled, fillcolor=lightgray];
+image__DNA [type=image, label=DNA, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
 image__OrigBlue [type=image, label=OrigBlue, shape=ellipse, style=filled, fillcolor=lightgray];
 image__OrigGreen [type=image, label=OrigGreen, shape=ellipse, style=filled, fillcolor=lightgray];
 image__OrigRed [type=image, label=OrigRed, shape=ellipse, style=filled, fillcolor=lightgray];
