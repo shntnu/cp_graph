@@ -12,7 +12,7 @@ NamesAndTypes_3270e965 [type=module, label="NamesAndTypes #3", module_name=Names
 OverlayOutlines_c307f0ac [type=module, label="OverlayOutlines #11", module_name=OverlayOutlines, module_num=11, original_num=11, stable_id="OverlayOutlines_c307f0ac", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 RelateObjects_a0fdd759 [type=module, label="RelateObjects #15", module_name=RelateObjects, module_num=15, original_num=15, stable_id="RelateObjects_a0fdd759", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 SaveImages_36fea0db [type=module, label="SaveImages #16", module_name=SaveImages, module_num=16, original_num=16, stable_id="SaveImages_36fea0db", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
-image__DNA [type=image, label=DNA, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+image__DNA [type=image, label=DNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__FilteredRNA [type=image, label=FilteredRNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__OrigActin_Golgi_Membrane [type=image, label="OrigActin_Golgi_Membrane", shape=ellipse, style=filled, fillcolor=lightgray];
 image__OrigDNA [type=image, label=OrigDNA, shape=ellipse, style=filled, fillcolor=lightgray];
@@ -21,13 +21,13 @@ image__OrigMito [type=image, label=OrigMito, shape=ellipse, style=filled, fillco
 image__OrigRNA [type=image, label=OrigRNA, shape=ellipse, style=filled, fillcolor=lightgray];
 image__RNA_in_Nuclei [type=image, label="RNA_in_Nuclei", shape=ellipse, style=filled, fillcolor=lightgray];
 image__SanityCheck [type=image, label=SanityCheck, shape=ellipse, style=filled, fillcolor=lightgray];
-object__Cell [type=object, label=Cell, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+object__Cell [type=object, label=Cell, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Cells [type=object, label=Cells, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Cytoplasm [type=object, label=Cytoplasm, shape=ellipse, style=filled, fillcolor=lightgreen];
-object__FilteredNuclei [type=object, label=FilteredNuclei, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+object__FilteredNuclei [type=object, label=FilteredNuclei, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Nuclei [type=object, label=Nuclei, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Nucleoli [type=object, label=Nucleoli, shape=ellipse, style=filled, fillcolor=lightgreen];
-object__NucleoliChildObjects [type=object, label=NucleoliChildObjects, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+object__NucleoliChildObjects [type=object, label=NucleoliChildObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
 EnhanceOrSuppressFeatures_49d444fd -> image__FilteredRNA [type="image_output"];
 IdentifyPrimaryObjects_421828fd -> object__Nucleoli [type="object_output"];
 IdentifyPrimaryObjects_e0743572 -> object__Nuclei [type="object_output"];
