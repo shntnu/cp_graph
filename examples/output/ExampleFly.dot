@@ -67,5 +67,6 @@ object__Nuclei -> MeasureObjectIntensity_493d53fb [type="object_list_input"];
 object__Nuclei -> MeasureObjectSizeShape_33e152a1 [type="object_list_input"];
 object__Nuclei -> MeasureTexture_493d53fb [type="object_list_input"];
 
+  {rank = min; NamesAndTypes_a64add3;}
   {rank = max; MeasureObjectSizeShape_33e152a1; MeasureObjectIntensity_493d53fb; MeasureTexture_493d53fb; SaveImages_c2b508af;}
 }

@@ -2,6 +2,7 @@ strict digraph {
 CorrectIlluminationCalculate_2ab137a7 [type=module, label="CorrectIlluminationCalculate #6", module_name=CorrectIlluminationCalculate, module_num=6, original_num=6, stable_id="CorrectIlluminationCalculate_2ab137a7", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 CorrectIlluminationCalculate_cd0871b [type=module, label="CorrectIlluminationCalculate #9", module_name=CorrectIlluminationCalculate, module_num=9, original_num=9, stable_id="CorrectIlluminationCalculate_cd0871b", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 CorrectIlluminationCalculate_e3750f2a [type=module, label="CorrectIlluminationCalculate #3", module_name=CorrectIlluminationCalculate, module_num=3, original_num=3, stable_id="CorrectIlluminationCalculate_e3750f2a", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
+LoadData_cbe5cfdf [type=module, label="LoadData #1", module_name=LoadData, module_num=1, original_num=1, stable_id="LoadData_cbe5cfdf", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 Resize_32606b38 [type=module, label="Resize #2", module_name=Resize, module_num=2, original_num=2, stable_id="Resize_32606b38", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 Resize_6f9ec43f [type=module, label="Resize #10", module_name=Resize, module_num=10, original_num=10, stable_id="Resize_6f9ec43f", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 Resize_9779805 [type=module, label="Resize #5", module_name=Resize, module_num=5, original_num=5, stable_id="Resize_9779805", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
@@ -30,6 +31,9 @@ CorrectIlluminationCalculate_cd0871b -> image__IllumBlueAvg [type="image_output"
 CorrectIlluminationCalculate_cd0871b -> image__IllumBlueDilated [type="image_output"];
 CorrectIlluminationCalculate_cd0871b -> image__IllumZO1 [type="image_output"];
 CorrectIlluminationCalculate_e3750f2a -> image__IllumDNA [type="image_output"];
+LoadData_cbe5cfdf -> image__OrigDNA [type="image_output"];
+LoadData_cbe5cfdf -> image__OrigPhalloidin [type="image_output"];
+LoadData_cbe5cfdf -> image__OrigZO1 [type="image_output"];
 Resize_32606b38 -> image__DownsampledDNA [type="image_output"];
 Resize_6f9ec43f -> image__UpsampledIllumZO1 [type="image_output"];
 Resize_9779805 -> image__DownsampledPhalloidin [type="image_output"];

@@ -2,6 +2,7 @@ strict digraph {
 CorrectIlluminationCalculate_2ab137a7 [type=module];
 CorrectIlluminationCalculate_cd0871b [type=module];
 CorrectIlluminationCalculate_e3750f2a [type=module];
+LoadData_cbe5cfdf [type=module];
 Resize_32606b38 [type=module];
 Resize_6f9ec43f [type=module];
 Resize_9779805 [type=module];
@@ -29,6 +30,9 @@ CorrectIlluminationCalculate_cd0871b -> image__IllumBlueAvg;
 CorrectIlluminationCalculate_cd0871b -> image__IllumBlueDilated;
 CorrectIlluminationCalculate_cd0871b -> image__IllumZO1;
 CorrectIlluminationCalculate_e3750f2a -> image__IllumDNA;
+LoadData_cbe5cfdf -> image__OrigDNA;
+LoadData_cbe5cfdf -> image__OrigPhalloidin;
+LoadData_cbe5cfdf -> image__OrigZO1;
 Resize_32606b38 -> image__DownsampledDNA;
 Resize_6f9ec43f -> image__UpsampledIllumZO1;
 Resize_9779805 -> image__DownsampledPhalloidin;

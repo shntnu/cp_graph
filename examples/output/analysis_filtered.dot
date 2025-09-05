@@ -1,5 +1,5 @@
 strict digraph {
-"image__Leave this black" [type=image, label="Leave this black", filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+"image__Leave this black" [type=image, label="Leave this black", shape=ellipse, style=filled, fillcolor=lightgray];
 Align_d0c009c5 [type=module, label="Align #4", module_name=Align, module_num=4, original_num=4, stable_id="Align_d0c009c5", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 CallBarcodes_bc36b96a [type=module, label="CallBarcodes #42", module_name=CallBarcodes, module_num=42, original_num=42, stable_id="CallBarcodes_bc36b96a", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 ConvertObjectsToImage_3c1046f2 [type=module, label="ConvertObjectsToImage #79", module_name=ConvertObjectsToImage, module_num=79, original_num=79, stable_id="ConvertObjectsToImage_3c1046f2", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
@@ -23,6 +23,7 @@ ImageMath_71d8e604 [type=module, label="ImageMath #18", module_name=ImageMath, m
 ImageMath_76ebca63 [type=module, label="ImageMath #8", module_name=ImageMath, module_num=8, original_num=8, stable_id="ImageMath_76ebca63", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 ImageMath_82709eb0 [type=module, label="ImageMath #35", module_name=ImageMath, module_num=35, original_num=35, stable_id="ImageMath_82709eb0", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 ImageMath_fd494492 [type=module, label="ImageMath #44", module_name=ImageMath, module_num=44, original_num=44, stable_id="ImageMath_fd494492", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
+LoadData_cbe5cfdf [type=module, label="LoadData #1", module_name=LoadData, module_num=1, original_num=1, stable_id="LoadData_cbe5cfdf", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 MaskImage_1c28bd3a [type=module, label="MaskImage #47", module_name=MaskImage, module_num=47, original_num=47, stable_id="MaskImage_1c28bd3a", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 MaskImage_37983b23 [type=module, label="MaskImage #24", module_name=MaskImage, module_num=24, original_num=24, stable_id="MaskImage_37983b23", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
 MaskImage_5611c620 [type=module, label="MaskImage #46", module_name=MaskImage, module_num=46, original_num=46, stable_id="MaskImage_5611c620", enabled=True, shape=box, style=filled, fontname="Helvetica-Bold", fillcolor=lightblue];
@@ -70,7 +71,7 @@ image__BarcodeScores_IntValues [type=image, label="BarcodeScores_IntValues", sha
 image__Barcodes_Barcodes [type=image, label="Barcodes_Barcodes", shape=ellipse, style=filled, fillcolor=lightgray];
 image__Barcodes_IntValues [type=image, label="Barcodes_IntValues", shape=ellipse, style=filled, fillcolor=lightgray];
 image__Barcodes_Scores [type=image, label="Barcodes_Scores", shape=ellipse, style=filled, fillcolor=lightgray];
-image__Barcodes_Thresh [type=image, label="Barcodes_Thresh", filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+image__Barcodes_Thresh [type=image, label="Barcodes_Thresh", shape=ellipse, style=filled, fillcolor=lightgray];
 image__CellOutlineImage [type=image, label=CellOutlineImage, shape=ellipse, style=filled, fillcolor=lightgray];
 image__Cells_Objects [type=image, label="Cells_Objects", shape=ellipse, style=filled, fillcolor=lightgray];
 image__ColorImage [type=image, label=ColorImage, shape=ellipse, style=filled, fillcolor=lightgray];
@@ -128,7 +129,7 @@ object__Foci [type=object, label=Foci, shape=ellipse, style=filled, fillcolor=li
 object__Foci_NonCellEdge [type=object, label="Foci_NonCellEdge", shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Foci_PreMask [type=object, label="Foci_PreMask", shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Nuclei [type=object, label=Nuclei, shape=ellipse, style=filled, fillcolor=lightgreen];
-object__PaddedObjects_Both [type=object, label="PaddedObjects_Both", filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+object__PaddedObjects_Both [type=object, label="PaddedObjects_Both", shape=ellipse, style=filled, fillcolor=lightgreen];
 object__PreCells [type=object, label=PreCells, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__RelateObjects [type=object, label=RelateObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__RemovedObjects [type=object, label=RemovedObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
@@ -136,7 +137,7 @@ object__ResizeCells [type=object, label=ResizeCells, shape=ellipse, style=filled
 object__ResizeConfluent [type=object, label=ResizeConfluent, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__ResizeNuclei [type=object, label=ResizeNuclei, shape=ellipse, style=filled, fillcolor=lightgreen];
 object__Resize_Foci [type=object, label="Resize_Foci", shape=ellipse, style=filled, fillcolor=lightgreen];
-object__WellEdgeObjects [type=object, label=WellEdgeObjects, filtered=True, shape=ellipse, style="filled,dashed", fillcolor=lightsalmon];
+object__WellEdgeObjects [type=object, label=WellEdgeObjects, shape=ellipse, style=filled, fillcolor=lightgreen];
 "image__Leave this black" -> GrayToColor_e2eac13e [type="image_input"];
 Align_d0c009c5 -> image__AlignedRed [type="image_output"];
 Align_d0c009c5 -> image__DAPI_Painting [type="image_output"];
@@ -167,6 +168,24 @@ ImageMath_71d8e604 -> image__WellEdgeDistance [type="image_output"];
 ImageMath_76ebca63 -> image__NonPaddedAreas_Any [type="image_output"];
 ImageMath_82709eb0 -> image__MaxOfCycle01 [type="image_output"];
 ImageMath_fd494492 -> image__Barcodes_Scores [type="image_output"];
+LoadData_cbe5cfdf -> "image__Leave this black" [type="image_output"];
+LoadData_cbe5cfdf -> image__Barcodes_Thresh [type="image_output"];
+LoadData_cbe5cfdf -> image__CorrDNA [type="image_output"];
+LoadData_cbe5cfdf -> image__CorrPhalloidin [type="image_output"];
+LoadData_cbe5cfdf -> image__CorrZO1 [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle01_A [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle01_C [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle01_DAPI [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle01_G [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle01_T [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle02_A [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle02_C [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle02_G [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle02_T [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle03_A [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle03_C [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle03_G [type="image_output"];
+LoadData_cbe5cfdf -> image__Cycle03_T [type="image_output"];
 MaskImage_1c28bd3a -> image__MaskedScores_IntValues [type="image_output"];
 MaskImage_37983b23 -> image__MaskedZO1 [type="image_output"];
 MaskImage_5611c620 -> image__MaskedBarcodes_IntValues [type="image_output"];
@@ -337,6 +356,6 @@ object__ResizeNuclei -> OverlayOutlines_cfebace4 [type="object_input"];
 object__Resize_Foci -> OverlayOutlines_5eab99c7 [type="object_input"];
 object__WellEdgeObjects -> MaskImage_5b78475 [type="object_input"];
 
-  {rank = min; image__CorrDNA; image__Cycle01_DAPI; image__CorrZO1; image__CorrPhalloidin; image__Cycle01_A; image__Cycle01_C; image__Cycle01_G; image__Cycle01_T; image__Cycle02_A; image__Cycle02_C; image__Cycle02_G; image__Cycle02_T; image__Cycle03_A; image__Cycle03_C; image__Cycle03_G; image__Cycle03_T;}
+  {rank = min; LoadData_cbe5cfdf;}
   {rank = max; MeasureImageIntensity_b80df925; MeasureColocalization_11dc7f83; MeasureImageIntensity_cd880b23; MeasureImageAreaOccupied_6bb28693; MeasureObjectIntensity_40d9dc39; MeasureObjectIntensity_f0c4470c; MeasureColocalization_b64ad458; MeasureObjectIntensity_5adac90b; MeasureObjectIntensity_93a3ea7d; MeasureObjectSizeShape_33e152a1; MeasureColocalization_42947605; SaveImages_c7ae0a8c; SaveImages_bef43005; SaveImages_22818067; SaveImages_e910b9eb; SaveImages_2c5c819a;}
 }
