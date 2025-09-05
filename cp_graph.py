@@ -1245,8 +1245,13 @@ def filter_keep_reachable_from_roots(
 
     # Find all root image nodes (nodes with a source module as parent)
     all_root_nodes = [
-        node for node in G.nodes()
-        if any(G.nodes[p].get("type") == NODE_TYPE_MODULE and G.nodes[p].get("module_name") in SOURCE_MODULES for p in G.predecessors(node))
+        node
+        for node in G.nodes()
+        if any(
+            G.nodes[p].get("type") == NODE_TYPE_MODULE
+            and G.nodes[p].get("module_name") in SOURCE_MODULES
+            for p in G.predecessors(node)
+        )
     ]
 
     # If no root nodes specified, return the original graph
