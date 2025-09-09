@@ -181,8 +181,12 @@ class DepGraphOutput(BaseModel):
     name: str
     destination_module: Optional[str] = None
     destination_module_num: Optional[int] = Field(None, ge=1)
+    # if type == "measurement"
     object_name: Optional[str] = None
     feature: Optional[str] = None
+    # if liveness info included
+    live: Optional[List[str]] = None
+    disposed: Optional[List[str]] = None
 
     @field_validator("object_name", "feature", mode="after")
     @classmethod
@@ -430,6 +434,22 @@ def validate_dependency_graph_with_pydantic(
         return False, error_message, None
     except Exception as e:
         return False, f"Unexpected error during validation: {e}", None
+
+def has_liveness_data(dependency_data: Dict[str, Any]) -> bool:
+    """
+    Check if the dependency graph contains liveness data.
+
+    Args:
+        dependency_data: The parsed dependency graph JSON data
+        (as used in `validate_dependency_graph_with_pydantic`)
+
+    Returns:
+        True if any module has liveness data (live and disposed fields), False otherwise
+    """
+    for module_data in dependency_data.get("modules", []):
+        if "live" in module_data and "disposed" in module_data:
+            return True
+    return False
 
 
 # ----- GRAPH CONSTRUCTION FUNCTIONS -----
@@ -790,6 +810,60 @@ def _add_output_connections(
 
 
 # ----- GRAPH FORMATTING AND OUTPUT -----
+def apply_liveness_styling(G: nx.DiGraph, modules_info: List[ModuleInfo],
+                           dependency_data: Dict[str, Any]) -> None:
+    """
+    Apply liveness-based styling to edges in the graph.
+
+    Args:
+        G: The NetworkX graph
+        modules_info: List of module information
+        dependency_data: Original dependency graph data with liveness info
+    """
+   # Build a mapping from module_num to liveness data
+    module_liveness = {}
+    for module_data in dependency_data.get("modules", []):
+        module_num = module_data.get("module_num")
+        module_liveness[module_num] = {
+            "live": module_data["live"],
+            "disposed": module_data["disposed"]
+        }
+
+    # Apply styling to edges
+    for edge in G.edges(data=True):
+        src, dst, _ = edge
+
+        # Only process edges going TO modules (input connections)
+        if G.nodes[dst].get("type") != NODE_TYPE_MODULE:
+            continue
+
+        # Only process image and object nodes
+        src_type = G.nodes[src].get("type")
+        if src_type not in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+            continue
+
+        # Get the data item name
+        data_name = G.nodes[src].get("name")
+        if not data_name:
+            continue
+
+        # Get the module number
+        module_num = G.nodes[dst].get("module_num")
+        if not module_num or module_num not in module_liveness:
+            continue
+
+        liveness_data = module_liveness[module_num]
+
+        # Apply styling based on liveness
+        if data_name in liveness_data["disposed"]:
+            # Red for disposed
+            G.edges[src, dst]["color"] = "red"
+            G.edges[src, dst]["penwidth"] = "2"
+        if data_name in liveness_data["live"]:
+            # Green for live
+            G.edges[src, dst]["color"] = "green" 
+            G.edges[src, dst]["penwidth"] = "2"
+
 def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
     """
     Apply visual styling attributes to graph nodes based on their types.
@@ -1686,6 +1760,7 @@ def process_pipeline(
     exclude_module_types: Optional[List[str]] = None,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
+    track_liveness: bool = False,
     no_single_parent: bool = False,
 ) -> GraphData:
     """
@@ -1712,6 +1787,7 @@ def process_pipeline(
         exclude_module_types: Optional list of module type names to exclude from the graph
         rank_nodes: Whether to add rank statements for positioning source and sink nodes
         rank_ignore_filtered: Whether to ignore filtered nodes when calculating ranks
+        track_liveness: Whether to highlight image/object edges based on liveness info (dep graph only)
         no_single_parent: Disable trimming of multiple parents
 
     Returns:
@@ -1725,6 +1801,11 @@ def process_pipeline(
                 dependency_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise click.ClickException(f"Error loading dependency JSON file: {e}")
+
+        if track_liveness and not has_liveness_data(dependency_data):
+            raise click.ClickException(
+                "Liveness tracking requested but dependency graph contains no liveness data"
+            )
 
         if not quiet:
             print(f"Using dependency JSON: {dependency_graph_path}")
@@ -1787,6 +1868,9 @@ def process_pipeline(
         # Apply node styling if formatting is enabled
         apply_node_styling(G, no_formatting)
 
+        if track_liveness and dependency_data and not no_formatting:
+            apply_liveness_styling(G, modules_info, dependency_data)
+
         # If no_module_info is True, simplify edges
         if no_module_info:
             for edge in G.edges():
@@ -1842,6 +1926,11 @@ def process_pipeline(
     "--rank-ignore-filtered",
     is_flag=True,
     help="Ignore filtered nodes when positioning source and sink nodes",
+)
+@click.option(
+    "--track-liveness",
+    is_flag=True,
+    help="Color edges based on liveness data (green=live, red=disposed). Requires --dependency-graph with liveness data.",
 )
 # Content filtering options
 @click.option(
@@ -1903,6 +1992,7 @@ def cli(
     explain_ids: bool,
     rank_nodes: bool,
     rank_ignore_filtered: bool,
+    track_liveness: bool,
     include_disabled: bool,
     root_nodes: Optional[str],
     remove_unused_images: bool,
@@ -1984,6 +2074,8 @@ def cli(
                 validate_dependency_graph_with_pydantic(dependency_data)
             )
 
+            is_valid == is_valid and (not track_liveness or has_liveness_data(dependency_data))
+
             if not quiet:
                 click.echo(message)
 
@@ -1994,6 +2086,11 @@ def cli(
         except Exception as e:
             if not quiet:
                 click.echo(f"Warning: Could not validate/summarize: {e}", err=True)
+
+    if not dependency_graph and track_liveness:
+        raise click.ClickException(
+            "--track-liveness can only be used with --dependency-graph"
+        )
 
     # Check output file is provided for processing
     if not output:
@@ -2019,6 +2116,7 @@ def cli(
             exclude_module_types=exclude_module_types_list,
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
+            track_liveness=track_liveness,
             no_single_parent=no_single_parent,
         )
     except click.ClickException as e:

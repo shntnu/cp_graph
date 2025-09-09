@@ -1,0 +1,3974 @@
+{
+  "modules": [
+    {
+      "module_name": "Images",
+      "module_num": 1,
+      "inputs": [],
+      "outputs": [],
+      "live": [],
+      "disposed": []
+    },
+    {
+      "module_name": "Metadata",
+      "module_num": 2,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Metadata_FileLocation",
+          "name": "Image.Metadata_FileLocation",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [],
+      "disposed": []
+    },
+    {
+      "module_name": "NamesAndTypes",
+      "module_num": 3,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "image",
+          "name": "OrigBlue",
+          "destination_module": "Crop",
+          "destination_module_num": 5
+        },
+        {
+          "type": "image",
+          "name": "OrigGreen",
+          "destination_module": "Crop",
+          "destination_module_num": 6
+        },
+        {
+          "type": "image",
+          "name": "OrigRed",
+          "destination_module": "Crop",
+          "destination_module_num": 7
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "FileName_OrigBlue",
+          "name": "Image.FileName_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "PathName_OrigBlue",
+          "name": "Image.PathName_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "URL_OrigBlue",
+          "name": "Image.URL_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "MD5Digest_OrigBlue",
+          "name": "Image.MD5Digest_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "SeriesName_OrigBlue",
+          "name": "Image.SeriesName_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Scaling_OrigBlue",
+          "name": "Image.Scaling_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Width_OrigBlue",
+          "name": "Image.Width_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Height_OrigBlue",
+          "name": "Image.Height_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Series_OrigBlue",
+          "name": "Image.Series_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Frame_OrigBlue",
+          "name": "Image.Frame_OrigBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "FileName_OrigGreen",
+          "name": "Image.FileName_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "PathName_OrigGreen",
+          "name": "Image.PathName_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "URL_OrigGreen",
+          "name": "Image.URL_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "MD5Digest_OrigGreen",
+          "name": "Image.MD5Digest_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "SeriesName_OrigGreen",
+          "name": "Image.SeriesName_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Scaling_OrigGreen",
+          "name": "Image.Scaling_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Width_OrigGreen",
+          "name": "Image.Width_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Height_OrigGreen",
+          "name": "Image.Height_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Series_OrigGreen",
+          "name": "Image.Series_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Frame_OrigGreen",
+          "name": "Image.Frame_OrigGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "FileName_OrigRed",
+          "name": "Image.FileName_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "PathName_OrigRed",
+          "name": "Image.PathName_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "URL_OrigRed",
+          "name": "Image.URL_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "MD5Digest_OrigRed",
+          "name": "Image.MD5Digest_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "SeriesName_OrigRed",
+          "name": "Image.SeriesName_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Scaling_OrigRed",
+          "name": "Image.Scaling_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Width_OrigRed",
+          "name": "Image.Width_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Height_OrigRed",
+          "name": "Image.Height_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Series_OrigRed",
+          "name": "Image.Series_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Frame_OrigRed",
+          "name": "Image.Frame_OrigRed",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "OrigGreen",
+        "OrigRed",
+        "OrigBlue"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "Groups",
+      "module_num": 4,
+      "inputs": [],
+      "outputs": [],
+      "live": [
+        "OrigGreen",
+        "OrigRed",
+        "OrigBlue"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "Crop",
+      "module_num": 5,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "OrigBlue",
+          "source_module": "NamesAndTypes",
+          "source_module_num": 3
+        }
+      ],
+      "outputs": [
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "destination_module": "Crop",
+          "destination_module_num": 6
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "destination_module": "Crop",
+          "destination_module_num": 7
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "destination_module": "IdentifyPrimaryObjects",
+          "destination_module_num": 8
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "destination_module": "MeasureObjectIntensity",
+          "destination_module_num": 12
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "destination_module": "MeasureTexture",
+          "destination_module_num": 13
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "destination_module": "GrayToColor",
+          "destination_module_num": 14
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Crop_AreaRetainedAfterCropping_CropBlue",
+          "name": "Image.Crop_AreaRetainedAfterCropping_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Crop_OriginalImageArea_CropBlue",
+          "name": "Image.Crop_OriginalImageArea_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "OrigGreen",
+        "OrigRed",
+        "OrigBlue"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "Crop",
+      "module_num": 6,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "OrigGreen",
+          "source_module": "NamesAndTypes",
+          "source_module_num": 3
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "source_module": "Crop",
+          "source_module_num": 5
+        }
+      ],
+      "outputs": [
+        {
+          "type": "image",
+          "name": "CropGreen",
+          "destination_module": "IdentifySecondaryObjects",
+          "destination_module_num": 9
+        },
+        {
+          "type": "image",
+          "name": "CropGreen",
+          "destination_module": "GrayToColor",
+          "destination_module_num": 14
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Crop_AreaRetainedAfterCropping_CropGreen",
+          "name": "Image.Crop_AreaRetainedAfterCropping_CropGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Crop_OriginalImageArea_CropGreen",
+          "name": "Image.Crop_OriginalImageArea_CropGreen",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "CropGreen",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "Crop",
+      "module_num": 7,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "OrigRed",
+          "source_module": "NamesAndTypes",
+          "source_module_num": 3
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "source_module": "Crop",
+          "source_module_num": 5
+        }
+      ],
+      "outputs": [
+        {
+          "type": "image",
+          "name": "CropRed",
+          "destination_module": "GrayToColor",
+          "destination_module_num": 14
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Crop_AreaRetainedAfterCropping_CropRed",
+          "name": "Image.Crop_AreaRetainedAfterCropping_CropRed",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Crop_OriginalImageArea_CropRed",
+          "name": "Image.Crop_OriginalImageArea_CropRed",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "CropRed",
+        "CropGreen",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "IdentifyPrimaryObjects",
+      "module_num": 8,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "source_module": "Crop",
+          "source_module_num": 5
+        }
+      ],
+      "outputs": [
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "destination_module": "IdentifySecondaryObjects",
+          "destination_module_num": 9
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "destination_module": "IdentifyTertiaryObjects",
+          "destination_module_num": 10
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "destination_module": "MeasureObjectSizeShape",
+          "destination_module_num": 11
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "destination_module": "MeasureObjectIntensity",
+          "destination_module_num": 12
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "destination_module": "MeasureTexture",
+          "destination_module_num": 13
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "destination_module": "ExportToSpreadsheet",
+          "destination_module_num": 17
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_Center_X",
+          "name": "Nuclei.Location_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_Center_Y",
+          "name": "Nuclei.Location_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_Center_Z",
+          "name": "Nuclei.Location_Center_Z",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Number_Object_Number",
+          "name": "Nuclei.Number_Object_Number",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Count_Nuclei",
+          "name": "Image.Count_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_FinalThreshold_Nuclei",
+          "name": "Image.Threshold_FinalThreshold_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_OrigThreshold_Nuclei",
+          "name": "Image.Threshold_OrigThreshold_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_WeightedVariance_Nuclei",
+          "name": "Image.Threshold_WeightedVariance_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_SumOfEntropies_Nuclei",
+          "name": "Image.Threshold_SumOfEntropies_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "Nuclei",
+        "CropRed",
+        "CropGreen",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "IdentifySecondaryObjects",
+      "module_num": 9,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "CropGreen",
+          "source_module": "Crop",
+          "source_module_num": 6
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "source_module": "IdentifyPrimaryObjects",
+          "source_module_num": 8
+        }
+      ],
+      "outputs": [
+        {
+          "type": "object",
+          "name": "Cells",
+          "destination_module": "IdentifyTertiaryObjects",
+          "destination_module_num": 10
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "destination_module": "MeasureObjectSizeShape",
+          "destination_module_num": 11
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "destination_module": "MeasureObjectIntensity",
+          "destination_module_num": 12
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "destination_module": "MeasureTexture",
+          "destination_module_num": 13
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "destination_module": "ExpandOrShrinkObjects",
+          "destination_module_num": 15
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Count_Cells",
+          "name": "Image.Count_Cells",
+          "destination_module": "ExpandOrShrinkObjects",
+          "destination_module_num": 15
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "destination_module": "ExportToSpreadsheet",
+          "destination_module_num": 17
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_Center_X",
+          "name": "Cells.Location_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_Center_Y",
+          "name": "Cells.Location_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_Center_Z",
+          "name": "Cells.Location_Center_Z",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Number_Object_Number",
+          "name": "Cells.Number_Object_Number",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Children_Cells_Count",
+          "name": "Nuclei.Children_Cells_Count",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Parent_Nuclei",
+          "name": "Cells.Parent_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_FinalThreshold_Cells",
+          "name": "Image.Threshold_FinalThreshold_Cells",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_OrigThreshold_Cells",
+          "name": "Image.Threshold_OrigThreshold_Cells",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_WeightedVariance_Cells",
+          "name": "Image.Threshold_WeightedVariance_Cells",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Threshold_SumOfEntropies_Cells",
+          "name": "Image.Threshold_SumOfEntropies_Cells",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "Nuclei",
+        "CropRed",
+        "OrigRed",
+        "CropGreen",
+        "OrigGreen",
+        "OrigBlue",
+        "Cells"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "IdentifyTertiaryObjects",
+      "module_num": 10,
+      "inputs": [
+        {
+          "type": "object",
+          "name": "Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "source_module": "IdentifyPrimaryObjects",
+          "source_module_num": 8
+        }
+      ],
+      "outputs": [
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "destination_module": "MeasureObjectSizeShape",
+          "destination_module_num": 11
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "destination_module": "MeasureObjectIntensity",
+          "destination_module_num": 12
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "destination_module": "MeasureTexture",
+          "destination_module_num": 13
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "destination_module": "ExportToSpreadsheet",
+          "destination_module_num": 17
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_Center_X",
+          "name": "Cytoplasm.Location_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_Center_Y",
+          "name": "Cytoplasm.Location_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Number_Object_Number",
+          "name": "Cytoplasm.Number_Object_Number",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Count_Cytoplasm",
+          "name": "Image.Count_Cytoplasm",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Children_Cytoplasm_Count",
+          "name": "Nuclei.Children_Cytoplasm_Count",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Parent_Nuclei",
+          "name": "Cytoplasm.Parent_Nuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Children_Cytoplasm_Count",
+          "name": "Cells.Children_Cytoplasm_Count",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Parent_Cells",
+          "name": "Cytoplasm.Parent_Cells",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "Nuclei",
+        "CropRed",
+        "Cytoplasm",
+        "OrigRed",
+        "CropGreen",
+        "OrigGreen",
+        "OrigBlue",
+        "Cells"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "MeasureObjectSizeShape",
+      "module_num": 11,
+      "inputs": [
+        {
+          "type": "object",
+          "name": "Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "source_module": "IdentifyPrimaryObjects",
+          "source_module_num": 8
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "source_module": "IdentifyTertiaryObjects",
+          "source_module_num": 10
+        }
+      ],
+      "outputs": [
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Extent",
+          "name": "Cells.AreaShape_Extent",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_EulerNumber",
+          "name": "Cells.AreaShape_EulerNumber",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_EquivalentDiameter",
+          "name": "Cells.AreaShape_EquivalentDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MajorAxisLength",
+          "name": "Cells.AreaShape_MajorAxisLength",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MinorAxisLength",
+          "name": "Cells.AreaShape_MinorAxisLength",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Center_X",
+          "name": "Cells.AreaShape_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Center_Y",
+          "name": "Cells.AreaShape_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_BoundingBoxMinimum_X",
+          "name": "Cells.AreaShape_BoundingBoxMinimum_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_BoundingBoxMinimum_Y",
+          "name": "Cells.AreaShape_BoundingBoxMinimum_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_BoundingBoxMaximum_X",
+          "name": "Cells.AreaShape_BoundingBoxMaximum_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_BoundingBoxMaximum_Y",
+          "name": "Cells.AreaShape_BoundingBoxMaximum_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Area",
+          "name": "Cells.AreaShape_Area",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Perimeter",
+          "name": "Cells.AreaShape_Perimeter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MaximumRadius",
+          "name": "Cells.AreaShape_MaximumRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MeanRadius",
+          "name": "Cells.AreaShape_MeanRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MedianRadius",
+          "name": "Cells.AreaShape_MedianRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MinFeretDiameter",
+          "name": "Cells.AreaShape_MinFeretDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_MaxFeretDiameter",
+          "name": "Cells.AreaShape_MaxFeretDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Orientation",
+          "name": "Cells.AreaShape_Orientation",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Eccentricity",
+          "name": "Cells.AreaShape_Eccentricity",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_FormFactor",
+          "name": "Cells.AreaShape_FormFactor",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Solidity",
+          "name": "Cells.AreaShape_Solidity",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_ConvexArea",
+          "name": "Cells.AreaShape_ConvexArea",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_Compactness",
+          "name": "Cells.AreaShape_Compactness",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "AreaShape_BoundingBoxArea",
+          "name": "Cells.AreaShape_BoundingBoxArea",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Extent",
+          "name": "Nuclei.AreaShape_Extent",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_EulerNumber",
+          "name": "Nuclei.AreaShape_EulerNumber",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_EquivalentDiameter",
+          "name": "Nuclei.AreaShape_EquivalentDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MajorAxisLength",
+          "name": "Nuclei.AreaShape_MajorAxisLength",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MinorAxisLength",
+          "name": "Nuclei.AreaShape_MinorAxisLength",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Center_X",
+          "name": "Nuclei.AreaShape_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Center_Y",
+          "name": "Nuclei.AreaShape_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_BoundingBoxMinimum_X",
+          "name": "Nuclei.AreaShape_BoundingBoxMinimum_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_BoundingBoxMinimum_Y",
+          "name": "Nuclei.AreaShape_BoundingBoxMinimum_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_BoundingBoxMaximum_X",
+          "name": "Nuclei.AreaShape_BoundingBoxMaximum_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_BoundingBoxMaximum_Y",
+          "name": "Nuclei.AreaShape_BoundingBoxMaximum_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Area",
+          "name": "Nuclei.AreaShape_Area",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Perimeter",
+          "name": "Nuclei.AreaShape_Perimeter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MaximumRadius",
+          "name": "Nuclei.AreaShape_MaximumRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MeanRadius",
+          "name": "Nuclei.AreaShape_MeanRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MedianRadius",
+          "name": "Nuclei.AreaShape_MedianRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MinFeretDiameter",
+          "name": "Nuclei.AreaShape_MinFeretDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_MaxFeretDiameter",
+          "name": "Nuclei.AreaShape_MaxFeretDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Orientation",
+          "name": "Nuclei.AreaShape_Orientation",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Eccentricity",
+          "name": "Nuclei.AreaShape_Eccentricity",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_FormFactor",
+          "name": "Nuclei.AreaShape_FormFactor",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Solidity",
+          "name": "Nuclei.AreaShape_Solidity",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_ConvexArea",
+          "name": "Nuclei.AreaShape_ConvexArea",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_Compactness",
+          "name": "Nuclei.AreaShape_Compactness",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "AreaShape_BoundingBoxArea",
+          "name": "Nuclei.AreaShape_BoundingBoxArea",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Extent",
+          "name": "Cytoplasm.AreaShape_Extent",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_EulerNumber",
+          "name": "Cytoplasm.AreaShape_EulerNumber",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_EquivalentDiameter",
+          "name": "Cytoplasm.AreaShape_EquivalentDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MajorAxisLength",
+          "name": "Cytoplasm.AreaShape_MajorAxisLength",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MinorAxisLength",
+          "name": "Cytoplasm.AreaShape_MinorAxisLength",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Center_X",
+          "name": "Cytoplasm.AreaShape_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Center_Y",
+          "name": "Cytoplasm.AreaShape_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_BoundingBoxMinimum_X",
+          "name": "Cytoplasm.AreaShape_BoundingBoxMinimum_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_BoundingBoxMinimum_Y",
+          "name": "Cytoplasm.AreaShape_BoundingBoxMinimum_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_BoundingBoxMaximum_X",
+          "name": "Cytoplasm.AreaShape_BoundingBoxMaximum_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_BoundingBoxMaximum_Y",
+          "name": "Cytoplasm.AreaShape_BoundingBoxMaximum_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Area",
+          "name": "Cytoplasm.AreaShape_Area",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Perimeter",
+          "name": "Cytoplasm.AreaShape_Perimeter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MaximumRadius",
+          "name": "Cytoplasm.AreaShape_MaximumRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MeanRadius",
+          "name": "Cytoplasm.AreaShape_MeanRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MedianRadius",
+          "name": "Cytoplasm.AreaShape_MedianRadius",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MinFeretDiameter",
+          "name": "Cytoplasm.AreaShape_MinFeretDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_MaxFeretDiameter",
+          "name": "Cytoplasm.AreaShape_MaxFeretDiameter",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Orientation",
+          "name": "Cytoplasm.AreaShape_Orientation",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Eccentricity",
+          "name": "Cytoplasm.AreaShape_Eccentricity",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_FormFactor",
+          "name": "Cytoplasm.AreaShape_FormFactor",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Solidity",
+          "name": "Cytoplasm.AreaShape_Solidity",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_ConvexArea",
+          "name": "Cytoplasm.AreaShape_ConvexArea",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_Compactness",
+          "name": "Cytoplasm.AreaShape_Compactness",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "AreaShape_BoundingBoxArea",
+          "name": "Cytoplasm.AreaShape_BoundingBoxArea",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "Nuclei",
+        "CropRed",
+        "Cytoplasm",
+        "OrigRed",
+        "CropGreen",
+        "OrigGreen",
+        "OrigBlue",
+        "Cells"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "MeasureObjectIntensity",
+      "module_num": 12,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "source_module": "Crop",
+          "source_module_num": 5
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "source_module": "IdentifyPrimaryObjects",
+          "source_module_num": 8
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "source_module": "IdentifyTertiaryObjects",
+          "source_module_num": 10
+        }
+      ],
+      "outputs": [
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_IntegratedIntensity_CropBlue",
+          "name": "Nuclei.Intensity_IntegratedIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MeanIntensity_CropBlue",
+          "name": "Nuclei.Intensity_MeanIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_StdIntensity_CropBlue",
+          "name": "Nuclei.Intensity_StdIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MinIntensity_CropBlue",
+          "name": "Nuclei.Intensity_MinIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MaxIntensity_CropBlue",
+          "name": "Nuclei.Intensity_MaxIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_IntegratedIntensityEdge_CropBlue",
+          "name": "Nuclei.Intensity_IntegratedIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MeanIntensityEdge_CropBlue",
+          "name": "Nuclei.Intensity_MeanIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_StdIntensityEdge_CropBlue",
+          "name": "Nuclei.Intensity_StdIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MinIntensityEdge_CropBlue",
+          "name": "Nuclei.Intensity_MinIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MaxIntensityEdge_CropBlue",
+          "name": "Nuclei.Intensity_MaxIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MassDisplacement_CropBlue",
+          "name": "Nuclei.Intensity_MassDisplacement_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_LowerQuartileIntensity_CropBlue",
+          "name": "Nuclei.Intensity_LowerQuartileIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MedianIntensity_CropBlue",
+          "name": "Nuclei.Intensity_MedianIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_MADIntensity_CropBlue",
+          "name": "Nuclei.Intensity_MADIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Intensity_UpperQuartileIntensity_CropBlue",
+          "name": "Nuclei.Intensity_UpperQuartileIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_CenterMassIntensity_X_CropBlue",
+          "name": "Nuclei.Location_CenterMassIntensity_X_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_CenterMassIntensity_Y_CropBlue",
+          "name": "Nuclei.Location_CenterMassIntensity_Y_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_CenterMassIntensity_Z_CropBlue",
+          "name": "Nuclei.Location_CenterMassIntensity_Z_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_MaxIntensity_X_CropBlue",
+          "name": "Nuclei.Location_MaxIntensity_X_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_MaxIntensity_Y_CropBlue",
+          "name": "Nuclei.Location_MaxIntensity_Y_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Location_MaxIntensity_Z_CropBlue",
+          "name": "Nuclei.Location_MaxIntensity_Z_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_IntegratedIntensity_CropBlue",
+          "name": "Cells.Intensity_IntegratedIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MeanIntensity_CropBlue",
+          "name": "Cells.Intensity_MeanIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_StdIntensity_CropBlue",
+          "name": "Cells.Intensity_StdIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MinIntensity_CropBlue",
+          "name": "Cells.Intensity_MinIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MaxIntensity_CropBlue",
+          "name": "Cells.Intensity_MaxIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_IntegratedIntensityEdge_CropBlue",
+          "name": "Cells.Intensity_IntegratedIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MeanIntensityEdge_CropBlue",
+          "name": "Cells.Intensity_MeanIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_StdIntensityEdge_CropBlue",
+          "name": "Cells.Intensity_StdIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MinIntensityEdge_CropBlue",
+          "name": "Cells.Intensity_MinIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MaxIntensityEdge_CropBlue",
+          "name": "Cells.Intensity_MaxIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MassDisplacement_CropBlue",
+          "name": "Cells.Intensity_MassDisplacement_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_LowerQuartileIntensity_CropBlue",
+          "name": "Cells.Intensity_LowerQuartileIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MedianIntensity_CropBlue",
+          "name": "Cells.Intensity_MedianIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_MADIntensity_CropBlue",
+          "name": "Cells.Intensity_MADIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Intensity_UpperQuartileIntensity_CropBlue",
+          "name": "Cells.Intensity_UpperQuartileIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_CenterMassIntensity_X_CropBlue",
+          "name": "Cells.Location_CenterMassIntensity_X_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_CenterMassIntensity_Y_CropBlue",
+          "name": "Cells.Location_CenterMassIntensity_Y_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_CenterMassIntensity_Z_CropBlue",
+          "name": "Cells.Location_CenterMassIntensity_Z_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_MaxIntensity_X_CropBlue",
+          "name": "Cells.Location_MaxIntensity_X_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_MaxIntensity_Y_CropBlue",
+          "name": "Cells.Location_MaxIntensity_Y_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Location_MaxIntensity_Z_CropBlue",
+          "name": "Cells.Location_MaxIntensity_Z_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_IntegratedIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_IntegratedIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MeanIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_MeanIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_StdIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_StdIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MinIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_MinIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MaxIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_MaxIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_IntegratedIntensityEdge_CropBlue",
+          "name": "Cytoplasm.Intensity_IntegratedIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MeanIntensityEdge_CropBlue",
+          "name": "Cytoplasm.Intensity_MeanIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_StdIntensityEdge_CropBlue",
+          "name": "Cytoplasm.Intensity_StdIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MinIntensityEdge_CropBlue",
+          "name": "Cytoplasm.Intensity_MinIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MaxIntensityEdge_CropBlue",
+          "name": "Cytoplasm.Intensity_MaxIntensityEdge_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MassDisplacement_CropBlue",
+          "name": "Cytoplasm.Intensity_MassDisplacement_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_LowerQuartileIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_LowerQuartileIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MedianIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_MedianIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_MADIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_MADIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Intensity_UpperQuartileIntensity_CropBlue",
+          "name": "Cytoplasm.Intensity_UpperQuartileIntensity_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_CenterMassIntensity_X_CropBlue",
+          "name": "Cytoplasm.Location_CenterMassIntensity_X_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_CenterMassIntensity_Y_CropBlue",
+          "name": "Cytoplasm.Location_CenterMassIntensity_Y_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_CenterMassIntensity_Z_CropBlue",
+          "name": "Cytoplasm.Location_CenterMassIntensity_Z_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_MaxIntensity_X_CropBlue",
+          "name": "Cytoplasm.Location_MaxIntensity_X_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_MaxIntensity_Y_CropBlue",
+          "name": "Cytoplasm.Location_MaxIntensity_Y_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Location_MaxIntensity_Z_CropBlue",
+          "name": "Cytoplasm.Location_MaxIntensity_Z_CropBlue",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "Nuclei",
+        "CropRed",
+        "Cytoplasm",
+        "OrigRed",
+        "CropGreen",
+        "OrigGreen",
+        "OrigBlue",
+        "Cells"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "MeasureTexture",
+      "module_num": 13,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "source_module": "Crop",
+          "source_module_num": 5
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        },
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "source_module": "IdentifyPrimaryObjects",
+          "source_module_num": 8
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "source_module": "IdentifyTertiaryObjects",
+          "source_module_num": 10
+        }
+      ],
+      "outputs": [
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "name": "Image.Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "name": "Image.Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "name": "Image.Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "name": "Image.Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Contrast_CropBlue_3_00_256",
+          "name": "Image.Texture_Contrast_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Contrast_CropBlue_3_01_256",
+          "name": "Image.Texture_Contrast_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Contrast_CropBlue_3_02_256",
+          "name": "Image.Texture_Contrast_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Contrast_CropBlue_3_03_256",
+          "name": "Image.Texture_Contrast_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Correlation_CropBlue_3_00_256",
+          "name": "Image.Texture_Correlation_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Correlation_CropBlue_3_01_256",
+          "name": "Image.Texture_Correlation_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Correlation_CropBlue_3_02_256",
+          "name": "Image.Texture_Correlation_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Correlation_CropBlue_3_03_256",
+          "name": "Image.Texture_Correlation_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Variance_CropBlue_3_00_256",
+          "name": "Image.Texture_Variance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Variance_CropBlue_3_01_256",
+          "name": "Image.Texture_Variance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Variance_CropBlue_3_02_256",
+          "name": "Image.Texture_Variance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Variance_CropBlue_3_03_256",
+          "name": "Image.Texture_Variance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "name": "Image.Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "name": "Image.Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "name": "Image.Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "name": "Image.Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumAverage_CropBlue_3_00_256",
+          "name": "Image.Texture_SumAverage_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumAverage_CropBlue_3_01_256",
+          "name": "Image.Texture_SumAverage_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumAverage_CropBlue_3_02_256",
+          "name": "Image.Texture_SumAverage_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumAverage_CropBlue_3_03_256",
+          "name": "Image.Texture_SumAverage_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumVariance_CropBlue_3_00_256",
+          "name": "Image.Texture_SumVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumVariance_CropBlue_3_01_256",
+          "name": "Image.Texture_SumVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumVariance_CropBlue_3_02_256",
+          "name": "Image.Texture_SumVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumVariance_CropBlue_3_03_256",
+          "name": "Image.Texture_SumVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumEntropy_CropBlue_3_00_256",
+          "name": "Image.Texture_SumEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumEntropy_CropBlue_3_01_256",
+          "name": "Image.Texture_SumEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumEntropy_CropBlue_3_02_256",
+          "name": "Image.Texture_SumEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_SumEntropy_CropBlue_3_03_256",
+          "name": "Image.Texture_SumEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Entropy_CropBlue_3_00_256",
+          "name": "Image.Texture_Entropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Entropy_CropBlue_3_01_256",
+          "name": "Image.Texture_Entropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Entropy_CropBlue_3_02_256",
+          "name": "Image.Texture_Entropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_Entropy_CropBlue_3_03_256",
+          "name": "Image.Texture_Entropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_00_256",
+          "name": "Image.Texture_DifferenceVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_01_256",
+          "name": "Image.Texture_DifferenceVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_02_256",
+          "name": "Image.Texture_DifferenceVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_03_256",
+          "name": "Image.Texture_DifferenceVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "name": "Image.Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "name": "Image.Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "name": "Image.Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "name": "Image.Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas1_CropBlue_3_00_256",
+          "name": "Image.Texture_InfoMeas1_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas1_CropBlue_3_01_256",
+          "name": "Image.Texture_InfoMeas1_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas1_CropBlue_3_02_256",
+          "name": "Image.Texture_InfoMeas1_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas1_CropBlue_3_03_256",
+          "name": "Image.Texture_InfoMeas1_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas2_CropBlue_3_00_256",
+          "name": "Image.Texture_InfoMeas2_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas2_CropBlue_3_01_256",
+          "name": "Image.Texture_InfoMeas2_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas2_CropBlue_3_02_256",
+          "name": "Image.Texture_InfoMeas2_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Texture_InfoMeas2_CropBlue_3_03_256",
+          "name": "Image.Texture_InfoMeas2_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "name": "Cells.Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "name": "Cells.Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "name": "Cells.Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "name": "Cells.Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Contrast_CropBlue_3_00_256",
+          "name": "Cells.Texture_Contrast_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Contrast_CropBlue_3_01_256",
+          "name": "Cells.Texture_Contrast_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Contrast_CropBlue_3_02_256",
+          "name": "Cells.Texture_Contrast_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Contrast_CropBlue_3_03_256",
+          "name": "Cells.Texture_Contrast_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Correlation_CropBlue_3_00_256",
+          "name": "Cells.Texture_Correlation_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Correlation_CropBlue_3_01_256",
+          "name": "Cells.Texture_Correlation_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Correlation_CropBlue_3_02_256",
+          "name": "Cells.Texture_Correlation_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Correlation_CropBlue_3_03_256",
+          "name": "Cells.Texture_Correlation_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Variance_CropBlue_3_00_256",
+          "name": "Cells.Texture_Variance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Variance_CropBlue_3_01_256",
+          "name": "Cells.Texture_Variance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Variance_CropBlue_3_02_256",
+          "name": "Cells.Texture_Variance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Variance_CropBlue_3_03_256",
+          "name": "Cells.Texture_Variance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "name": "Cells.Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "name": "Cells.Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "name": "Cells.Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "name": "Cells.Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumAverage_CropBlue_3_00_256",
+          "name": "Cells.Texture_SumAverage_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumAverage_CropBlue_3_01_256",
+          "name": "Cells.Texture_SumAverage_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumAverage_CropBlue_3_02_256",
+          "name": "Cells.Texture_SumAverage_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumAverage_CropBlue_3_03_256",
+          "name": "Cells.Texture_SumAverage_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumVariance_CropBlue_3_00_256",
+          "name": "Cells.Texture_SumVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumVariance_CropBlue_3_01_256",
+          "name": "Cells.Texture_SumVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumVariance_CropBlue_3_02_256",
+          "name": "Cells.Texture_SumVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumVariance_CropBlue_3_03_256",
+          "name": "Cells.Texture_SumVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumEntropy_CropBlue_3_00_256",
+          "name": "Cells.Texture_SumEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumEntropy_CropBlue_3_01_256",
+          "name": "Cells.Texture_SumEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumEntropy_CropBlue_3_02_256",
+          "name": "Cells.Texture_SumEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_SumEntropy_CropBlue_3_03_256",
+          "name": "Cells.Texture_SumEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Entropy_CropBlue_3_00_256",
+          "name": "Cells.Texture_Entropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Entropy_CropBlue_3_01_256",
+          "name": "Cells.Texture_Entropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Entropy_CropBlue_3_02_256",
+          "name": "Cells.Texture_Entropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_Entropy_CropBlue_3_03_256",
+          "name": "Cells.Texture_Entropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_00_256",
+          "name": "Cells.Texture_DifferenceVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_01_256",
+          "name": "Cells.Texture_DifferenceVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_02_256",
+          "name": "Cells.Texture_DifferenceVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_03_256",
+          "name": "Cells.Texture_DifferenceVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "name": "Cells.Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "name": "Cells.Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "name": "Cells.Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "name": "Cells.Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas1_CropBlue_3_00_256",
+          "name": "Cells.Texture_InfoMeas1_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas1_CropBlue_3_01_256",
+          "name": "Cells.Texture_InfoMeas1_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas1_CropBlue_3_02_256",
+          "name": "Cells.Texture_InfoMeas1_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas1_CropBlue_3_03_256",
+          "name": "Cells.Texture_InfoMeas1_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas2_CropBlue_3_00_256",
+          "name": "Cells.Texture_InfoMeas2_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas2_CropBlue_3_01_256",
+          "name": "Cells.Texture_InfoMeas2_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas2_CropBlue_3_02_256",
+          "name": "Cells.Texture_InfoMeas2_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cells",
+          "feature": "Texture_InfoMeas2_CropBlue_3_03_256",
+          "name": "Cells.Texture_InfoMeas2_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Contrast_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_Contrast_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Contrast_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_Contrast_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Contrast_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_Contrast_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Contrast_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_Contrast_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Correlation_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_Correlation_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Correlation_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_Correlation_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Correlation_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_Correlation_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Correlation_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_Correlation_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Variance_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_Variance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Variance_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_Variance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Variance_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_Variance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Variance_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_Variance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumAverage_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_SumAverage_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumAverage_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_SumAverage_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumAverage_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_SumAverage_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumAverage_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_SumAverage_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumVariance_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_SumVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumVariance_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_SumVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumVariance_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_SumVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumVariance_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_SumVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumEntropy_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_SumEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumEntropy_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_SumEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumEntropy_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_SumEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_SumEntropy_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_SumEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Entropy_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_Entropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Entropy_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_Entropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Entropy_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_Entropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_Entropy_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_Entropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_DifferenceVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_DifferenceVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_DifferenceVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_DifferenceVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas1_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_InfoMeas1_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas1_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_InfoMeas1_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas1_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_InfoMeas1_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas1_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_InfoMeas1_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas2_CropBlue_3_00_256",
+          "name": "Nuclei.Texture_InfoMeas2_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas2_CropBlue_3_01_256",
+          "name": "Nuclei.Texture_InfoMeas2_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas2_CropBlue_3_02_256",
+          "name": "Nuclei.Texture_InfoMeas2_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Nuclei",
+          "feature": "Texture_InfoMeas2_CropBlue_3_03_256",
+          "name": "Nuclei.Texture_InfoMeas2_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_AngularSecondMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_AngularSecondMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_AngularSecondMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_AngularSecondMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Contrast_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_Contrast_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Contrast_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_Contrast_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Contrast_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_Contrast_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Contrast_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_Contrast_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Correlation_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_Correlation_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Correlation_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_Correlation_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Correlation_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_Correlation_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Correlation_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_Correlation_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Variance_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_Variance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Variance_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_Variance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Variance_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_Variance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Variance_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_Variance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_InverseDifferenceMoment_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_InverseDifferenceMoment_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_InverseDifferenceMoment_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_InverseDifferenceMoment_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumAverage_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_SumAverage_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumAverage_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_SumAverage_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumAverage_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_SumAverage_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumAverage_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_SumAverage_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumVariance_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_SumVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumVariance_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_SumVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumVariance_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_SumVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumVariance_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_SumVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumEntropy_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_SumEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumEntropy_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_SumEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumEntropy_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_SumEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_SumEntropy_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_SumEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Entropy_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_Entropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Entropy_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_Entropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Entropy_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_Entropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_Entropy_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_Entropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_DifferenceVariance_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_DifferenceVariance_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_DifferenceVariance_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceVariance_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_DifferenceVariance_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_DifferenceEntropy_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_DifferenceEntropy_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_DifferenceEntropy_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_DifferenceEntropy_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas1_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_InfoMeas1_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas1_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_InfoMeas1_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas1_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_InfoMeas1_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas1_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_InfoMeas1_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas2_CropBlue_3_00_256",
+          "name": "Cytoplasm.Texture_InfoMeas2_CropBlue_3_00_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas2_CropBlue_3_01_256",
+          "name": "Cytoplasm.Texture_InfoMeas2_CropBlue_3_01_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas2_CropBlue_3_02_256",
+          "name": "Cytoplasm.Texture_InfoMeas2_CropBlue_3_02_256",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Cytoplasm",
+          "feature": "Texture_InfoMeas2_CropBlue_3_03_256",
+          "name": "Cytoplasm.Texture_InfoMeas2_CropBlue_3_03_256",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "CropBlue",
+        "Nuclei",
+        "CropRed",
+        "Cytoplasm",
+        "CropGreen",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue",
+        "Cells"
+      ],
+      "disposed": []
+    },
+    {
+      "module_name": "GrayToColor",
+      "module_num": 14,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "CropRed",
+          "source_module": "Crop",
+          "source_module_num": 7
+        },
+        {
+          "type": "image",
+          "name": "CropGreen",
+          "source_module": "Crop",
+          "source_module_num": 6
+        },
+        {
+          "type": "image",
+          "name": "CropBlue",
+          "source_module": "Crop",
+          "source_module_num": 5
+        }
+      ],
+      "outputs": [
+        {
+          "type": "image",
+          "name": "RGBImage",
+          "destination_module": "SaveImages",
+          "destination_module_num": 16
+        }
+      ],
+      "live": [
+        "Nuclei",
+        "Cytoplasm",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue",
+        "RGBImage",
+        "Cells"
+      ],
+      "disposed": [
+        "CropBlue",
+        "CropGreen",
+        "CropRed"
+      ]
+    },
+    {
+      "module_name": "ExpandOrShrinkObjects",
+      "module_num": 15,
+      "inputs": [
+        {
+          "type": "object",
+          "name": "Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Count_Cells",
+          "name": "Image.Count_Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        }
+      ],
+      "outputs": [
+        {
+          "type": "object",
+          "name": "ShrunkenNuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "ShrunkenNuclei",
+          "feature": "Location_Center_X",
+          "name": "ShrunkenNuclei.Location_Center_X",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "ShrunkenNuclei",
+          "feature": "Location_Center_Y",
+          "name": "ShrunkenNuclei.Location_Center_Y",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "ShrunkenNuclei",
+          "feature": "Number_Object_Number",
+          "name": "ShrunkenNuclei.Number_Object_Number",
+          "destination_module": null,
+          "destination_module_num": null
+        },
+        {
+          "type": "measurement",
+          "object_name": "Image",
+          "feature": "Count_ShrunkenNuclei",
+          "name": "Image.Count_ShrunkenNuclei",
+          "destination_module": null,
+          "destination_module_num": null
+        }
+      ],
+      "live": [
+        "Nuclei",
+        "Cytoplasm",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue",
+        "RGBImage",
+        "Cells"
+      ],
+      "disposed": [
+        "ShrunkenNuclei"
+      ]
+    },
+    {
+      "module_name": "SaveImages",
+      "module_num": 16,
+      "inputs": [
+        {
+          "type": "image",
+          "name": "RGBImage",
+          "source_module": "GrayToColor",
+          "source_module_num": 14
+        }
+      ],
+      "outputs": [],
+      "live": [
+        "Nuclei",
+        "Cytoplasm",
+        "OrigRed",
+        "OrigGreen",
+        "OrigBlue",
+        "Cells"
+      ],
+      "disposed": [
+        "RGBImage"
+      ]
+    },
+    {
+      "module_name": "ExportToSpreadsheet",
+      "module_num": 17,
+      "inputs": [
+        {
+          "type": "object",
+          "name": "Nuclei",
+          "source_module": "IdentifyPrimaryObjects",
+          "source_module_num": 8
+        },
+        {
+          "type": "object",
+          "name": "Cells",
+          "source_module": "IdentifySecondaryObjects",
+          "source_module_num": 9
+        },
+        {
+          "type": "object",
+          "name": "Cytoplasm",
+          "source_module": "IdentifyTertiaryObjects",
+          "source_module_num": 10
+        }
+      ],
+      "outputs": [],
+      "live": [
+        "OrigGreen",
+        "OrigRed",
+        "OrigBlue"
+      ],
+      "disposed": [
+        "Nuclei",
+        "Cytoplasm",
+        "Cells"
+      ]
+    }
+  ],
+  "metadata": {
+    "total_modules": 17,
+    "total_edges": 445
+  }
+}
