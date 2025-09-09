@@ -435,6 +435,7 @@ def validate_dependency_graph_with_pydantic(
     except Exception as e:
         return False, f"Unexpected error during validation: {e}", None
 
+
 def has_liveness_data(dependency_data: Dict[str, Any]) -> bool:
     """
     Check if the dependency graph contains liveness data.
@@ -810,8 +811,9 @@ def _add_output_connections(
 
 
 # ----- GRAPH FORMATTING AND OUTPUT -----
-def apply_liveness_styling(G: nx.DiGraph, modules_info: List[ModuleInfo],
-                           dependency_data: Dict[str, Any]) -> None:
+def apply_liveness_styling(
+    G: nx.DiGraph, modules_info: List[ModuleInfo], dependency_data: Dict[str, Any]
+) -> None:
     """
     Apply liveness-based styling to edges in the graph.
 
@@ -820,13 +822,13 @@ def apply_liveness_styling(G: nx.DiGraph, modules_info: List[ModuleInfo],
         modules_info: List of module information
         dependency_data: Original dependency graph data with liveness info
     """
-   # Build a mapping from module_num to liveness data
+    # Build a mapping from module_num to liveness data
     module_liveness = {}
     for module_data in dependency_data.get("modules", []):
         module_num = module_data.get("module_num")
         module_liveness[module_num] = {
             "live": module_data["live"],
-            "disposed": module_data["disposed"]
+            "disposed": module_data["disposed"],
         }
 
     # Apply styling to edges
@@ -861,8 +863,9 @@ def apply_liveness_styling(G: nx.DiGraph, modules_info: List[ModuleInfo],
             G.edges[src, dst]["penwidth"] = "2"
         if data_name in liveness_data["live"]:
             # Green for live
-            G.edges[src, dst]["color"] = "green" 
+            G.edges[src, dst]["color"] = "green"
             G.edges[src, dst]["penwidth"] = "2"
+
 
 def apply_node_styling(G: nx.DiGraph, no_formatting: bool = False) -> None:
     """
@@ -2074,7 +2077,9 @@ def cli(
                 validate_dependency_graph_with_pydantic(dependency_data)
             )
 
-            is_valid == is_valid and (not track_liveness or has_liveness_data(dependency_data))
+            is_valid == is_valid and (
+                not track_liveness or has_liveness_data(dependency_data)
+            )
 
             if not quiet:
                 click.echo(message)
