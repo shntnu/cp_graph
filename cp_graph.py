@@ -184,9 +184,6 @@ class DepGraphOutput(BaseModel):
     # if type == "measurement"
     object_name: Optional[str] = None
     feature: Optional[str] = None
-    # if liveness info included
-    live: Optional[List[str]] = None
-    disposed: Optional[List[str]] = None
 
     @field_validator("object_name", "feature", mode="after")
     @classmethod
@@ -206,6 +203,9 @@ class DepGraphModule(BaseModel):
     module_num: int = Field(ge=1)
     inputs: List[DepGraphInput] = []
     outputs: List[DepGraphOutput] = []
+    # if liveness info included
+    live: Optional[List[str]] = None
+    disposed: Optional[List[str]] = None
 
 
 class DepGraphMetadata(BaseModel):
@@ -326,7 +326,7 @@ def extract_module_io(module: Dict[str, Any]) -> ModuleInfo:
 
 
 def extract_module_io_from_dependency_graph(
-    dependency_data: Dict[str, Any],
+    dependency_data: DependencyGraph,
 ) -> List[ModuleInfo]:
     """
     Extract module I/O information from a dependency graph JSON file.
@@ -340,7 +340,7 @@ def extract_module_io_from_dependency_graph(
     modules_info: List[ModuleInfo] = []
 
     # Get modules from the dependency JSON
-    modules = dependency_data.get("modules", [])
+    modules = dependency_data.modules
 
     for module_data in modules:
         # Initialize input/output dictionaries
@@ -356,46 +356,31 @@ def extract_module_io_from_dependency_graph(
             NODE_TYPE_MEASUREMENT: [],
         }
 
-        # Extract basic module information
-        module_name = module_data.get("module_name", "Unknown")
-        module_num = module_data.get("module_num", 0)
         # Dependency JSON doesn't typically contain enabled status, assume enabled
         module_enabled = True
 
         # Process inputs
-        for input_dep in module_data.get("inputs", []):
-            dep_type = input_dep.get("type", "")
-            dep_name = input_dep.get("name", "")
-
-            if not dep_name:
-                continue
-
-            if dep_type == "image":
-                inputs[NODE_TYPE_IMAGE].append(dep_name)
-            elif dep_type == "object":
-                inputs[NODE_TYPE_OBJECT].append(dep_name)
-            elif dep_type == "measurement":
-                inputs[NODE_TYPE_MEASUREMENT].append(dep_name)
+        for input_dep in module_data.inputs:
+            if input_dep.type== "image":
+                inputs[NODE_TYPE_IMAGE].append(input_dep.name)
+            elif input_dep.type == "object":
+                inputs[NODE_TYPE_OBJECT].append(input_dep.name)
+            elif input_dep.type == "measurement":
+                inputs[NODE_TYPE_MEASUREMENT].append(input_dep.name)
 
         # Process outputs
-        for output_dep in module_data.get("outputs", []):
-            dep_type = output_dep.get("type", "")
-            dep_name = output_dep.get("name", "")
-
-            if not dep_name:
-                continue
-
-            if dep_type == "image":
-                outputs[NODE_TYPE_IMAGE].append(dep_name)
-            elif dep_type == "object":
-                outputs[NODE_TYPE_OBJECT].append(dep_name)
-            elif dep_type == "measurement":
-                outputs[NODE_TYPE_MEASUREMENT].append(dep_name)
+        for output_dep in module_data.outputs:
+            if output_dep.type == "image":
+                outputs[NODE_TYPE_IMAGE].append(output_dep.name)
+            elif output_dep.type == "object":
+                outputs[NODE_TYPE_OBJECT].append(output_dep.name)
+            elif output_dep.type == "measurement":
+                outputs[NODE_TYPE_MEASUREMENT].append(output_dep.name)
 
         # Create ModuleInfo object
         module_info: ModuleInfo = {
-            "module_num": module_num,
-            "module_name": module_name,
+            "module_num": module_data.module_num,
+            "module_name": module_data.module_name,
             "inputs": inputs,
             "outputs": outputs,
             "enabled": module_enabled,
@@ -436,7 +421,7 @@ def validate_dependency_graph_with_pydantic(
         return False, f"Unexpected error during validation: {e}", None
 
 
-def has_liveness_data(dependency_data: Dict[str, Any]) -> bool:
+def has_liveness_data(dependency_data: DependencyGraph) -> bool:
     """
     Check if the dependency graph contains liveness data.
 
@@ -445,12 +430,13 @@ def has_liveness_data(dependency_data: Dict[str, Any]) -> bool:
         (as used in `validate_dependency_graph_with_pydantic`)
 
     Returns:
-        True if any module has liveness data (live and disposed fields), False otherwise
+        True if all modules have liveness data (live and disposed fields, even if empty), False otherwise
     """
-    for module_data in dependency_data.get("modules", []):
-        if "live" in module_data and "disposed" in module_data:
-            return True
-    return False
+    for module_data in dependency_data.modules:
+        if type(module_data.live) is not list or type(module_data.disposed) is not list:
+            return False
+    # all modules pass
+    return True
 
 
 # ----- GRAPH CONSTRUCTION FUNCTIONS -----
@@ -581,12 +567,12 @@ def _module_has_relevant_io(
         True if the module has any I/O, False otherwise
     """
     # Check inputs - if any input type has values, return True
-    for input_type, inputs in module_info["inputs"].items():
+    for _, inputs in module_info["inputs"].items():
         if inputs:
             return True
 
     # Check outputs - if any output type has values, return True
-    for output_type, outputs in module_info["outputs"].items():
+    for _, outputs in module_info["outputs"].items():
         if outputs:
             return True
 
@@ -812,23 +798,25 @@ def _add_output_connections(
 
 # ----- GRAPH FORMATTING AND OUTPUT -----
 def apply_liveness_styling(
-    G: nx.DiGraph, modules_info: List[ModuleInfo], dependency_data: Dict[str, Any]
+    G: nx.DiGraph, dependency_data: DependencyGraph
 ) -> None:
     """
     Apply liveness-based styling to edges in the graph.
 
     Args:
         G: The NetworkX graph
-        modules_info: List of module information
         dependency_data: Original dependency graph data with liveness info
     """
     # Build a mapping from module_num to liveness data
-    module_liveness = {}
-    for module_data in dependency_data.get("modules", []):
-        module_num = module_data.get("module_num")
-        module_liveness[module_num] = {
-            "live": module_data["live"],
-            "disposed": module_data["disposed"],
+    module_liveness: Dict[int, Dict[str, List[str]]] = {}
+    for module_data in dependency_data.modules:
+        # they won't be None since `has_liveness_data` was called
+        # but this the type checker still complains
+        live = module_data.live or []
+        disposed = module_data.disposed or []
+        module_liveness[module_data.module_num] = {
+            "live": live,
+            "disposed": disposed,
         }
 
     # Apply styling to edges
@@ -868,7 +856,7 @@ def apply_liveness_styling(
             # Red for disposed
             G.edges[src, dst]["color"] = "red"
             G.edges[src, dst]["penwidth"] = "2"
-        if data_name in liveness_data["live"]:
+        elif data_name in liveness_data["live"]:
             # Green for live
             G.edges[src, dst]["color"] = "green"
             G.edges[src, dst]["penwidth"] = "2"
@@ -1218,7 +1206,7 @@ def print_pipeline_summary(G: nx.DiGraph, pipeline_path: str) -> None:
 
     # Count different node types
     node_counts = {}
-    for n, attr in G.nodes(data=True):
+    for _, attr in G.nodes(data=True):
         node_type = attr.get("type")
         if node_type not in node_counts:
             node_counts[node_type] = 0
@@ -1251,9 +1239,9 @@ def print_connections(G: nx.DiGraph) -> None:
     """
     print("\nConnections:")
     for edge in G.edges(data=True):
-        src, dst, attrs = edge
-        src_type = G.nodes[src].get("type")
-        dst_type = G.nodes[dst].get("type")
+        src, dst, _ = edge
+        src_type = G.nodes[src].get("type") or ""
+        dst_type = G.nodes[dst].get("type") or ""
 
         # Only show module connections
         if dst_type == NODE_TYPE_MODULE:
@@ -1630,7 +1618,7 @@ def apply_graph_filters(
     """
     # Start with a copy of the original graph
     filtered_graph = G.copy()
-    initial_node_count = len(filtered_graph.nodes())
+    initial_node_count = len(filtered_graph.nodes()) # type: ignore
 
     # Track count of affected nodes
     total_affected = 0
@@ -1745,7 +1733,7 @@ def apply_graph_filters(
         if highlight_filtered:
             print(f"Total nodes highlighted by all filters: {total_affected}")
         else:
-            total_removed = initial_node_count - len(filtered_graph.nodes())
+            total_removed = initial_node_count - len(filtered_graph.nodes()) # type: ignore
             print(f"Total nodes removed by all filters: {total_removed}")
 
     return filtered_graph
@@ -1805,6 +1793,8 @@ def process_pipeline(
             - graph is a NetworkX DiGraph representing the pipeline
             - modules_info is a list of module information dictionaries
     """
+    # init with None to avoid possible unbound variable error later
+    dependency_data = None
     if dependency_graph_path:
         try:
             with open(dependency_graph_path, "r") as f:
@@ -1812,6 +1802,10 @@ def process_pipeline(
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise click.ClickException(f"Error loading dependency JSON file: {e}")
 
+        # validate dependency data and get pydantic types
+        dependency_data = DependencyGraph(**dependency_data)
+
+        # validate liveness data
         if track_liveness and not has_liveness_data(dependency_data):
             raise click.ClickException(
                 "Liveness tracking requested but dependency graph contains no liveness data"
@@ -1879,7 +1873,7 @@ def process_pipeline(
         apply_node_styling(G, no_formatting)
 
         if track_liveness and dependency_data and not no_formatting:
-            apply_liveness_styling(G, modules_info, dependency_data)
+            apply_liveness_styling(G, dependency_data)
 
         # If no_module_info is True, simplify edges
         if no_module_info:
@@ -2052,7 +2046,7 @@ def cli(
             )
 
         try:
-            with open(dependency_graph_path, "r") as f:
+            with open(dependency_graph_path, "r") as f: # type: ignore
                 dependency_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise click.ClickException(f"Error loading dependency graph: {e}")
@@ -2076,7 +2070,7 @@ def cli(
     # Validate before processing if requested
     if dependency_graph and summary and not validate_only:
         try:
-            with open(dependency_graph_path, "r") as f:
+            with open(dependency_graph_path, "r") as f: # type: ignore
                 dependency_data = json.load(f)
 
             # Validate and show summary if successful
