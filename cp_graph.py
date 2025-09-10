@@ -834,23 +834,24 @@ def apply_liveness_styling(
     # Apply styling to edges
     for edge in G.edges(data=True):
         src, dst, _ = edge
-
-        # Only process edges going TO modules (input connections)
-        if G.nodes[dst].get("type") != NODE_TYPE_MODULE:
-            continue
-
-        # Only process image and object nodes
         src_type = G.nodes[src].get("type")
-        if src_type not in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+        dst_type = G.nodes[dst].get("type")
+
+        if src_type == NODE_TYPE_MODULE and dst_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+            module_node = src
+            data_node = dst
+        elif src_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT) and dst_type == NODE_TYPE_MODULE:
+            module_node = dst
+            data_node = src
+        else:
             continue
 
-        # Get the data item name
-        data_name = G.nodes[src].get("name")
+        data_name = G.nodes[data_node].get("name")
         if not data_name:
             continue
 
-        # Get the module number
-        module_num = G.nodes[dst].get("module_num")
+        module_num = G.nodes[module_node].get("module_num")
+
         if not module_num or module_num not in module_liveness:
             continue
 
