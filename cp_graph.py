@@ -2084,7 +2084,7 @@ def cli(
                 validate_dependency_graph_with_pydantic(dependency_data)
             )
 
-            is_valid == is_valid and (
+            is_valid = is_valid and (
                 not track_liveness or has_liveness_data(dependency_data)
             )
 
