@@ -837,10 +837,16 @@ def apply_liveness_styling(
         src_type = G.nodes[src].get("type")
         dst_type = G.nodes[dst].get("type")
 
-        if src_type == NODE_TYPE_MODULE and dst_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT):
+        if src_type == NODE_TYPE_MODULE and dst_type in (
+            NODE_TYPE_IMAGE,
+            NODE_TYPE_OBJECT,
+        ):
             module_node = src
             data_node = dst
-        elif src_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT) and dst_type == NODE_TYPE_MODULE:
+        elif (
+            src_type in (NODE_TYPE_IMAGE, NODE_TYPE_OBJECT)
+            and dst_type == NODE_TYPE_MODULE
+        ):
             module_node = dst
             data_node = src
         else:
