@@ -108,5 +108,10 @@ pixi exec --spec "graphviz" dot -Tpng examples/output/ExampleFly.dot -o examples
     examples/ExampleFly-dep-graph.json examples/output/ExampleFly-measurement.dot
 pixi exec --spec "graphviz" dot -Tpng examples/output/ExampleFly-measurement.dot -o examples/output/ExampleFly-measurement.png
 
+# ExampleFly with measurements and liveness styling
+./cp_graph.py --dependency-graph --remove-unused-measurements --track-liveness --rank-nodes \
+  examples/ExampleFlyMeas-liveness-dep.json examples/output/ExampleFly-liveness.dot
+pixi exec --spec "graphviz" dot -Tpng examples/output/ExampleFly-liveness.dot -o examples/output/ExampleFly-liveness.png
+
 echo "Done! All example outputs have been regenerated."
 echo "Files created in: examples/output/"

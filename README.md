@@ -253,6 +253,21 @@ pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-measurement.do
 The above example generates the following image:
 <img src="examples/output/ExampleFly-measurement.png" alt="Example Fly Graph with measurement">
 
+The dependency graph JSON also optionally has liveness information.
+For a CellProfiler pipeline, a module having an image or object in "live" list means that it may use that image/object as an input, but is not that image/object's ultimate destination (i.e. other subsequent modules also depend on that image/object). If an image/object is in the "disposed" list, it means that the image/object is not used by subsequent modules.
+`cp_graph` can style edges (green for live, red for disposed) if the `--track-liveness` flag is included.
+
+```bash
+./cp_graph.py --dependency-graph --remove-unused-measurements --track-liveness --rank-nodes \
+  examples/ExampleFlyMeas-liveness-dep.json examples/output/ExampleFly-liveness.dot
+# convert it to png
+pixi exec --spec "graphviz" dot -Tpng "examples/output/ExampleFly-liveness.dot" -o "examples/output/ExampleFly-liveness.png"
+```
+
+The above example generates the following image:
+<img src="examples/output/ExampleFly-liveness.png" alt="Example Fly Graph with measurement and liveness information">
+
+
 > [!IMPORTANT]
 > CellProfiler generates many measurements. When generating a graph image (e.g. png), it is highly recommended to use the `--remove-unused-measuremetns` flag. This removes measurements which are not inputs to modules. Otherwise the graph would be extremely large and cluttered. Excluding that flag is still useful for the text summary of inputs and outputs.
 

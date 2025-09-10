@@ -133,6 +133,11 @@ def main():
             "./cp_graph.py --remove-unused-objects --remove-unused-measurements --dependency-graph examples/ExampleFly-dep-graph.json examples/output/ExampleFly-measurement.dot",
             Path("examples/output/ExampleFly-measurement.dot"),
         ),
+        (
+            "ExampleFly with measurements and liveness styling",
+            "./cp_graph.py --dependency-graph --remove-unused-measurements --track-liveness --rank-nodes examples/ExampleFlyMeas-liveness-dep.json examples/output/ExampleFly-liveness.dot",
+            Path("examples/output/ExampleFly-liveness.dot"),
+        )
     ]
 
     # Track results
