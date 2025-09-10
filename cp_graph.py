@@ -361,7 +361,7 @@ def extract_module_io_from_dependency_graph(
 
         # Process inputs
         for input_dep in module_data.inputs:
-            if input_dep.type== "image":
+            if input_dep.type == "image":
                 inputs[NODE_TYPE_IMAGE].append(input_dep.name)
             elif input_dep.type == "object":
                 inputs[NODE_TYPE_OBJECT].append(input_dep.name)
@@ -797,9 +797,7 @@ def _add_output_connections(
 
 
 # ----- GRAPH FORMATTING AND OUTPUT -----
-def apply_liveness_styling(
-    G: nx.DiGraph, dependency_data: DependencyGraph
-) -> None:
+def apply_liveness_styling(G: nx.DiGraph, dependency_data: DependencyGraph) -> None:
     """
     Apply liveness-based styling to edges in the graph.
 
@@ -1618,7 +1616,7 @@ def apply_graph_filters(
     """
     # Start with a copy of the original graph
     filtered_graph = G.copy()
-    initial_node_count = len(filtered_graph.nodes()) # type: ignore
+    initial_node_count = len(filtered_graph.nodes())  # type: ignore
 
     # Track count of affected nodes
     total_affected = 0
@@ -1733,7 +1731,7 @@ def apply_graph_filters(
         if highlight_filtered:
             print(f"Total nodes highlighted by all filters: {total_affected}")
         else:
-            total_removed = initial_node_count - len(filtered_graph.nodes()) # type: ignore
+            total_removed = initial_node_count - len(filtered_graph.nodes())  # type: ignore
             print(f"Total nodes removed by all filters: {total_removed}")
 
     return filtered_graph
@@ -2046,7 +2044,7 @@ def cli(
             )
 
         try:
-            with open(dependency_graph_path, "r") as f: # type: ignore
+            with open(dependency_graph_path, "r") as f:  # type: ignore
                 dependency_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise click.ClickException(f"Error loading dependency graph: {e}")
@@ -2070,7 +2068,7 @@ def cli(
     # Validate before processing if requested
     if dependency_graph and summary and not validate_only:
         try:
-            with open(dependency_graph_path, "r") as f: # type: ignore
+            with open(dependency_graph_path, "r") as f:  # type: ignore
                 dependency_data = json.load(f)
 
             # Validate and show summary if successful
