@@ -1149,6 +1149,7 @@ def write_graph_to_file(
     ultra_minimal: bool = False,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
+    quiet = False,
 ) -> None:
     """
     Write the graph to the specified output file in the appropriate format.
@@ -1188,7 +1189,8 @@ def write_graph_to_file(
         # Default to GraphML
         nx.write_graphml(G, output_path)
 
-    print(f"Graph saved to: {output_path}")
+    if not quiet:
+        print(f"Graph saved to: {output_path}")
 
 
 def print_pipeline_summary(G: nx.DiGraph, pipeline_path: str) -> None:
@@ -1887,6 +1889,7 @@ def process_pipeline(
             ultra_minimal=ultra_minimal,
             rank_nodes=rank_nodes,
             rank_ignore_filtered=rank_ignore_filtered,
+            quiet=quiet,
         )
 
     return G, modules_info
