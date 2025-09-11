@@ -262,8 +262,7 @@ For example, the edge from `IdentifySecondaryObjects` to `Cells` is green becaus
 Similarly, `CropBlue` → `IdentifyPrimaryObjects` is green because `CropBlue` is still needed by other modules.
 In contrast, `RGBImage` → `SaveImages` is red because `SaveImages` is the final destination for `RGBImage`.
 
-> [!NOTE]
-> Note that measurement modules (`MeasureObjectIntensity`, `MeasureTexture`, etc.) may appear to be terminal nodes in the visualization, but they actually produce measurements that are implicitly consumed by `ExportToSpreadsheet`. `ExportToSpreadsheet` exports all measurements without explicitly listing them as inputs, which is why no measurement connections are shown in the graph.
+Note that measurement modules (`MeasureObjectIntensity`, `MeasureTexture`, etc.) may appear to be terminal nodes in the visualization, but they actually produce measurements that are implicitly consumed by `ExportToSpreadsheet`. `ExportToSpreadsheet` exports all measurements without explicitly listing them as inputs, which is why no measurement connections are shown in the graph.
 
 ```bash
 ./cp_graph.py --dependency-graph --remove-unused-measurements --track-liveness --rank-nodes \
