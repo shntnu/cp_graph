@@ -254,8 +254,14 @@ The above example generates the following image:
 <img src="examples/output/ExampleFly-measurement.png" alt="Example Fly Graph with measurement">
 
 The dependency graph JSON also optionally has liveness information.
-For a CellProfiler pipeline, a module having an image or object in "live" list means that it may use that image/object as an input, but is not that image/object's ultimate destination (i.e. other subsequent modules also depend on that image/object). If an image/object is in the "disposed" list, it means that the image/object is not used by subsequent modules.
-`cp_graph` can style edges (green for live, red for disposed) if the `--track-liveness` flag is included.
+When the `--track-liveness` flag is used, all edges between modules and data are colored to show data lifecycle:
+- **Green edges**: The data has further uses downstream in the pipeline
+- **Red edges**: The data has no further uses after this point
+
+For example, the edge from `IdentifySecondaryObjects` to Cells is green because Cells continues to multiple downstream modules. Similarly, `CropBlue` → `IdentifyPrimaryObjects` is green because CropBlue is still needed by other modules. In contrast, `RGBImage` → `SaveImages` is red because SaveImages is the final destination for RGBImage.
+
+> [!NOTE]
+> Note that measurement modules (`MeasureObjectIntensity`, `MeasureTexture`, etc.) may appear to be terminal nodes in the visualization, but they actually produce measurements that are implicitly consumed by `ExportToSpreadsheet`. `ExportToSpreadsheet` exports all measurements without explicitly listing them as inputs, which is why no measurement connections are shown in the graph.
 
 ```bash
 ./cp_graph.py --dependency-graph --remove-unused-measurements --track-liveness --rank-nodes \
