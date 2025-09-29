@@ -1,4 +1,6 @@
 exclude: \.json$
+ci:
+  autoupdate_schedule: never
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0
