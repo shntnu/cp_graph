@@ -1149,7 +1149,7 @@ def write_graph_to_file(
     ultra_minimal: bool = False,
     rank_nodes: bool = False,
     rank_ignore_filtered: bool = False,
-    quiet = False,
+    quiet=False,
 ) -> None:
     """
     Write the graph to the specified output file in the appropriate format.
